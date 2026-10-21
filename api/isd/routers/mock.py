@@ -44,3 +44,25 @@ def simulate_family_deposit(
     except LookupError as e:
         raise HTTPException(404, str(e)) from e
     return {"ref": row.ref, "balance_cents": row.balance_after_cents}
+
+
+class FacilityEventBody(BaseModel):
+    event_id: str = Field(min_length=4, max_length=64)
+    type: str
+    payload: dict = {}
+
+
+@router.post("/facility-events", status_code=201)
+def simulate_facility_event(
+    body: FacilityEventBody,
+    staff: Staff = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Stands in for the facility's cell-camera and movement systems (FacilityEventSource)."""
+    from isd.interfaces.facility import FacilityEventIn
+    from isd.services import facility
+
+    result = facility.ingest(
+        db, FacilityEventIn(body.event_id, body.type, body.payload), datetime.now(UTC)
+    )
+    return {"result": result}

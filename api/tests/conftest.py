@@ -17,24 +17,33 @@ OWNER_URL = make_url(settings.MIGRATION_DATABASE_URL).set(database=TEST_DB)
 APP_URL = make_url(settings.DATABASE_URL).set(database=TEST_DB)
 
 
-@pytest.fixture(scope="session")
-def _database():
+def make_database(name: str) -> str:
+    """Creates an empty database `name`, migrated to head; returns the owner connection URL."""
     admin = create_engine(make_url(settings.MIGRATION_DATABASE_URL), isolation_level="AUTOCOMMIT")
     try:
         with admin.connect() as c:
-            c.execute(text(f"DROP DATABASE IF EXISTS {TEST_DB} WITH (FORCE)"))
-            c.execute(text(f"CREATE DATABASE {TEST_DB}"))
+            c.execute(text(f"DROP DATABASE IF EXISTS {name} WITH (FORCE)"))
+            c.execute(text(f"CREATE DATABASE {name}"))
     except Exception as exc:  # noqa: BLE001
         pytest.fail(
             f"Postgres not reachable/initialised ({exc}). Run `make db-local` first.",
             pytrace=False,
         )
-    cfg = Config(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
-    cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "..", "alembic"))
-    cfg.attributes["url"] = OWNER_URL.render_as_string(hide_password=False)
+    finally:
+        admin.dispose()
+    url = make_url(settings.MIGRATION_DATABASE_URL).set(database=name)
+    here = os.path.dirname(__file__)
+    cfg = Config(os.path.join(here, "..", "alembic.ini"))
+    cfg.set_main_option("script_location", os.path.join(here, "..", "alembic"))
+    cfg.attributes["url"] = url.render_as_string(hide_password=False)
     command.upgrade(cfg, "head")
+    return url.render_as_string(hide_password=False)
+
+
+@pytest.fixture(scope="session")
+def _database():
+    make_database(TEST_DB)
     yield
-    admin.dispose()
 
 
 @pytest.fixture(scope="session")
@@ -176,3 +185,20 @@ def kiosk(owner_engine):
             return r.id, token, d.code
 
     return _make
+
+
+@pytest.fixture
+def reference_data(owner):
+    """The content allow-list and two job listings, inside the test transaction."""
+    from isd.seed_db import ensure_reference_data
+
+    ensure_reference_data(owner)
+    owner.flush()
+
+
+@pytest.fixture(scope="session")
+def committed_reference(owner_engine):
+    from isd.seed_db import ensure_reference_data
+
+    with Session(owner_engine) as s, s.begin():
+        ensure_reference_data(s)

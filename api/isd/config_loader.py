@@ -8,11 +8,27 @@ from isd.engine.config import (
     validate_commissary,
     validate_courses,
     validate_offenses,
+    validate_reading,
+    validate_rec,
     validate_sanctions,
+    validate_welfare,
 )
+from isd.jobs_config import validate_jobs  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
-CONFIG_FILES = ("tiers", "points", "sanctions", "offenses", "compliance", "commissary", "courses")
+CONFIG_FILES = (
+    "tiers",
+    "points",
+    "sanctions",
+    "offenses",
+    "compliance",
+    "commissary",
+    "courses",
+    "welfare",
+    "jobs",
+    "rec",
+    "reading",
+)
 
 
 def load_config(config_dir: Path = CONFIG_DIR) -> dict[str, dict]:
@@ -40,6 +56,14 @@ def validate_section(name: str, payload: dict) -> None:
         validate_commissary(payload)
     elif name == "courses":
         validate_courses(payload)
+    elif name == "welfare":
+        validate_welfare(payload)
+    elif name == "jobs":
+        validate_jobs(payload)
+    elif name == "rec":
+        validate_rec(payload)
+    elif name == "reading":
+        validate_reading(payload)
     elif name not in CONFIG_FILES:
         raise ValueError(f"unknown config section: {name}")
 

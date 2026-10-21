@@ -11,3 +11,4 @@ inactivity_return_home_seconds: 90
 entitlement_snapshot_ttl_minutes: 60
 mirror_max_minutes: 15
 mirror_idle_seconds: 60
+public_log_min_cell: 3

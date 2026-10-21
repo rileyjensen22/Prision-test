@@ -20,6 +20,7 @@ from isd.models import (
     Staff,
     TierHistory,
 )
+from isd.services import welfare
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements, load_engine_config
 from isd.services.points import total_points
@@ -372,4 +373,5 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
         "overdue_appeals": sum(a["overdue"] for a in appeals),
         "offline_devices": sum(r["offline"] for r in ro),
         "outlier_flags": outliers(session, now)["flagged"] if show_outliers else None,
+        "welfare_flags": len(welfare.all_flags(session, now)),
     }

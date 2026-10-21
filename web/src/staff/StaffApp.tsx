@@ -6,22 +6,26 @@ import Appeals from './pages/Appeals'
 import AuditLog from './pages/AuditLog'
 import ConfigEditor from './pages/ConfigEditor'
 import Confirmations from './pages/Confirmations'
+import ContentJobs from './pages/ContentJobs'
 import Dashboard from './pages/Dashboard'
 import Mirror from './pages/Mirror'
 import Outliers from './pages/Outliers'
 import ResidentDetail from './pages/ResidentDetail'
 import Roster from './pages/Roster'
 import ViewAs from './pages/ViewAs'
+import Welfare from './pages/Welfare'
 
 const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
 const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff', label: 'Dashboard' },
   { to: '/staff/roster', label: 'Roster' },
+  { to: '/staff/welfare', label: 'Welfare' },
   { to: '/staff/confirmations', label: 'Confirmations', roles: SUPERVISION },
   { to: '/staff/appeals', label: 'Appeals', roles: SUPERVISION },
   { to: '/staff/outliers', label: 'Outliers', roles: SUPERVISION },
   { to: '/staff/view-as', label: 'View as' },
   { to: '/staff/mirror', label: 'Live mirror', roles: SUPERVISION },
+  { to: '/staff/content', label: 'Content & jobs' },
   { to: '/staff/config', label: 'Config' },
   { to: '/staff/audit', label: 'Audit log', roles: ['admin', 'auditor'] },
 ]
@@ -102,6 +106,8 @@ function Shell() {
               </Guard>
             }
           />
+          <Route path="welfare" element={<Welfare />} />
+          <Route path="content" element={<ContentJobs />} />
           <Route path="config" element={<ConfigEditor />} />
           <Route
             path="audit"

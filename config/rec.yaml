@@ -1,0 +1,5 @@
+# Out-of-cell time slots (stub). Indoor slots are part of the protected baseline; outdoor needs the outdoor_rec feature.
+version: 1
+capacity: 6
+indoor_slots: ["09:00", "13:30", "18:00"]
+outdoor_slots: ["10:00", "15:00"]

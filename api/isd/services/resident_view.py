@@ -22,7 +22,12 @@ from isd.schemas import (
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements, load_engine_config
 from isd.services.points import total_points
-from isd.services.usage import call_seconds_today, spent_cents_this_week
+from isd.services.usage import (
+    call_seconds_today,
+    messages_sent_today,
+    spent_cents_this_week,
+    video_seconds_this_week,
+)
 
 _ALLOWANCES = [  # feature, limit key, period, unit
     ("calls", "minutes_per_day", "day", "minutes"),
@@ -71,6 +76,8 @@ def build_resident_view(
     used = {
         "calls": minutes_used(call_seconds_today(session, resident_id, at_time)),
         "commissary": spent_cents_this_week(session, resident_id, at_time) / 100,
+        "texting": messages_sent_today(session, resident_id, at_time),
+        "video": minutes_used(video_seconds_this_week(session, resident_id, at_time)),
     }
     return ResidentView(
         resident_code=resident.code,

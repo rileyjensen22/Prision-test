@@ -1,19 +1,22 @@
 """Phase 1 data model. Business rules live in isd.engine, not here."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -239,6 +242,7 @@ class CallRecord(Base):
             "NOT (privileged AND monitor_ref IS NOT NULL)", name="ck_privileged_no_monitor_ref"
         ),
         CheckConstraint("status IN ('active', 'completed', 'timed_out')", name="ck_call_status"),
+        CheckConstraint("medium IN ('voice', 'video')", name="ck_call_medium"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
@@ -253,6 +257,7 @@ class CallRecord(Base):
     max_seconds: Mapped[int] = mapped_column(Integer)
     duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="active")
+    medium: Mapped[str] = mapped_column(String(8), default="voice", server_default="voice")
 
 
 class CourseProgress(Base):
@@ -331,3 +336,162 @@ class MirrorSession(Base):
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     end_reason: Mapped[str | None] = mapped_column(String(16), nullable=True)  # manual|timeout|idle
     frames_served: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class OutOfCellLog(Base):
+    """Facility-entered minutes out of the cell per day. Append-only: a correction is a new row."""
+
+    __tablename__ = "out_of_cell_log"
+    __table_args__ = (
+        CheckConstraint("minutes >= 0 AND minutes <= 1440", name="ck_ooc_minutes"),
+        CheckConstraint("source IN ('facility', 'ingest')", name="ck_ooc_source"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    day: Mapped[date] = mapped_column(Date)
+    minutes: Mapped[int] = mapped_column(Integer)
+    source: Mapped[str] = mapped_column(String(8))
+    entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WelfareAck(Base):
+    __tablename__ = "welfare_acks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    flag_type: Mapped[str] = mapped_column(String(32))
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"))
+    note: Mapped[str] = mapped_column(Text)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class Message(Base):
+    """Text messages. Attorney messages are never stored: no body, not monitored (invariant 6)."""
+
+    __tablename__ = "messages"
+    __table_args__ = (
+        CheckConstraint("direction IN ('out', 'in')", name="ck_msg_direction"),
+        CheckConstraint("NOT (privileged AND monitored)", name="ck_msg_privileged_not_monitored"),
+        CheckConstraint("NOT (privileged AND body IS NOT NULL)", name="ck_msg_privileged_no_body"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
+    direction: Mapped[str] = mapped_column(String(3))
+    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    privileged: Mapped[bool] = mapped_column(Boolean)
+    monitored: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class FacilityEvent(Base):
+    """Events from the facility's own systems (for example cell cameras). Idempotent by event_id."""
+
+    __tablename__ = "facility_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(64), unique=True)
+    type: Mapped[str] = mapped_column(String(32))
+    payload: Mapped[dict] = mapped_column(JSONB, default=dict)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    result: Mapped[str] = mapped_column(String(64))
+
+
+class ChessGame(Base):
+    """Chess stub. There is deliberately no chat or message column on games or moves."""
+
+    __tablename__ = "chess_games"
+    __table_args__ = (
+        CheckConstraint("opponent_kind IN ('engine', 'human')", name="ck_chess_opponent"),
+        CheckConstraint("status IN ('waiting', 'active', 'finished')", name="ck_chess_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    opponent_kind: Mapped[str] = mapped_column(String(8))
+    status: Mapped[str] = mapped_column(String(10), default="active")
+    provider_ref: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ChessMove(Base):
+    __tablename__ = "chess_moves"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    game_id: Mapped[int] = mapped_column(ForeignKey("chess_games.id"), index=True)
+    ply: Mapped[int] = mapped_column(Integer)
+    move: Mapped[str] = mapped_column(String(16))
+    by: Mapped[str] = mapped_column(String(8))  # resident | opponent
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ApprovedContentSource(Base):
+    """Allow-list for outside content. Everything not listed here is blocked (CSP follows it)."""
+
+    __tablename__ = "approved_content_sources"
+    __table_args__ = (CheckConstraint("kind IN ('bundled', 'external')", name="ck_source_kind"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), unique=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    base_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReadingLog(Base):
+    __tablename__ = "reading_log"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    item_id: Mapped[str] = mapped_column(String(64))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+JOB_TASK_TYPES = ("transcription_public_domain", "captioning", "labeling_non_personal")
+
+
+class JobListing(Base):
+    """Voluntary work. Task types are limited to ones that never handle anyone's personal data."""
+
+    __tablename__ = "job_listings"
+    __table_args__ = (CheckConstraint(f"task_type IN {JOB_TASK_TYPES}", name="ck_job_task_type"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(32), unique=True)
+    title: Mapped[str] = mapped_column(String(128))
+    task_type: Mapped[str] = mapped_column(String(40))
+    description: Mapped[str] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class JobEnrollment(Base):
+    """Opt-in record. Joining or leaving creates no points, sanction, or entitlement change."""
+
+    __tablename__ = "job_enrollments"
+    __table_args__ = (
+        CheckConstraint("status IN ('active', 'left')", name="ck_enroll_status"),
+        Index(
+            "uq_one_active_enrollment",
+            "resident_id",
+            "listing_id",
+            unique=True,
+            postgresql_where=text("status = 'active'"),
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("job_listings.id"))
+    status: Mapped[str] = mapped_column(String(8), default="active")
+    opted_in_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    left_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class RecBooking(Base):
+    __tablename__ = "rec_bookings"
+    __table_args__ = (
+        UniqueConstraint("resident_id", "day", "slot", name="uq_rec_booking"),
+        CheckConstraint("kind IN ('indoor', 'outdoor')", name="ck_rec_kind"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    day: Mapped[date] = mapped_column(Date)
+    slot: Mapped[str] = mapped_column(String(5))
+    kind: Mapped[str] = mapped_column(String(8))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

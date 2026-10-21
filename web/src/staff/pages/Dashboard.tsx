@@ -10,6 +10,7 @@ interface Summary {
   overdue_appeals: number
   offline_devices: number
   outlier_flags: number | null
+  welfare_flags: number
 }
 interface Ev {
   seq: number
@@ -54,7 +55,7 @@ export default function Dashboard() {
     <Page title="Dashboard">
       <ErrorLine error={summary.error} />
       {s && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
           <Stat id="stat-residents" label="Residents" value={s.residents} to="/staff/roster" />
           <Stat
             id="stat-pending"
@@ -75,6 +76,13 @@ export default function Dashboard() {
             label="Devices offline"
             value={s.offline_devices}
             to="/staff/roster"
+            warn
+          />
+          <Stat
+            id="stat-welfare"
+            label="Welfare flags"
+            value={s.welfare_flags}
+            to="/staff/welfare"
             warn
           />
           <Stat

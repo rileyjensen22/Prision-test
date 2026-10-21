@@ -1,0 +1,97 @@
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { BackLink, Card } from '../components'
+import { useResident } from '../ResidentContext'
+import { errorCode } from './helpers'
+
+interface Slot {
+  slot: string
+  kind: 'indoor' | 'outdoor'
+  allowed: boolean
+  booked: boolean
+  spaces: number
+}
+interface Day {
+  day: string
+  baseline_minutes: number
+  slots: Slot[]
+}
+
+export function Rec() {
+  const { t } = useTranslation()
+  const { request } = useResident()
+  const [day, setDay] = useState<Day | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const load = () =>
+    request<Day>('/device/rec')
+      .then(setDay)
+      .catch(() => {})
+  useEffect(() => {
+    void load()
+  }, [request])
+
+  async function act(slot: string, what: 'book' | 'cancel') {
+    if (!day) return
+    setError(null)
+    try {
+      await request(`/device/rec/${what}`, {
+        method: 'POST',
+        body: JSON.stringify({ day: day.day, slot }),
+      })
+    } catch (e) {
+      const code = errorCode(e)
+      setError(t(`rec.err.${code}`, { defaultValue: code }))
+    }
+    await load()
+  }
+
+  return (
+    <div className="space-y-6">
+      <BackLink />
+      <h1 className="text-3xl font-bold">{t('rec.title')}</h1>
+      {day && <p data-testid="rec-baseline">{t('rec.baseline', { n: day.baseline_minutes })}</p>}
+      {error && (
+        <p role="alert" data-testid="rec-error">
+          {error}
+        </p>
+      )}
+      <ul className="space-y-3">
+        {(day?.slots ?? []).map((s) => (
+          <li key={s.slot}>
+            <Card data-testid={`slot-${s.slot}`} data-allowed={s.allowed} data-booked={s.booked}>
+              <p className="text-xl font-semibold">
+                {s.slot} · {t(`rec.${s.kind}`)}
+              </p>
+              {!s.allowed ? (
+                <p>🔒 {t('rec.locked')}</p>
+              ) : (
+                <div className="mt-2 flex items-center gap-3">
+                  <span>{t('rec.spaces', { n: s.spaces })}</span>
+                  {s.booked ? (
+                    <>
+                      <span>✓ {t('rec.booked')}</span>
+                      <button
+                        onClick={() => void act(s.slot, 'cancel')}
+                        className="min-h-14 rounded-lg border-2 border-white px-5 py-3"
+                      >
+                        {t('rec.cancel')}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => void act(s.slot, 'book')}
+                      className="min-h-14 rounded-lg bg-green-700 px-5 py-3 font-semibold"
+                    >
+                      {t('rec.book')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </Card>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}

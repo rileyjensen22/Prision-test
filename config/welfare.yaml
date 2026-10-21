@@ -1,0 +1,9 @@
+# Welfare flags (CLAUDE.md section 11). A resident is compared with their OWN recent history.
+version: 1
+no_contact_days: 7            # flag when there has been no contact this many days
+baseline_days: 21             # the resident's usual level is measured over this period...
+recent_days: 7                # ...and compared with the most recent days
+drop_ratio: 0.3               # flag when the recent daily average falls below 30% of usual
+min_baseline_per_day: 0.5     # ignore residents who are rarely active anyway (too noisy)
+out_of_cell_unrecorded_days: 3
+ack_suppress_days: 3          # a flag staff have acknowledged stays quiet this long

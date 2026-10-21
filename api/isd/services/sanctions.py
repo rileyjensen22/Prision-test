@@ -36,6 +36,7 @@ def _immediate_count(session: Session, officer_id: int | None, now: datetime) ->
             Sanction.issued_by == officer_id,
             Sanction.applied_immediately.is_(True),
             Sanction.issued_at > now - timedelta(days=7),
+            Sanction.issued_at <= now,
         )
     ).scalar()
 

@@ -11,7 +11,16 @@ from alembic.config import Config
 from isd import settings
 from isd.auth import hash_device_token, hash_password
 from isd.config_loader import load_config
-from isd.models import Cell, Contact, Device, DeviceAssignment, Resident, Staff
+from isd.models import (
+    CallRecord,
+    Cell,
+    Contact,
+    Device,
+    DeviceAssignment,
+    Resident,
+    Staff,
+)
+from isd.seed_db import ensure_reference_data
 from isd.services import commissary, points, sanctions
 from isd.services.audit import SYSTEM, Actor
 from isd.services.config_store import set_config
@@ -56,6 +65,7 @@ def main() -> None:
     with Session(create_engine(url)) as s, s.begin():
         for name, payload in load_config().items():
             set_config(s, SYSTEM, name, payload, "e2e seed")
+        ensure_reference_data(s)
         pw = hash_password("pw")
         staff_pw = hash_password(STAFF_PASSWORD)
         for username, role in STAFF.items():
@@ -80,6 +90,8 @@ def main() -> None:
             start_points=0,
             contacts=(),
             funds=0,
+            assigned_days_ago=0,
+            quiet_after_days=None,
         ):
             r = Resident(
                 code=f"E2E-{key.upper()}",
@@ -92,7 +104,14 @@ def main() -> None:
             dev.token_hash = hash_device_token(tokens[key])
             s.add_all([r, cell, dev])
             s.flush()
-            s.add(DeviceAssignment(device_id=dev.id, cell_id=cell.id, resident_id=r.id))
+            s.add(
+                DeviceAssignment(
+                    device_id=dev.id,
+                    cell_id=cell.id,
+                    resident_id=r.id,
+                    assigned_at=now - timedelta(days=assigned_days_ago),
+                )
+            )
             if start_points:
                 points.record_points(
                     s,
@@ -115,6 +134,33 @@ def main() -> None:
                 )
             if funds:
                 commissary.deposit(s, SYSTEM, r.id, funds, "e2e", f"e2e-{key}", now)
+            if (
+                quiet_after_days is not None
+            ):  # chatty for three weeks, then silent: a welfare case
+                s.flush()
+                family = s.execute(
+                    select(Contact.id).where(
+                        Contact.resident_id == r.id, Contact.type == "family"
+                    )
+                ).scalar()
+                for d in range(quiet_after_days, quiet_after_days + 20):
+                    for k in range(2):
+                        started = now - timedelta(days=d, hours=k)
+                        s.add(
+                            CallRecord(
+                                resident_id=r.id,
+                                contact_id=family,
+                                contact_type="family",
+                                privileged=False,
+                                monitored=True,
+                                provider_ref="seed",
+                                started_at=started,
+                                ended_at=started + timedelta(minutes=5),
+                                max_seconds=900,
+                                duration_seconds=300,
+                                status="completed",
+                            )
+                        )
             for _ in range(certs):
                 points.add_point_event(
                     s, SYSTEM, r.id, "program_certificate", now - timedelta(days=1)
@@ -146,6 +192,13 @@ def main() -> None:
         )  # staff e2e: supervisor-issued sanction; staff-controlled settings
         # One officer who records far more than peers, so the outlier view has something to flag
         resident("zed")
+        # Welfare: on the unit 40 days, talked twice a day until eight days ago, then nothing
+        resident("wes", contacts=("family",), assigned_days_ago=40, quiet_after_days=8)
+        resident(
+            "tess", start_points=450, contacts=("family", "attorney")
+        )  # tier 4: texting, reading
+        resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
+        resident("cam")  # receives a cell-camera event
         heavy = Actor(
             s.execute(select(Staff.id).where(Staff.username == "e2e_heavy")).scalar(),
             "officer",

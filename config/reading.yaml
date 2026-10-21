@@ -1,0 +1,27 @@
+# Bundled public-domain or original texts (nothing is fetched from outside). catalog: general (tier 1) | expanded (tier 4).
+version: 1
+items:
+  - id: tortoise-hare
+    title: "The Tortoise and the Hare (retelling)"
+    author: "Traditional fable, retold"
+    catalog: general
+    language: en
+    text: "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+  - id: lion-mouse
+    title: "The Lion and the Mouse (retelling)"
+    author: "Traditional fable, retold"
+    catalog: general
+    language: en
+    text: "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+  - id: preamble
+    title: "Preamble to the Constitution of the United States"
+    author: "United States, 1787 (public domain)"
+    catalog: expanded
+    language: en
+    text: "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
+  - id: gettysburg
+    title: "The Gettysburg Address (opening)"
+    author: "Abraham Lincoln, 1863 (public domain)"
+    catalog: expanded
+    language: en
+    text: "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."

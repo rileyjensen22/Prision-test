@@ -9,3 +9,4 @@ MIGRATION_DATABASE_URL = os.environ.get(
 )
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-secret-change-me")
 TOKEN_TTL_SECONDS = int(os.environ.get("TOKEN_TTL_SECONDS", "28800"))
+PUBLIC_LOG_SALT = os.environ.get("PUBLIC_LOG_SALT", "dev-only-public-log-salt-change-me")

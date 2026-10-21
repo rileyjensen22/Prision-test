@@ -5,14 +5,15 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from isd.engine.authority import Evidence
 from isd.engine.calls import CallDenied, effective_seconds, plan_call
 from isd.interfaces.telephony import CallHandle, PrivilegedCommunicationError, TelephonyService
 from isd.models import CallRecord, Contact
 from isd.providers import get_telephony
-from isd.services.audit import Actor, append_audit
+from isd.services.audit import SYSTEM, Actor, append_audit
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements
-from isd.services.usage import call_seconds_today
+from isd.services.usage import call_seconds_today, video_seconds_this_week
 
 
 def privileged_types(session: Session) -> set[str]:
@@ -57,6 +58,7 @@ def start_call(
     contact_id: int,
     now: datetime,
     telephony: TelephonyService | None = None,
+    medium: str = "voice",
 ) -> CallRecord:
     tel = telephony or get_telephony()
     contact = session.get(Contact, contact_id)
@@ -68,6 +70,9 @@ def start_call(
     ):
         raise CallDenied("CONTACT_UNAVAILABLE", "contact not available")
     privileged = contact.type in privileged_types(session)
+    if medium == "video" and privileged:
+        # Attorney access stays on the phone, where the privilege guard is. No video stub for it.
+        raise CallDenied("VIDEO_NOT_AVAILABLE", "use a phone call to reach your attorney")
     # No-contact orders block regular contacts. Attorney access is baseline, so it is never blocked.
     if contact.blocked and not privileged:
         raise CallDenied("CONTACT_UNAVAILABLE", "contact not available")
@@ -81,12 +86,17 @@ def start_call(
         raise CallDenied("CALL_IN_PROGRESS", "a call is already in progress")
 
     ent = get_entitlements(session, resident_id, now)
-    calls = ent.features["calls"]
+    if medium == "video":
+        feature, limit_key = ent.features["video"], "minutes_per_week"
+        used = video_seconds_this_week(session, resident_id, now)
+    else:
+        feature, limit_key = ent.features["calls"], "minutes_per_day"
+        used = call_seconds_today(session, resident_id, now)
     plan = plan_call(
         privileged=privileged,
-        allowed=calls.allowed,
-        limit_minutes=calls.limits.get("minutes_per_day"),
-        used_seconds=call_seconds_today(session, resident_id, now),
+        allowed=feature.allowed,
+        limit_minutes=feature.limits.get(limit_key),
+        used_seconds=used,
     )
     if privileged and not ent.allowed("attorney_calls"):  # cannot happen: baseline
         raise CallDenied("FEATURE_LOCKED", "attorney calls unavailable")
@@ -102,6 +112,7 @@ def start_call(
         started_at=now,
         max_seconds=plan.max_seconds,
         status="active",
+        medium=medium,
     )
     session.add(record)
     session.flush()
@@ -163,3 +174,36 @@ def fetch_recording(
         payload={"call_id": call_id, "resident_id": c.resident_id},
     )
     return tel.recording(CallHandle(c.provider_ref, False))
+
+
+def report_video_tamper(
+    session: Session,
+    resident_id: int,
+    call_id: int,
+    now: datetime,
+    telephony: TelephonyService | None = None,
+):
+    """The device saw its camera covered during a video call: end the call and raise DEVICE_TAMPER.
+
+    The sanction is system-detected evidence only; a supervisor still has to confirm it. Reporting
+    the same call twice does not create a second sanction.
+    """
+    from sqlalchemy import select as _select
+
+    from isd.models import Sanction
+    from isd.services.sanctions import issue_sanction
+
+    c = session.execute(
+        _select(CallRecord).where(CallRecord.id == call_id).with_for_update()
+    ).scalar()
+    if c is None or c.resident_id != resident_id or c.medium != "video":
+        raise CallDenied("NOT_FOUND", "video call not found")
+    ref = f"video-call-{c.id}"
+    existing = session.execute(_select(Sanction).where(Sanction.evidence_ref == ref)).scalar()
+    if existing:
+        return existing
+    if c.status == "active":
+        end_call(session, resident_id, call_id, now, telephony)
+    return issue_sanction(
+        session, SYSTEM, resident_id, "DEVICE_TAMPER", now, Evidence("system_event", ref=ref)
+    )

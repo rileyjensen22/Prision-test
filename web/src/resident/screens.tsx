@@ -162,6 +162,17 @@ export function Home() {
       </Card>
 
       <Card>
+        <h2 className="mb-3 text-2xl font-bold">{t('home.optional')}</h2>
+        <Link
+          to="/resident/jobs"
+          data-testid="jobs-link"
+          className="block min-h-16 rounded-xl border-2 border-slate-400 p-4 text-xl"
+        >
+          {t('home.jobsLink')}
+        </Link>
+      </Card>
+
+      <Card>
         <h2 className="mb-3 text-2xl font-bold">{t('home.always')}</h2>
         <ul className="grid grid-cols-2 gap-3">
           {ALWAYS_ORDER.filter((n) => features[n]).map((name) => (
@@ -313,7 +324,7 @@ export function FeaturePage() {
     <div className="space-y-6">
       <BackLink />
       <h1 className="text-3xl font-bold">{t(`feature.${name}`)}</h1>
-      <p>{t('featurePage.soon')}</p>
+      <p>{t('stub.text')}</p>
       {f && Object.keys(f.limits).length > 0 && (
         <Card>
           <h2 className="font-bold">{t('featurePage.limits')}</h2>

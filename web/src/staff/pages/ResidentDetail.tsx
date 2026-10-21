@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { errorText, fmt, post, put } from '../api'
+import { api, errorText, fmt, post, put } from '../api'
 import { useAuth } from '../auth'
 import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
 
@@ -251,6 +251,152 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
   )
 }
 
+function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boolean }) {
+  const { data, reload } = useLoad<{ day: string; minutes: number | null }[]>(
+    `/staff/residents/${residentId}/out-of-cell?days=14`,
+  )
+  const [day, setDay] = useState(new Date().toISOString().slice(0, 10))
+  const [minutes, setMinutes] = useState('')
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+  async function save(e: FormEvent) {
+    e.preventDefault()
+    try {
+      await post('/staff/out-of-cell', { resident_id: residentId, day, minutes: Number(minutes) })
+      setMsg({ kind: 'ok', text: 'Recorded.' })
+      setMinutes('')
+      await reload()
+    } catch (err) {
+      setMsg({ kind: 'err', text: errorText(err) })
+    }
+  }
+  return (
+    <Panel title="Out-of-cell time (last 14 days)" data-testid="ooc-panel">
+      <div className="flex flex-wrap gap-1" data-testid="ooc-days">
+        {(data ?? []).map((d) => (
+          <span
+            key={d.day}
+            title={d.day}
+            className={`rounded px-2 py-1 text-xs ${d.minutes === null ? 'bg-gray-100 text-gray-500' : d.minutes < 60 ? 'bg-red-100 text-red-900' : 'bg-green-100 text-green-900'}`}
+          >
+            {d.day.slice(5)}: {d.minutes ?? '—'}
+          </span>
+        ))}
+      </div>
+      {canEdit && (
+        <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-2">
+          <label className="text-sm">
+            Day
+            <input
+              aria-label="Out-of-cell day"
+              type="date"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              className="mt-1 block rounded border px-2 py-1"
+            />
+          </label>
+          <label className="text-sm">
+            Minutes out of cell
+            <input
+              aria-label="Minutes out of cell"
+              type="number"
+              min={0}
+              max={1440}
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              className="mt-1 block w-28 rounded border px-2 py-1"
+            />
+          </label>
+          <Btn type="submit" disabled={minutes === ''}>
+            Record
+          </Btn>
+          <span className="text-xs text-gray-600">
+            Entries are never edited; a correction is a new entry.
+          </span>
+        </form>
+      )}
+      {msg && (
+        <div className="mt-2">
+          <Notice kind={msg.kind}>{msg.text}</Notice>
+        </div>
+      )}
+    </Panel>
+  )
+}
+
+interface TimelineEvent {
+  at: string
+  kind: string
+  detail: Record<string, unknown>
+}
+
+function Activity({ residentId }: { residentId: number }) {
+  const [reason, setReason] = useState('')
+  const [events, setEvents] = useState<TimelineEvent[] | null>(null)
+  const [err, setErr] = useState<string | null>(null)
+  async function open(e: FormEvent) {
+    e.preventDefault()
+    setErr(null)
+    try {
+      setEvents(
+        await api<TimelineEvent[]>(
+          `/staff/residents/${residentId}/timeline?reason=${encodeURIComponent(reason)}`,
+        ),
+      )
+    } catch (x) {
+      setErr(errorText(x))
+    }
+  }
+  const text = (e: TimelineEvent) =>
+    Object.entries(e.detail)
+      .filter(([, v]) => v !== null && v !== undefined)
+      .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${String(v)}`)
+      .join(', ')
+  return (
+    <Panel title="Activity (metadata only)" data-testid="activity-panel">
+      <p className="mb-2 text-sm text-gray-600">
+        Shows that things happened and for how long, never message text or call content. Each look
+        is recorded in the audit log with your reason.
+      </p>
+      {events === null ? (
+        <form onSubmit={open} className="flex flex-wrap items-end gap-2">
+          <label className="flex-1 text-sm">
+            Why are you viewing this?
+            <input
+              aria-label="Reason for viewing activity"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="mt-1 block w-full rounded border px-2 py-2"
+            />
+          </label>
+          <Btn type="submit" disabled={reason.trim().length < 5}>
+            View activity
+          </Btn>
+        </form>
+      ) : (
+        <Table data-testid="timeline">
+          <thead>
+            <tr>
+              <Th>When</Th>
+              <Th>What</Th>
+              <Th>Details</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((e, i) => (
+              <tr key={i}>
+                <Td>{fmt(e.at)}</Td>
+                <Td>{e.kind}</Td>
+                <Td>{text(e)}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+      <ErrorLine error={err} />
+    </Panel>
+  )
+}
+
 export default function ResidentDetail() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -349,6 +495,10 @@ export default function ResidentDetail() {
           </Table>
         </Panel>
       </div>
+      <OutOfCell residentId={d.resident_id} canEdit={!!canEdit} />
+      {user && ['supervisor', 'admin', 'auditor'].includes(user.role) && (
+        <Activity residentId={d.resident_id} />
+      )}
       {canEdit && <SettingsForm d={d} onDone={() => void reload()} />}
     </Page>
   )

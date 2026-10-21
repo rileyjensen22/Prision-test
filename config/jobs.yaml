@@ -1,0 +1,4 @@
+# Jobs are voluntary and never affect tier or entitlements (invariant 7).
+# Compliance review of wages, deductions and voluntariness is REQUIRED before any real use.
+version: 1
+pay_split: {resident_pct: 60, facility_pct: 30, deductions_pct: 10}

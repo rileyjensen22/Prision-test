@@ -142,3 +142,29 @@ def validate_courses(payload: dict) -> None:
         for q in c["quiz"]:
             if not 0 <= q["answer"] < len(q["choices"]):
                 raise ValueError(f"{c['code']}/{q['id']}: answer index out of range")
+
+
+def validate_welfare(payload: dict) -> None:
+    if payload["recent_days"] < 1 or payload["baseline_days"] < payload["recent_days"]:
+        raise ValueError("baseline_days must be at least recent_days, and both positive")
+    if not 0 < payload["drop_ratio"] < 1:
+        raise ValueError("drop_ratio must be between 0 and 1")
+    if payload["no_contact_days"] < 1 or payload["min_baseline_per_day"] < 0:
+        raise ValueError("no_contact_days must be positive and min_baseline_per_day non-negative")
+
+
+def validate_rec(payload: dict) -> None:
+    if payload["capacity"] < 1:
+        raise ValueError("capacity must be positive")
+    for slot in (*payload["indoor_slots"], *payload["outdoor_slots"]):
+        hh, _, mm = slot.partition(":")
+        if not (hh.isdigit() and mm.isdigit() and 0 <= int(hh) < 24 and 0 <= int(mm) < 60):
+            raise ValueError(f"bad slot time {slot!r}; use HH:MM")
+
+
+def validate_reading(payload: dict) -> None:
+    ids = set()
+    for it in payload["items"]:
+        if it["id"] in ids or it["catalog"] not in ("general", "expanded"):
+            raise ValueError(f"{it['id']}: duplicate id or bad catalog")
+        ids.add(it["id"])

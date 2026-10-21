@@ -2,10 +2,21 @@
 
 from datetime import UTC, datetime
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from isd.auth import hash_device_token, hash_password
-from isd.models import Cell, ConfigVersion, Contact, Device, DeviceAssignment, Resident, Staff
+from isd.models import (
+    ApprovedContentSource,
+    Cell,
+    ConfigVersion,
+    Contact,
+    Device,
+    DeviceAssignment,
+    JobListing,
+    Resident,
+    Staff,
+)
 from isd.services import commissary, points
 from isd.services.audit import SYSTEM, append_audit
 from isd.services.config_store import get_current
@@ -35,14 +46,49 @@ def ensure_config(session: Session, config: dict) -> None:
             )
 
 
+def ensure_reference_data(session: Session) -> None:
+    """The content allow-list and sample job listings (safe to run repeatedly)."""
+    now = datetime.now(UTC)
+    if session.execute(select(ApprovedContentSource.id)).first() is None:
+        session.add(
+            ApprovedContentSource(
+                name="Bundled public-domain texts", kind="bundled", active=True, approved_at=now
+            )
+        )
+    if session.execute(select(JobListing.id)).first() is None:
+        session.add_all(
+            [
+                JobListing(
+                    code="TRANSCRIBE",
+                    title="Transcribe public-domain books",
+                    task_type="transcription_public_domain",
+                    active=True,
+                    created_at=now,
+                    description="Type up public-domain book pages. No personal data is involved.",
+                ),
+                JobListing(
+                    code="CAPTION",
+                    title="Caption educational videos",
+                    task_type="captioning",
+                    active=True,
+                    created_at=now,
+                    description="Write captions for course videos.",
+                ),
+            ]
+        )
+    session.flush()
+
+
 def seed_database(session: Session, data: dict) -> bool:
     if get_current(session, "tiers"):
         ensure_config(session, data["config"])
+        ensure_reference_data(session)
         return False
     pw_hash = hash_password(DEV_PASSWORD)
     for s in data["staff"]:
         session.add(Staff(username=s["username"], role=s["role"], password_hash=pw_hash))
     ensure_config(session, data["config"])
+    ensure_reference_data(session)
     session.flush()
     now = datetime.now(UTC)
     codes: dict[str, Resident] = {}

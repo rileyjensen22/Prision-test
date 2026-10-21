@@ -6,6 +6,10 @@ import { RequestStaffDialog } from './RequestStaff'
 import { ResidentProvider, useResident } from './ResidentContext'
 import { Calls } from './features/Calls'
 import { Commissary } from './features/Commissary'
+import { Jobs } from './features/Jobs'
+import { Reading } from './features/Reading'
+import { Rec } from './features/Rec'
+import { Texting } from './features/Texting'
 import { Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
 import { TEXT_SIZE } from './theme'
@@ -77,6 +81,12 @@ function Shell() {
             <Route path="feature/commissary" element={<Commissary />} />
             <Route path="feature/basic_education" element={<Education />} />
             <Route path="feature/advanced_education" element={<Education />} />
+            <Route path="feature/texting" element={<Texting />} />
+            <Route path="feature/reading_general" element={<Reading />} />
+            <Route path="feature/reading_expanded" element={<Reading />} />
+            <Route path="feature/outdoor_rec" element={<Rec />} />
+            <Route path="feature/out_of_cell_minimum" element={<Rec />} />
+            <Route path="jobs" element={<Jobs />} />
             <Route path="course/:code" element={<Course />} />
             <Route path="feature/:name" element={<FeaturePage />} />
           </Routes>
