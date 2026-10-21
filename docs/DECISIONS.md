@@ -37,3 +37,17 @@
 - **Feature catalog** (`engine/features.py`) is the only definition of the protected baseline. Steps 3–5 of the composition only operate on non-baseline features, and property tests assert the baseline is never removed.
 - **Contact-level blocks** are returned as `blocked_contact_ids` (they're per-contact, not per-feature) and apply at every tier.
 - **Not yet done (later phases):** clean-day awards (needs the daily job), `valid_until` for the offline snapshot (Phase 3; `next_change_at` is the building block), HTTP routes for sanctions/appeals (Phase 5).
+
+## Phase 3
+
+- **Device identity by token.** Kiosk routes (`/device/*`) are authenticated by a per-device secret (hash stored in `devices.token_hash`), then resolved device -> open assignment -> resident. Rejected: unauthenticated device code (anyone on the network could read a resident's screen). The RBAC route-guard test accepts either a staff role guard or the device guard.
+- **One payload, one code path.** `build_resident_view()` produces the `ResidentView` the kiosk renders. Phase 6 sandbox/mirror will call the same function (a test confirms `simulation` is the only field that differs).
+- **Offline = fail closed.** `valid_until` = min(next sanction boundary, now + TTL). Past it with no connection, non-baseline features are paused client-side (`OFFLINE_STALE`). Rejected: trusting the cache indefinitely (a lock that should have started or ended would be wrong), or locking everything including baseline (violates invariant 1).
+- **Server-time offset.** Staleness uses `Date.now() + (server generated_at - device time at fetch)`. This came out of the e2e offline test: a skewed device clock would otherwise extend or cut short the cache.
+- **Appeals and Request staff are idempotent for offline replay.** Staff requests carry a `client_id` (unique); a duplicate appeal returns 409, which the queue treats as delivered.
+- **Tier-locked vs restricted.** "Not unlocked yet" appears on the service tile only; the Restrictions list shows sanctions, offense restrictions, and the ceiling. Offense restrictions show the config `reason_text` (English only for now; localizing it needs a per-language field in the offense config).
+- **Allowances show `used: 0`** until calls and commissary track usage in Phase 4.
+- **Reading level** is stored and sent but not yet used to switch wording; captions flag is stored for video (stub). Both are staff-set only.
+- **Staff-controlled settings and assignments** have API routes now (`PUT /staff/residents/{id}/settings`, `POST /staff/device-assignments`); both are audit-logged with a required reason. The staff UI for them is Phase 5.
+- **E2E runs the real stack.** Playwright seeds a fresh `isd_e2e` database, serves the API with uvicorn on :8001 and the production web build on :4173, so the CSP and API contract are both exercised.
+- **Known gap:** no login/rate limiting on device routes yet (Phase 8), and the device token lives in localStorage.

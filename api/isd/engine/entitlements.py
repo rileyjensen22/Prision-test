@@ -26,6 +26,7 @@ class Reason:
     ends_at: datetime | None = None
     detail: str = ""
     ref_id: int | None = None
+    params: dict[str, int | str] = field(default_factory=dict)  # for client-side translation
 
 
 @dataclass(frozen=True)
@@ -116,10 +117,17 @@ def _tier_step(feature: str, facts: ResidentFacts, eff: int, ceil: int, cfg: Eng
             "ceiling",
             ASK_STAFF,
             detail=f"Repeat-return ceiling is tier {ceil}",
+            params={"ceiling": ceil},
         )
     else:
         needed = _first_tier_granting(feature, cfg)
-        why = Reason("TIER_LOCKED", "tier", ASK_STAFF, detail=f"Unlocks at tier {needed}")
+        why = Reason(
+            "TIER_LOCKED",
+            "tier",
+            ASK_STAFF,
+            detail=f"Unlocks at tier {needed}",
+            params={"tier": needed or 0},
+        )
     return None, why
 
 

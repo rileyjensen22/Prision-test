@@ -2,12 +2,17 @@
 
 from sqlalchemy.orm import Session
 
-from isd.auth import hash_password
+from isd.auth import hash_device_token, hash_password
 from isd.models import Cell, ConfigVersion, Contact, Device, DeviceAssignment, Resident, Staff
 from isd.services.audit import SYSTEM, append_audit
 from isd.services.config_store import get_current
 
 DEV_PASSWORD = "dev-password-not-secret"  # synthetic dev accounts only
+
+
+def dev_device_token(cell: str) -> str:
+    """Predictable tokens for synthetic dev devices only. Real devices get random secrets."""
+    return f"dev-device-token-{cell}"
 
 
 def seed_database(session: Session, data: dict) -> bool:
@@ -34,7 +39,9 @@ def seed_database(session: Session, data: dict) -> bool:
         session.add(res)
         codes[r["id"]] = res
         cell = Cell(code=r["cell"])
-        device = Device(code=f"DEV-{r['cell']}")
+        device = Device(
+            code=f"DEV-{r['cell']}", token_hash=hash_device_token(dev_device_token(r["cell"]))
+        )
         session.add_all([cell, device])
         session.flush()
         session.add(DeviceAssignment(device_id=device.id, cell_id=cell.id, resident_id=res.id))

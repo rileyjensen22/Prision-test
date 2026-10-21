@@ -7,3 +7,5 @@ appeal_review_hours: 72
 officer_weekly_immediate_sanction_cap: 3
 public_log_enabled: false
 offline_alert_minutes: 30
+inactivity_return_home_seconds: 90
+entitlement_snapshot_ttl_minutes: 60

@@ -82,6 +82,7 @@ class Device(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True)
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    token_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
 
 
 class DeviceAssignment(Base):
@@ -205,3 +206,21 @@ class AuditLog(Base):
     payload: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict)
     prev_hash: Mapped[str] = mapped_column(String(64))
     hash: Mapped[str] = mapped_column(String(64))
+
+
+class StaffRequest(Base):
+    """Resident pressed Request staff / medical / mental-health (baseline features)."""
+
+    __tablename__ = "staff_requests"
+    __table_args__ = (
+        CheckConstraint("kind IN ('staff', 'medical', 'mental_health')", name="ck_request_kind"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(16))
+    client_id: Mapped[str] = mapped_column(
+        String(64), unique=True
+    )  # makes offline replay idempotent
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(16), default="open")
+    handled_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)

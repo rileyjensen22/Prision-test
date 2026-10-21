@@ -4,7 +4,7 @@ export default function StaffApp() {
   const { t } = useTranslation()
   return (
     <main className="p-8">
-      <h1 className="text-xl">{t('staffHome')}</h1>
+      <h1 className="text-xl">{t('app.staffHome')}</h1>
     </main>
   )
 }

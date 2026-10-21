@@ -1,0 +1,73 @@
+"""Endpoints called by the resident kiosk. Authenticated by device token, not by staff login."""
+
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from isd.auth import DeviceContext, current_device
+from isd.db import get_db
+from isd.engine.authority import AuthorityError
+from isd.models import Sanction, StaffRequest
+from isd.schemas import ResidentView
+from isd.services import sanctions
+from isd.services.resident_view import build_resident_view
+
+router = APIRouter(prefix="/device", tags=["device"])
+
+
+@router.get("/view", response_model=ResidentView)
+def view(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    now = datetime.now(UTC)
+    ctx.device.last_sync_at = now
+    return build_resident_view(db, ctx.resident_id, now)
+
+
+class AppealIn(BaseModel):
+    sanction_id: int
+
+
+@router.post("/appeals", status_code=201)
+def appeal(
+    body: AppealIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+) -> dict:
+    s = db.get(Sanction, body.sanction_id)
+    if s is None or s.resident_id != ctx.resident_id:
+        raise HTTPException(404, "sanction not found")
+    try:
+        a = sanctions.file_appeal(db, s.id, datetime.now(UTC))
+    except AuthorityError as e:
+        raise HTTPException(409, {"code": e.code, "message": str(e)}) from e
+    return {"appeal_id": a.id, "due_at": a.due_at.isoformat()}
+
+
+class RequestIn(BaseModel):
+    kind: str = Field(pattern="^(staff|medical|mental_health)$")
+    client_id: str = Field(min_length=8, max_length=64)  # lets the offline queue replay safely
+    created_at: datetime | None = None
+
+
+@router.post("/requests", status_code=201)
+def request_staff(
+    body: RequestIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+) -> dict:
+    existing = db.execute(
+        select(StaffRequest).where(StaffRequest.client_id == body.client_id)
+    ).scalar()
+    if existing:
+        return {"request_id": existing.id, "duplicate": True}
+    row = StaffRequest(
+        resident_id=ctx.resident_id,
+        kind=body.kind,
+        client_id=body.client_id,
+        created_at=body.created_at or datetime.now(UTC),
+    )
+    db.add(row)
+    try:
+        db.flush()
+    except IntegrityError as e:  # concurrent replay of the same client_id
+        raise HTTPException(409, "duplicate request") from e
+    return {"request_id": row.id, "duplicate": False}

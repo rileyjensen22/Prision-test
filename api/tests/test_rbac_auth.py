@@ -6,7 +6,10 @@ PUBLIC = {"/health", "/auth/login", "/openapi.json", "/docs", "/redoc", "/docs/o
 
 
 def _has_role_guard(route: APIRoute) -> bool:
-    return any(hasattr(d.call, "allowed_roles") for d in route.dependant.dependencies)
+    return any(
+        hasattr(d.call, "allowed_roles") or hasattr(d.call, "device_auth")
+        for d in route.dependant.dependencies
+    )
 
 
 def test_every_non_public_route_has_a_role_guard():

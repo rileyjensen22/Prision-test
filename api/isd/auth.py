@@ -79,3 +79,41 @@ def require_roles(*roles: str):
 
     dependency.allowed_roles = roles  # type: ignore[attr-defined]
     return dependency
+
+
+# ---- Kiosk device identity (CLAUDE.md 7: identity = device -> cell -> resident, no login) ----
+def hash_device_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+class DeviceContext:
+    def __init__(self, device, resident_id: int):
+        self.device, self.resident_id = device, resident_id
+
+
+def current_device(
+    x_device_token: str | None = Header(default=None), db: Session = Depends(get_db)
+) -> DeviceContext:
+    from isd.models import Device, DeviceAssignment
+
+    device = (
+        db.execute(
+            select(Device).where(Device.token_hash == hash_device_token(x_device_token or ""))
+        ).scalar()
+        if x_device_token
+        else None
+    )
+    if device is None:
+        raise HTTPException(401, "unknown device")
+    assignment = db.execute(
+        select(DeviceAssignment)
+        .where(DeviceAssignment.device_id == device.id, DeviceAssignment.ended_at.is_(None))
+        .order_by(DeviceAssignment.assigned_at.desc())
+        .limit(1)
+    ).scalar()
+    if assignment is None:
+        raise HTTPException(409, "device is not assigned to a resident")
+    return DeviceContext(device, assignment.resident_id)
+
+
+current_device.device_auth = True  # marker checked by the route-guard test
