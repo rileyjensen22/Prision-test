@@ -84,3 +84,54 @@ def staff_tokens(owner_engine, client):
             s.flush()
             headers[role] = {"Authorization": f"Bearer {make_token(st.id)}"}
     return headers
+
+
+# ---- helpers for service-level tests (all run inside the rolled-back `owner` session) ----
+import uuid  # noqa: E402
+from datetime import UTC, datetime  # noqa: E402
+
+NOW = datetime(2026, 3, 2, 9, 0, tzinfo=UTC)
+
+
+@pytest.fixture
+def seeded(owner):
+    """Seed config into the test transaction; returns the loaded EngineConfig."""
+    from isd.config_loader import load_config
+    from isd.services.audit import SYSTEM
+    from isd.services.config_store import set_config
+    from isd.services.entitlement_service import load_engine_config
+
+    for name, payload in load_config().items():
+        set_config(owner, SYSTEM, name, payload, "test seed")
+    return load_engine_config(owner)
+
+
+@pytest.fixture
+def make_staff(owner):
+    from isd.models import Staff
+    from isd.services.audit import Actor
+
+    def _make(role: str) -> Actor:
+        st = Staff(username=f"{role}_{uuid.uuid4().hex[:8]}", role=role, password_hash="x")
+        owner.add(st)
+        owner.flush()
+        return Actor(st.id, role)
+
+    return _make
+
+
+@pytest.fixture
+def make_resident(owner):
+    from isd.models import Resident
+
+    def _make(prior_returns: int = 0) -> int:
+        r = Resident(
+            code=f"RES-{uuid.uuid4().hex[:8]}",
+            display_name="Synthetic",
+            prior_returns=prior_returns,
+        )
+        owner.add(r)
+        owner.flush()
+        return r.id
+
+    return _make

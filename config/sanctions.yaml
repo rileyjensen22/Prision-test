@@ -1,11 +1,11 @@
 version: 1
 officer_weekly_immediate_sanction_cap: 3
 appeal_review_hours: 72
-# confirmation: officer_immediate | supervisor_always | supervisor_evidence | system_event_supervisor
+# severity (minor|major) picks the point deduction; confirmation: officer_immediate | supervisor_always | supervisor_evidence | system_event_supervisor
 infractions:
-  DISRUPT:         {label: Disruptive behavior,          scope: communication,  duration_hours: 24,  confirmation: officer_immediate}
-  CELL_MESS:       {label: Cell sanitation,              scope: commissary,     duration_hours: 24,  confirmation: officer_immediate}
-  STAFF_DISRESPECT: {label: Disrespect to staff,         scope: communication,  duration_hours: 24,  confirmation: supervisor_always}
-  CAM_BLOCK:       {label: Facility cell camera obstructed, scope: all_non_baseline, duration_hours: 48,  confirmation: supervisor_evidence}
-  DEVICE_TAMPER:   {label: Device camera covered during call, scope: video,      duration_hours: 72,  confirmation: system_event_supervisor}
-  DEVICE_DAMAGE:   {label: Device damage,                scope: all_non_baseline, duration_hours: 168, confirmation: supervisor_evidence}
+  DISRUPT: {label: Disruptive behavior,          scope: communication,  duration_hours: 24,  confirmation: officer_immediate, severity: minor}
+  CELL_MESS: {label: Cell sanitation,              scope: commissary,     duration_hours: 24,  confirmation: officer_immediate, severity: minor}
+  STAFF_DISRESPECT: {label: Disrespect to staff,         scope: communication,  duration_hours: 24,  confirmation: supervisor_always, severity: minor}
+  CAM_BLOCK: {label: Facility cell camera obstructed, scope: all_non_baseline, duration_hours: 48,  confirmation: supervisor_evidence, severity: major}
+  DEVICE_TAMPER: {label: Device camera covered during call, scope: video,      duration_hours: 72,  confirmation: system_event_supervisor, severity: major}
+  DEVICE_DAMAGE: {label: Device damage,                scope: all_non_baseline, duration_hours: 168, confirmation: supervisor_evidence, severity: major}

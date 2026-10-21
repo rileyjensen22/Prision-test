@@ -118,6 +118,7 @@ class PointEvent(Base):
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     created_at: Mapped[datetime] = _now()
+    ref_sanction_id: Mapped[int | None] = mapped_column(ForeignKey("sanctions.id"), nullable=True)
 
 
 class Sanction(Base):
@@ -141,6 +142,13 @@ class Sanction(Base):
     evidence: Mapped[str | None] = mapped_column(Text, nullable=True)
     confirmed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    evidence_type: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    evidence_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    evidence_reporter_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    applied_immediately: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    overturned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class Appeal(Base):
@@ -153,6 +161,19 @@ class Appeal(Base):
     status: Mapped[str] = mapped_column(String(16), default="open")
     reviewer_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    outcome_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class TierHistory(Base):
+    """Earned-tier changes. Current earned tier = latest row (default 1); drops are rate-limited."""
+
+    __tablename__ = "tier_history"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    from_tier: Mapped[int] = mapped_column(Integer)
+    to_tier: Mapped[int] = mapped_column(Integer)
+    points: Mapped[int] = mapped_column(Integer)
 
 
 class OffenseFlag(Base):

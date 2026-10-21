@@ -8,6 +8,12 @@ isd/models.py
 isd/seed_db.py
 isd/settings.py
 isd/engine/__init__.py
+isd/engine/authority.py
+isd/engine/ceiling.py
+isd/engine/config.py
+isd/engine/entitlements.py
+isd/engine/features.py
+isd/engine/tiers.py
 isd/interfaces/__init__.py
 isd/mocks/__init__.py
 isd/routers/__init__.py
@@ -17,6 +23,9 @@ isd/routers/config.py
 isd/services/__init__.py
 isd/services/audit.py
 isd/services/config_store.py
+isd/services/entitlement_service.py
+isd/services/points.py
+isd/services/sanctions.py
 isd_api.egg-info/PKG-INFO
 isd_api.egg-info/SOURCES.txt
 isd_api.egg-info/dependency_links.txt
@@ -25,6 +34,7 @@ isd_api.egg-info/top_level.txt
 tests/test_audit.py
 tests/test_config.py
 tests/test_config_store.py
+tests/test_engine_services.py
 tests/test_health.py
 tests/test_rbac_auth.py
 tests/test_seed.py
