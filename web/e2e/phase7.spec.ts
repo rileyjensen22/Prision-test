@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test'
 
-import { apiHeaders, openKiosk, staffLogin, token } from './helpers'
+import {
+  allAuditEntries,
+  apiHeaders,
+  auditCountExcludingLogins,
+  openKiosk,
+  staffLogin,
+  token,
+} from './helpers'
 
 test('reading: general texts at tier 1, expanded at tier 4', async ({ page }) => {
   await openKiosk(page, 'fay', '/resident/feature/reading_general')
@@ -20,8 +27,7 @@ test('jobs are optional and joining or leaving changes nothing about the residen
   request,
 }) => {
   const auditor = await apiHeaders(request, 'e2e_auditor')
-  const auditCount = async () =>
-    (await (await request.get('/api/audit?limit=500', { headers: auditor })).json()).length
+  const auditCount = () => auditCountExcludingLogins(request, auditor)
   const before = await auditCount()
 
   await openKiosk(page, 'tess')
@@ -150,13 +156,10 @@ test('activity timeline: supervisors and up only, reason required, access is log
   await aud.getByLabel('Reason for viewing activity').fill('quarterly compliance audit')
   await aud.getByRole('button', { name: 'View activity' }).click()
   await expect(aud.getByTestId('timeline')).toContainText('sanction')
-  const entries = await (
-    await request.get('/api/audit?limit=500', { headers: await apiHeaders(request, 'e2e_auditor') })
-  ).json()
+  const entries = await allAuditEntries(request, await apiHeaders(request, 'e2e_auditor'))
   expect(
     entries.some(
-      (e: { action: string; payload: { reason?: string } }) =>
-        e.action === 'monitoring_access' && e.payload.reason === 'quarterly compliance audit',
+      (e) => e.action === 'monitoring_access' && e.payload.reason === 'quarterly compliance audit',
     ),
   ).toBe(true)
 })

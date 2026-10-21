@@ -20,6 +20,12 @@ jobs:
       - run: PGPASSWORD=postgres_dev_only psql -h localhost -U postgres -q -f scripts/db-init.sql
       - run: ruff check api scripts && ruff format --check api scripts
       - run: cd api && pytest -q
+      - name: No secrets in the repository
+        run: python scripts/check-secrets.py
+      - name: Dependency audit (Python)
+        run: pip install pip-audit && pip-audit --skip-editable
+      - name: Simulated week (every invariant must hold)
+        run: python scripts/simulate-week.py
   web:
     runs-on: ubuntu-latest
     services:
@@ -40,4 +46,6 @@ jobs:
       - run: pip install -e "api[dev]"
       - run: PGPASSWORD=postgres_dev_only psql -h localhost -U postgres -q -f scripts/db-init.sql
       - run: cd web && npm ci && npm run lint && npm test
+      - name: Dependency audit (production dependencies)
+        run: cd web && npm audit --omit=dev
       - run: cd web && npx playwright install --with-deps chromium && npm run e2e

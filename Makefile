@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: db-local migrate dev test seed lint format simulate-week export-public-log install clean
+.PHONY: db-local migrate daily secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -39,6 +39,12 @@ format: $(VENV)/.installed
 	$(VENV)/bin/ruff check --fix api scripts
 	$(VENV)/bin/ruff format api scripts
 	cd web && npm run format
+
+daily: $(VENV)/.installed migrate  ## run the daily job (clean-day points, tier checks)
+	$(PY) scripts/daily-job.py
+
+secrets-check:  ## fail if the repository contains anything that looks like a secret
+	$(PY) scripts/check-secrets.py
 
 simulate-week: $(VENV)/.installed
 	$(PY) scripts/simulate-week.py

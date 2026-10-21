@@ -8,11 +8,11 @@ import time
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from isd import settings
+from isd import limits, settings
 from isd.db import get_db
 from isd.models import Staff
 
@@ -51,21 +51,28 @@ def parse_token(token: str) -> int | None:
     return claims["sub"] if claims.get("exp", 0) > time.time() else None
 
 
+_DUMMY_HASH = _hasher.hash("not-a-real-password")
+
+
 def authenticate(session: Session, username: str, password: str) -> Staff | None:
     staff = session.execute(select(Staff).where(Staff.username == username)).scalar()
-    if staff and staff.active and verify_password(staff.password_hash, password):
-        return staff
-    return None
+    # Always do one password check, so an unknown username takes as long as a wrong password.
+    ok = verify_password(staff.password_hash if staff else _DUMMY_HASH, password)
+    return staff if staff and staff.active and ok else None
 
 
 def current_staff(
-    authorization: str | None = Header(default=None), db: Session = Depends(get_db)
+    request: Request,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
 ) -> Staff:
+    limits.enforce("ip", limits.client_ip(request))
     scheme, _, token = (authorization or "").partition(" ")
     staff_id = parse_token(token) if scheme.lower() == "bearer" else None
     staff = db.get(Staff, staff_id) if staff_id else None
     if not staff or not staff.active:
         raise HTTPException(401, "not authenticated")
+    limits.enforce("staff", f"staff:{staff.id}")
     return staff
 
 
@@ -92,9 +99,13 @@ class DeviceContext:
 
 
 def current_device(
-    x_device_token: str | None = Header(default=None), db: Session = Depends(get_db)
+    request: Request,
+    x_device_token: str | None = Header(default=None),
+    db: Session = Depends(get_db),
 ) -> DeviceContext:
     from isd.models import Device, DeviceAssignment
+
+    limits.enforce("ip", limits.client_ip(request))
 
     device = (
         db.execute(
@@ -105,6 +116,7 @@ def current_device(
     )
     if device is None:
         raise HTTPException(401, "unknown device")
+    limits.enforce("device", f"device:{device.id}")
     assignment = db.execute(
         select(DeviceAssignment)
         .where(DeviceAssignment.device_id == device.id, DeviceAssignment.ended_at.is_(None))

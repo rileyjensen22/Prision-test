@@ -103,3 +103,21 @@ def assign_device(
         },
     )
     return {"device": device.code, "resident_id": resident.id}
+
+
+@router.post("/devices/{device_code}/token")
+def rotate_device_token(
+    device_code: str,
+    staff: Staff = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Issue a fresh token for a kiosk. It is shown once; give it to the device as `#device=...`."""
+    from isd.services import devices
+
+    try:
+        token = devices.rotate_token(
+            db, Actor(staff.id, staff.role), device_code, datetime.now(UTC)
+        )
+    except LookupError as e:
+        raise HTTPException(404, str(e)) from e
+    return {"device": device_code, "token": token, "kiosk_address_fragment": f"#device={token}"}

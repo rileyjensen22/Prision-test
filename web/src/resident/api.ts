@@ -14,15 +14,22 @@ export class HttpError extends Error {
 
 const TOKEN_KEY = 'isd.deviceToken'
 
-/** The device token arrives once as ?device=...; it is stored and removed from the address. */
+/**
+ * The device token arrives once, in the URL *fragment* (`/resident#device=...`). A fragment is never
+ * sent to the web server, so the token cannot end up in its access logs. It is saved on the device
+ * and removed from the address. A `?device=` query value is ignored (and removed) for the same reason.
+ */
 export function resolveDeviceToken(): string | null {
   const url = new URL(window.location.href)
-  const fromUrl = url.searchParams.get('device')
-  if (fromUrl) {
-    localStorage.setItem(TOKEN_KEY, fromUrl)
+  const fromHash = new URLSearchParams(url.hash.replace(/^#/, '')).get('device')
+  const hadQuery = url.searchParams.has('device')
+  if (fromHash || hadQuery) {
     url.searchParams.delete('device')
-    window.history.replaceState(null, '', url.pathname + url.search + url.hash)
-    return fromUrl
+    window.history.replaceState(null, '', url.pathname + url.search)
+  }
+  if (fromHash) {
+    localStorage.setItem(TOKEN_KEY, fromHash)
+    return fromHash
   }
   return localStorage.getItem(TOKEN_KEY)
 }

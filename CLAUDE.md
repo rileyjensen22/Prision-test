@@ -37,7 +37,8 @@ Customers: other correctional facilities, and facilities we run ourselves. Initi
 /web            React app (resident + staff)
 /config         seed YAML: tiers, points, sanctions, offenses, compliance
 /docs           ASSUMPTIONS.md, DECISIONS.md, kiosk.md, architecture.md
-/scripts        seed, simulate-week, export-public-log
+/scripts        seed, simulate-week, export-public-log, daily-job, check-secrets, rotate-device-token
+/deploy         example reverse-proxy config (untested example)
 ```
 
 ## 4. Core domain
@@ -234,10 +235,12 @@ Work one phase at a time. Don't start the next until the current phase's tests p
 ```
 make db-local # (no Docker) create dev DB roles on a local Postgres
 make migrate  # alembic upgrade head
+make daily    # daily job: clean-day points, tier checks (delayed drops), cleanup
+make secrets-check  # fail if anything that looks like a secret is committed
 make dev      # run api + web + postgres
 make test     # pytest + vitest + playwright
 make seed     # synthetic residents, staff, config
 make lint
-make simulate-week
-make export-public-log
+make simulate-week   # a simulated week, then every invariant checked (exit 0 = all hold)
+make export-public-log   # only if an operator enabled public_log_enabled
 ```

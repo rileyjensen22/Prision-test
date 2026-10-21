@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from isd import settings
 from isd.auth import hash_device_token, hash_password
 from isd.models import (
     ApprovedContentSource,
@@ -80,6 +81,10 @@ def ensure_reference_data(session: Session) -> None:
 
 
 def seed_database(session: Session, data: dict) -> bool:
+    if settings.ENV == "production":
+        raise RuntimeError(
+            "refusing to load the synthetic seed (predictable tokens and passwords) in production"
+        )
     if get_current(session, "tiers"):
         ensure_config(session, data["config"])
         ensure_reference_data(session)

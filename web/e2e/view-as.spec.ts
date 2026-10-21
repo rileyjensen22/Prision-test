@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { apiHeaders, openKiosk, staffLogin } from './helpers'
+import { apiHeaders, auditCountExcludingLogins, openKiosk, staffLogin } from './helpers'
 
 const sim = (page: import('@playwright/test').Page) => page.getByTestId('sim-screen')
 
@@ -9,8 +9,7 @@ test('sandbox: override tier, sanctions and language; nothing is written anywher
   request,
 }) => {
   const auditor = await apiHeaders(request, 'e2e_auditor')
-  const auditCount = async () =>
-    (await (await request.get('/api/audit?limit=500', { headers: auditor })).json()).length
+  const auditCount = () => auditCountExcludingLogins(request, auditor)
   const appealsFor = async () =>
     (
       await (

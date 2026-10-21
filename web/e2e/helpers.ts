@@ -10,7 +10,7 @@ export function token(resident: string): string {
 
 /** Opens the kiosk the way a staff-provisioned device would: with its device token. */
 export async function openKiosk(page: Page, resident: string, path = '/resident') {
-  await page.goto(`${path}?device=${token(resident)}`)
+  await page.goto(`${path}#device=${token(resident)}`)
 }
 
 interface StaffFixtures {
@@ -41,4 +41,34 @@ export async function apiHeaders(
   })
   const { token } = await r.json()
   return { Authorization: `Bearer ${token}` }
+}
+
+export interface AuditEntry {
+  seq: number
+  action: string
+  payload: Record<string, unknown>
+}
+
+/** Every audit entry, oldest first. One request returns at most 500, so this pages through the log. */
+export async function allAuditEntries(
+  request: import('@playwright/test').APIRequestContext,
+  headers: Record<string, string>,
+): Promise<AuditEntry[]> {
+  const out: AuditEntry[] = []
+  for (;;) {
+    const after = out.length ? out[out.length - 1].seq : 0
+    const page = (await (
+      await request.get(`/api/audit?after_seq=${after}&limit=500`, { headers })
+    ).json()) as AuditEntry[]
+    if (page.length === 0) return out
+    out.push(...page)
+  }
+}
+
+/** How many audit entries exist, not counting sign-ins (every staff login adds one). */
+export async function auditCountExcludingLogins(
+  request: import('@playwright/test').APIRequestContext,
+  headers: Record<string, string>,
+): Promise<number> {
+  return (await allAuditEntries(request, headers)).filter((e) => e.action !== 'login').length
 }

@@ -4,16 +4,15 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from isd.auth import DeviceContext, current_device
 from isd.db import get_db
 from isd.engine.authority import AuthorityError
-from isd.models import Sanction, StaffRequest
+from isd.models import Sanction
 from isd.schemas import ResidentView
-from isd.services import sanctions
+from isd.services import sanctions, staff_requests
 from isd.services.resident_view import build_resident_view
 
 router = APIRouter(prefix="/device", tags=["device"])
@@ -54,23 +53,13 @@ class RequestIn(BaseModel):
 def request_staff(
     body: RequestIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ) -> dict:
-    existing = db.execute(
-        select(StaffRequest).where(StaffRequest.client_id == body.client_id)
-    ).scalar()
-    if existing:
-        return {"request_id": existing.id, "duplicate": True}
-    row = StaffRequest(
-        resident_id=ctx.resident_id,
-        kind=body.kind,
-        client_id=body.client_id,
-        created_at=body.created_at or datetime.now(UTC),
-    )
-    db.add(row)
     try:
-        db.flush()
+        row, duplicate = staff_requests.create(
+            db, ctx.resident_id, body.kind, body.client_id, body.created_at or datetime.now(UTC)
+        )
     except IntegrityError as e:  # concurrent replay of the same client_id
         raise HTTPException(409, "duplicate request") from e
-    return {"request_id": row.id, "duplicate": False}
+    return {"request_id": row.id, "duplicate": duplicate}
 
 
 class ScreenIn(BaseModel):

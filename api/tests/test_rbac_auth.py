@@ -1,8 +1,17 @@
 from fastapi.routing import APIRoute
 
 from isd.main import app
+from tests.helpers import documented_operations, iter_api_routes, operations
 
-PUBLIC = {"/health", "/auth/login", "/openapi.json", "/docs", "/redoc", "/docs/oauth2-redirect"}
+PUBLIC = {
+    "/health",
+    "/auth/login",
+    "/auth/sso",
+    "/openapi.json",
+    "/docs",
+    "/redoc",
+    "/docs/oauth2-redirect",
+}
 
 
 def _has_role_guard(route: APIRoute) -> bool:
@@ -13,11 +22,11 @@ def _has_role_guard(route: APIRoute) -> bool:
 
 
 def test_every_non_public_route_has_a_role_guard():
-    unguarded = [
-        r.path
-        for r in app.routes
-        if isinstance(r, APIRoute) and r.path not in PUBLIC and not _has_role_guard(r)
-    ]
+    # We must inspect exactly the routes the API documents, or this proves nothing.
+    assert operations(app) == documented_operations(app)
+    routes = [r for r in iter_api_routes(app) if r.path not in PUBLIC]
+    assert len(routes) > 50
+    unguarded = [r.path for r in routes if not _has_role_guard(r)]
     assert unguarded == []
 
 

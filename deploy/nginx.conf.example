@@ -1,0 +1,37 @@
+# EXAMPLE ONLY. Adapt to your environment and test before use; this file is not exercised by CI.
+# Serves the built web app and proxies the API, adding the headers the API cannot add for static files.
+
+server {
+    listen 443 ssl http2;
+    server_name isd.example.invalid;
+    ssl_certificate     /etc/ssl/isd/fullchain.pem;
+    ssl_certificate_key /etc/ssl/isd/privkey.pem;
+
+    root /srv/isd/web/dist;
+    index index.html;
+
+    # Security headers for the web app (the API adds its own).
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    # The page's own Content-Security-Policy is a <meta> tag injected at build time.
+
+    client_max_body_size 1m;   # matches MAX_BODY_BYTES
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;      # one uvicorn process, started with --proxy-headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;   # overwrite, never append client-supplied values
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+
+    location / {
+        try_files $uri /index.html;            # single-page app routes
+    }
+
+    # Do not log the device-token fragment (clients never send it) or request bodies.
+    access_log /var/log/nginx/isd.access.log;
+}

@@ -202,3 +202,21 @@ def committed_reference(owner_engine):
 
     with Session(owner_engine) as s, s.begin():
         ensure_reference_data(s)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _rate_limits_off_by_default():
+    """The suite makes thousands of requests from one address; the security tests turn limits on."""
+    settings.RATE_LIMIT_ENABLED = False
+    yield
+
+
+@pytest.fixture
+def rate_limits_on():
+    from isd import limits
+
+    settings.RATE_LIMIT_ENABLED = True
+    limits.reset_defaults()
+    yield limits
+    settings.RATE_LIMIT_ENABLED = False
+    limits.reset_defaults()
