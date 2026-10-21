@@ -1,0 +1,12 @@
+node_modules
+.venv
+var
+dist
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.hypothesis
+.env
+web/test-results
+web/playwright-report

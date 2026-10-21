@@ -1,0 +1,9 @@
+version: 1
+events:
+  clean_day:               {points: 2,    source: system}
+  basic_course:            {points: 50,   source: system}
+  advanced_course:         {points: 100,  source: system}
+  program_certificate:     {points: 200,  source: system}
+  staff_commendation:      {points: 10,   source: staff, reason_required: true, max_per_week: 3}
+  confirmed_minor_infraction: {points: -25,  source: staff}
+  confirmed_major_infraction: {points: -100, source: staff}

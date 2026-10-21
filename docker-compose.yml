@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: isd
+      POSTGRES_PASSWORD: isd_dev_only
+      POSTGRES_DB: isd
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U isd"]
+      interval: 5s
+      retries: 10
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql+psycopg://isd:isd_dev_only@db:5432/isd
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+    volumes: ["./api:/app", "./config:/config"]
+  web:
+    build: ./web
+    ports: ["5173:5173"]
+    depends_on: [api]
+    volumes: ["./web/src:/app/src"]
+volumes:
+  pgdata:

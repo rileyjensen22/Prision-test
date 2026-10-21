@@ -1,0 +1,9 @@
+# ALL ITEMS UNVERIFIED. Confirm with counsel before any deployment.
+call_rate_cap_per_minute: null
+recording_retention_days: null
+privileged_contact_types: [attorney]
+min_out_of_cell_minutes_per_day: 60
+appeal_review_hours: 72
+officer_weekly_immediate_sanction_cap: 3
+public_log_enabled: false
+offline_alert_minutes: 30
