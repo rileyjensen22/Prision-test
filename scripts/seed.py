@@ -42,7 +42,7 @@ def build_seed(seed: int = 1) -> dict:
             "cell": f"A-{i + 1:02d}",
             "language": rng.choice(["en", "es"]),
             "prior_returns": rng.choice([0, 0, 0, 1, 2, 4]),
-            "points": rng.choice([0, 40, 120, 300, 520]),
+            "points": rng.choice([0, 40, 60, 120, 300, 520]),
         }
         for i in range(12)
     ]

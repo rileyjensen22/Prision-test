@@ -53,7 +53,7 @@ class AllowanceOut(BaseModel):
     period: str  # day | week
     unit: str
     limit: int
-    used: int
+    used: float
 
 
 class ResidentSettings(BaseModel):

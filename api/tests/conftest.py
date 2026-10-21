@@ -87,7 +87,6 @@ def staff_tokens(owner_engine, client):
 
 
 # ---- helpers for service-level tests (all run inside the rolled-back `owner` session) ----
-import uuid  # noqa: E402
 from datetime import UTC, datetime  # noqa: E402
 
 NOW = datetime(2026, 3, 2, 9, 0, tzinfo=UTC)
@@ -112,7 +111,7 @@ def make_staff(owner):
     from isd.services.audit import Actor
 
     def _make(role: str) -> Actor:
-        st = Staff(username=f"{role}_{uuid.uuid4().hex[:8]}", role=role, password_hash="x")
+        st = Staff(username=f"{role}_{_uuid.uuid4().hex[:8]}", role=role, password_hash="x")
         owner.add(st)
         owner.flush()
         return Actor(st.id, role)
@@ -126,12 +125,54 @@ def make_resident(owner):
 
     def _make(prior_returns: int = 0) -> int:
         r = Resident(
-            code=f"RES-{uuid.uuid4().hex[:8]}",
+            code=f"RES-{_uuid.uuid4().hex[:8]}",
             display_name="Synthetic",
             prior_returns=prior_returns,
         )
         owner.add(r)
         owner.flush()
         return r.id
+
+    return _make
+
+
+# ---- committed fixtures for HTTP-level tests ----
+import uuid as _uuid  # noqa: E402
+
+from isd.auth import hash_device_token  # noqa: E402
+from isd.config_loader import load_config  # noqa: E402
+from isd.models import Cell, Device, DeviceAssignment, Resident  # noqa: E402
+from isd.services.audit import SYSTEM  # noqa: E402
+from isd.services.config_store import get_current, set_config  # noqa: E402
+
+
+@pytest.fixture(scope="session")
+def committed_config(owner_engine):
+    with Session(owner_engine) as s, s.begin():
+        for name, payload in load_config().items():
+            if get_current(s, name) is None:
+                set_config(s, SYSTEM, name, payload, "test seed")
+
+
+@pytest.fixture
+def kiosk(owner_engine):
+    """Factory: committed resident + cell + device; returns (resident_id, token, device_code)."""
+    created = []
+
+    def _make(prior_returns=0, assigned=True):
+        tag = _uuid.uuid4().hex[:8]
+        token = f"tok-{tag}"
+        with Session(owner_engine) as s, s.begin():
+            r = Resident(code=f"R-{tag}", display_name="Synthetic", prior_returns=prior_returns)
+            c, d = (
+                Cell(code=f"C-{tag}"),
+                Device(code=f"D-{tag}", token_hash=hash_device_token(token)),
+            )
+            s.add_all([r, c, d])
+            s.flush()
+            if assigned:
+                s.add(DeviceAssignment(device_id=d.id, cell_id=c.id, resident_id=r.id))
+            created.append(r.id)
+            return r.id, token, d.code
 
     return _make

@@ -1,0 +1,12 @@
+# Synthetic commissary catalog and policy. Prices are in cents.
+# min_tier uses the resident's effective tier; blocked_offense_categories are PLACEHOLDER categories.
+version: 1
+max_deposit_cents: 50000
+items:
+  - {code: SOAP, name: {en: "Bar soap", es: "Jabón en barra"}, price_cents: 125, category: hygiene, min_tier: 1, blocked_offense_categories: []}
+  - {code: TOOTHPASTE, name: {en: "Toothpaste", es: "Pasta dental"}, price_cents: 210, category: hygiene, min_tier: 1, blocked_offense_categories: []}
+  - {code: PAD, name: {en: "Writing pad", es: "Bloc de notas"}, price_cents: 175, category: writing, min_tier: 1, blocked_offense_categories: []}
+  - {code: STAMPS, name: {en: "Postage stamps (book)", es: "Sellos postales (libreta)"}, price_cents: 800, category: writing, min_tier: 1, blocked_offense_categories: []}
+  - {code: SNACK, name: {en: "Snack pack", es: "Paquete de bocadillos"}, price_cents: 350, category: food, min_tier: 2, blocked_offense_categories: []}
+  - {code: COFFEE, name: {en: "Instant coffee", es: "Café instantáneo"}, price_cents: 450, category: food, min_tier: 3, blocked_offense_categories: []}
+  - {code: HEADPHONES, name: {en: "Headphones", es: "Audífonos"}, price_cents: 1200, category: electronics, min_tier: 4, blocked_offense_categories: [PLACEHOLDER_CATEGORY_A]}

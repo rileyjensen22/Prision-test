@@ -5,52 +5,16 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from isd.auth import hash_device_token
-from isd.config_loader import load_config
 from isd.models import (
     AuditLog,
-    Cell,
-    Device,
-    DeviceAssignment,
     Resident,
     StaffRequest,
 )
 from isd.services import points, sanctions
 from isd.services.audit import SYSTEM, Actor, verify_chain
-from isd.services.config_store import get_current, set_config
 from isd.services.resident_view import build_resident_view
 
-
-@pytest.fixture(scope="module", autouse=True)
-def committed_config(owner_engine):
-    with Session(owner_engine) as s, s.begin():
-        for name, payload in load_config().items():
-            if get_current(s, name) is None:
-                set_config(s, SYSTEM, name, payload, "test seed")
-
-
-@pytest.fixture
-def kiosk(owner_engine):
-    """Factory: committed resident + cell + device; returns (resident_id, token, device_code)."""
-    created = []
-
-    def _make(prior_returns=0, assigned=True):
-        tag = uuid.uuid4().hex[:8]
-        token = f"tok-{tag}"
-        with Session(owner_engine) as s, s.begin():
-            r = Resident(code=f"R-{tag}", display_name="Synthetic", prior_returns=prior_returns)
-            c, d = (
-                Cell(code=f"C-{tag}"),
-                Device(code=f"D-{tag}", token_hash=hash_device_token(token)),
-            )
-            s.add_all([r, c, d])
-            s.flush()
-            if assigned:
-                s.add(DeviceAssignment(device_id=d.id, cell_id=c.id, resident_id=r.id))
-            created.append(r.id)
-            return r.id, token, d.code
-
-    return _make
+pytestmark = pytest.mark.usefixtures("committed_config")
 
 
 def hdr(token):

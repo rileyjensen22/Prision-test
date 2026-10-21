@@ -27,7 +27,11 @@ export function resolveDeviceToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)
 }
 
-async function call(token: string, path: string, init: RequestInit = {}): Promise<unknown> {
+export async function callApi(
+  token: string,
+  path: string,
+  init: RequestInit = {},
+): Promise<unknown> {
   let res: Response
   try {
     res = await fetch(`/api${path}`, {
@@ -42,13 +46,15 @@ async function call(token: string, path: string, init: RequestInit = {}): Promis
   return body
 }
 
-export const fetchView = (token: string) => call(token, '/device/view') as Promise<ResidentView>
+export const fetchView = (token: string) => callApi(token, '/device/view') as Promise<ResidentView>
 
 export function sendEvent(token: string, ev: QueuedEvent): Promise<unknown> {
   if (ev.type === 'request')
-    return call(token, '/device/requests', {
+    return callApi(token, '/device/requests', {
       method: 'POST',
       body: JSON.stringify({ client_id: ev.client_id, ...ev.payload }),
     })
-  return call(token, '/device/appeals', { method: 'POST', body: JSON.stringify(ev.payload) })
+  return callApi(token, '/device/appeals', { method: 'POST', body: JSON.stringify(ev.payload) })
 }
+
+export const newOrderId = (): string => crypto.randomUUID()

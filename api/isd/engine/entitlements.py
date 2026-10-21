@@ -69,6 +69,7 @@ class Entitlements:
     features: dict[str, FeatureEntitlement]
     blocked_contact_ids: tuple[int, ...]
     next_change_at: datetime | None  # earliest sanction start/end after at_time
+    offense_categories: tuple[str, ...] = ()
 
     def allowed(self, feature: str) -> bool:
         return self.features[feature].allowed
@@ -191,4 +192,5 @@ def compute_entitlements(
         features=features,
         blocked_contact_ids=tuple(sorted(facts.blocked_contact_ids)),
         next_change_at=min(boundaries, default=None),
+        offense_categories=tuple(sorted({o.category for o in facts.offenses})),
     )

@@ -4,10 +4,15 @@ from pathlib import Path
 
 import yaml
 
-from isd.engine.config import validate_offenses, validate_sanctions
+from isd.engine.config import (
+    validate_commissary,
+    validate_courses,
+    validate_offenses,
+    validate_sanctions,
+)
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
-CONFIG_FILES = ("tiers", "points", "sanctions", "offenses", "compliance")
+CONFIG_FILES = ("tiers", "points", "sanctions", "offenses", "compliance", "commissary", "courses")
 
 
 def load_config(config_dir: Path = CONFIG_DIR) -> dict[str, dict]:
@@ -31,6 +36,10 @@ def validate_section(name: str, payload: dict) -> None:
         validate_sanctions(payload)
     elif name == "offenses":
         validate_offenses(payload)
+    elif name == "commissary":
+        validate_commissary(payload)
+    elif name == "courses":
+        validate_courses(payload)
     elif name not in CONFIG_FILES:
         raise ValueError(f"unknown config section: {name}")
 

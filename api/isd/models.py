@@ -107,6 +107,7 @@ class Contact(Base):
     type: Mapped[str] = mapped_column(String(16))
     approved: Mapped[bool] = mapped_column(Boolean, default=True)
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)  # no-contact order
+    phone_ref: Mapped[str | None] = mapped_column(String(32), nullable=True)  # synthetic number
 
 
 class PointEvent(Base):
@@ -224,3 +225,91 @@ class StaffRequest(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(16), default="open")
     handled_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+
+
+class CallRecord(Base):
+    """Metadata only. Privileged (attorney) calls never carry monitoring data (invariant 6)."""
+
+    __tablename__ = "call_records"
+    __table_args__ = (
+        CheckConstraint("NOT (privileged AND monitored)", name="ck_privileged_not_monitored"),
+        CheckConstraint(
+            "NOT (privileged AND monitor_ref IS NOT NULL)", name="ck_privileged_no_monitor_ref"
+        ),
+        CheckConstraint("status IN ('active', 'completed', 'timed_out')", name="ck_call_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
+    contact_type: Mapped[str] = mapped_column(String(16))
+    privileged: Mapped[bool] = mapped_column(Boolean)
+    monitored: Mapped[bool] = mapped_column(Boolean)
+    monitor_ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    provider_ref: Mapped[str] = mapped_column(String(64))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    max_seconds: Mapped[int] = mapped_column(Integer)
+    duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), default="active")
+
+
+class CourseProgress(Base):
+    __tablename__ = "course_progress"
+    __table_args__ = (UniqueConstraint("resident_id", "course_code", name="uq_progress"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    course_code: Mapped[str] = mapped_column(String(32))
+    lessons_done: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class QuizAttempt(Base):
+    __tablename__ = "quiz_attempts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    course_code: Mapped[str] = mapped_column(String(32))
+    correct: Mapped[int] = mapped_column(Integer)
+    total: Mapped[int] = mapped_column(Integer)
+    passed: Mapped[bool] = mapped_column(Boolean)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CommissaryOrder(Base):
+    __tablename__ = "commissary_orders"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    client_id: Mapped[str] = mapped_column(String(64), unique=True)
+    total_cents: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CommissaryOrderLine(Base):
+    __tablename__ = "commissary_order_lines"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("commissary_orders.id"), index=True)
+    item_code: Mapped[str] = mapped_column(String(32))
+    qty: Mapped[int] = mapped_column(Integer)
+    unit_price_cents: Mapped[int] = mapped_column(Integer)
+
+
+class TrustLedger(Base):
+    """Append-only trust-account ledger (UPDATE/DELETE blocked like the audit log)."""
+
+    __tablename__ = "trust_ledger"
+    __table_args__ = (
+        CheckConstraint(
+            "entry_type IN ('deposit', 'purchase', 'refund', 'adjustment')", name="ck_ledger_type"
+        ),
+        CheckConstraint("amount_cents <> 0", name="ck_ledger_nonzero"),
+        CheckConstraint("balance_after_cents >= 0", name="ck_ledger_no_overdraft"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    entry_type: Mapped[str] = mapped_column(String(16))
+    amount_cents: Mapped[int] = mapped_column(Integer)  # signed
+    balance_after_cents: Mapped[int] = mapped_column(Integer)
+    ref: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    order_id: Mapped[int | None] = mapped_column(ForeignKey("commissary_orders.id"), nullable=True)
+    memo: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

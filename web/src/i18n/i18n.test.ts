@@ -49,3 +49,26 @@ test('every infraction code and feature the API can return has a translation', (
   ])
     expect(en.feature).toHaveProperty(f)
 })
+
+test('every error code the feature APIs can return is translated', () => {
+  for (const c of [
+    'FEATURE_LOCKED',
+    'LIMIT_REACHED',
+    'CONTACT_UNAVAILABLE',
+    'CALL_IN_PROGRESS',
+    'NOT_FOUND',
+  ])
+    expect(en.calls.err).toHaveProperty(c)
+  for (const c of [
+    'FEATURE_LOCKED',
+    'INSUFFICIENT_FUNDS',
+    'WEEKLY_LIMIT',
+    'ITEM_TIER',
+    'ITEM_OFFENSE',
+    'BAD_QUANTITY',
+    'EMPTY_ORDER',
+    'UNKNOWN_ITEM',
+  ])
+    expect(en.commissary.err).toHaveProperty(c)
+  for (const c of ['ITEM_TIER', 'ITEM_OFFENSE']) expect(en.commissary.blocked).toHaveProperty(c)
+})

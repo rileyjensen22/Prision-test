@@ -107,3 +107,30 @@ def validate_offenses(payload: dict) -> None:
         unknown = set(row["blocked_features"]) - NON_BASELINE_FEATURES
         if unknown:  # baseline features can never be blocked (invariant 1)
             raise ValueError(f"{row['offense_category']}: cannot block {sorted(unknown)}")
+
+
+def validate_commissary(payload: dict) -> None:
+    seen = set()
+    for item in payload["items"]:
+        if item["code"] in seen:
+            raise ValueError(f"duplicate commissary item {item['code']}")
+        seen.add(item["code"])
+        if item["price_cents"] <= 0 or not 1 <= item["min_tier"] <= 10:
+            raise ValueError(f"{item['code']}: price must be positive and min_tier in 1..10")
+    if payload["max_deposit_cents"] <= 0:
+        raise ValueError("max_deposit_cents must be positive")
+
+
+def validate_courses(payload: dict) -> None:
+    codes = set()
+    for c in payload["courses"]:
+        if c["code"] in codes:
+            raise ValueError(f"duplicate course {c['code']}")
+        codes.add(c["code"])
+        if c["level"] not in ("basic", "advanced", "program"):
+            raise ValueError(f"{c['code']}: unknown level {c['level']!r}")
+        if not 0 < c["pass_mark"] <= 1 or not c["lessons"] or not c["quiz"]:
+            raise ValueError(f"{c['code']}: needs lessons, quiz questions, and pass_mark in (0, 1]")
+        for q in c["quiz"]:
+            if not 0 <= q["answer"] < len(q["choices"]):
+                raise ValueError(f"{c['code']}/{q['id']}: answer index out of range")

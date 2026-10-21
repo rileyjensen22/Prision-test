@@ -4,6 +4,9 @@ import { Route, Routes, useNavigate } from 'react-router-dom'
 
 import { RequestStaffDialog } from './RequestStaff'
 import { ResidentProvider, useResident } from './ResidentContext'
+import { Calls } from './features/Calls'
+import { Commissary } from './features/Commissary'
+import { Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
 import { useInactivity } from './useInactivity'
 
@@ -60,6 +63,11 @@ function Shell() {
             <Route path="locks" element={<Locks />} />
             <Route path="appeal/:sanctionId" element={<Appeal />} />
             <Route path="tier" element={<TierScreen />} />
+            <Route path="feature/calls" element={<Calls />} />
+            <Route path="feature/commissary" element={<Commissary />} />
+            <Route path="feature/basic_education" element={<Education />} />
+            <Route path="feature/advanced_education" element={<Education />} />
+            <Route path="course/:code" element={<Course />} />
             <Route path="feature/:name" element={<FeaturePage />} />
           </Routes>
         )}

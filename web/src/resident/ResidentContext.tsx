@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { HttpError, NetworkError, fetchView, resolveDeviceToken, sendEvent } from './api'
+import { HttpError, NetworkError, callApi, fetchView, resolveDeviceToken, sendEvent } from './api'
 import { enqueue, flushQueue, loadQueue, newClientId } from './queue'
 import type { QueuedEvent } from './queue'
 import { effectiveFeatures, isStale } from './snapshot'
@@ -24,6 +24,8 @@ interface Ctx {
   now: number
   pending: number
   refresh: () => Promise<void>
+  /** Calls a device endpoint. Throws NetworkError when offline, HttpError for 4xx/5xx. */
+  request: <T>(path: string, init?: RequestInit) => Promise<T>
   /** Returns 'sent' when delivered now, 'queued' when saved for later, 'duplicate' if already open. */
   submit: (
     ev: Omit<QueuedEvent, 'client_id'> & { client_id?: string },
@@ -136,6 +138,11 @@ export function ResidentProvider({ children }: { children: ReactNode }) {
     [refresh],
   )
 
+  const request = useCallback(async <T,>(path: string, init?: RequestInit) => {
+    if (!token.current) throw new NetworkError('no token')
+    return (await callApi(token.current, path, init)) as T
+  }, [])
+
   const value = useMemo<Ctx>(
     () => ({
       status,
@@ -146,9 +153,10 @@ export function ResidentProvider({ children }: { children: ReactNode }) {
       now,
       pending,
       refresh,
+      request,
       submit,
     }),
-    [status, view, online, stale, now, pending, refresh, submit],
+    [status, view, online, stale, now, pending, refresh, request, submit],
   )
   return <ResidentCtx.Provider value={value}>{children}</ResidentCtx.Provider>
 }

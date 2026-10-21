@@ -11,8 +11,8 @@ from alembic.config import Config
 from isd import settings
 from isd.auth import hash_device_token, hash_password
 from isd.config_loader import load_config
-from isd.models import Cell, Device, DeviceAssignment, Resident, Staff
-from isd.services import points, sanctions
+from isd.models import Cell, Contact, Device, DeviceAssignment, Resident, Staff
+from isd.services import commissary, points, sanctions
 from isd.services.audit import SYSTEM, Actor
 from isd.services.config_store import set_config
 from sqlalchemy import create_engine, text
@@ -63,6 +63,9 @@ def main() -> None:
             certs=0,
             sanction=None,
             issued_ago=timedelta(hours=1),
+            start_points=0,
+            contacts=(),
+            funds=0,
         ):
             r = Resident(
                 code=f"E2E-{key.upper()}",
@@ -76,6 +79,28 @@ def main() -> None:
             s.add_all([r, cell, dev])
             s.flush()
             s.add(DeviceAssignment(device_id=dev.id, cell_id=cell.id, resident_id=r.id))
+            if start_points:
+                points.record_points(
+                    s,
+                    SYSTEM,
+                    r.id,
+                    "seed_adjustment",
+                    start_points,
+                    "system",
+                    now - timedelta(days=2),
+                )
+                points.evaluate_tier(s, r.id, now - timedelta(days=2))
+            for n, kind in enumerate(contacts):
+                s.add(
+                    Contact(
+                        resident_id=r.id,
+                        name=f"Synthetic {kind} {key}",
+                        type=kind,
+                        phone_ref=f"555-02{n:02d}",
+                    )
+                )
+            if funds:
+                commissary.deposit(s, SYSTEM, r.id, funds, "e2e", f"e2e-{key}", now)
             for _ in range(certs):
                 points.add_point_event(
                     s, SYSTEM, r.id, "program_certificate", now - timedelta(days=1)
@@ -97,6 +122,10 @@ def main() -> None:
             "eve", sanction="DISRUPT", issued_ago=timedelta(hours=23, minutes=40)
         )  # ends in 20 min
         resident("fay")  # clean; request-staff flows
+        # Demo loop: 60 points, one basic course (+50) crosses 100 and lifts calls 15 -> 20 minutes
+        resident("gina", start_points=60, contacts=("family", "attorney"))
+        resident("hal", funds=5000)  # commissary shopper, tier 1
+        resident("ivy", contacts=("family", "attorney"))  # call flows
     OUT.write_text(
         json.dumps({"tokens": tokens, "generated_at": now.isoformat()}, indent=2)
     )

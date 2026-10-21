@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from isd.engine.calls import minutes_used
 from isd.engine.features import BASELINE_FEATURES
 from isd.models import Appeal, Resident
 from isd.schemas import (
@@ -20,6 +21,7 @@ from isd.schemas import (
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements, load_engine_config
 from isd.services.points import total_points
+from isd.services.usage import call_seconds_today, spent_cents_this_week
 
 _ALLOWANCES = [  # feature, limit key, period, unit
     ("calls", "minutes_per_day", "day", "minutes"),
@@ -61,6 +63,10 @@ def build_resident_view(
     open_appeals = set(
         session.execute(select(Appeal.sanction_id).where(Appeal.status == "open")).scalars()
     )
+    used = {
+        "calls": minutes_used(call_seconds_today(session, resident_id, at_time)),
+        "commissary": spent_cents_this_week(session, resident_id, at_time) / 100,
+    }
     return ResidentView(
         resident_code=resident.code,
         settings=ResidentSettings(
@@ -72,7 +78,9 @@ def build_resident_view(
         tier=_tier(session, resident_id, ent, cfg, at_time),
         features=features,
         allowances=[
-            AllowanceOut(feature=f, period=p, unit=u, limit=features[f].limits[k], used=0)
+            AllowanceOut(
+                feature=f, period=p, unit=u, limit=features[f].limits[k], used=used.get(f, 0)
+            )
             for f, k, p, u in _ALLOWANCES
             if features[f].allowed and k in features[f].limits
         ],

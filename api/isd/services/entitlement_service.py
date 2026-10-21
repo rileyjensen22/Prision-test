@@ -5,7 +5,6 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from isd.config_loader import CONFIG_FILES
 from isd.engine.config import EngineConfig
 from isd.engine.entitlements import (
     Entitlements,
@@ -17,10 +16,12 @@ from isd.engine.entitlements import (
 from isd.models import Contact, OffenseFlag, Resident, Sanction, TierHistory
 from isd.services.config_store import get_current
 
+ENGINE_SECTIONS = ("tiers", "points", "sanctions", "offenses")
+
 
 def load_engine_config(session: Session) -> EngineConfig:
     sections = {}
-    for name in CONFIG_FILES:
+    for name in ENGINE_SECTIONS:
         row = get_current(session, name)
         if row is None:
             raise LookupError(f"config section {name!r} has not been seeded")

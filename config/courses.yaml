@@ -1,0 +1,86 @@
+# Education content (synthetic, original). Versioned like other config so edits are audit-logged.
+# level: basic (baseline feature, +50) | advanced (needs advanced_education, +100) | program (+200)
+# Text fields are {en, es}. Quiz answers never leave the server.
+version: 1
+courses:
+  - code: MONEY101
+    level: basic
+    title: {en: "Everyday Money Basics", es: "Fundamentos del dinero diario"}
+    pass_mark: 0.6
+    lessons:
+      - id: budget
+        title: {en: "Making a simple budget", es: "Cómo hacer un presupuesto sencillo"}
+        body:
+          en: A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.
+          es: Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y después los gustos. Si los gastos superan los ingresos, cambie primero los gustos.
+      - id: saving
+        title: {en: "Saving a little each week", es: "Ahorrar un poco cada semana"}
+        body:
+          en: Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.
+          es: Los ahorros pequeños y regulares se acumulan. Apartar unos pocos dólares cada día de pago crea un colchón para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente.
+      - id: debt
+        title: {en: "Understanding debt and interest", es: "Entender la deuda y los intereses"}
+        body:
+          en: Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.
+          es: El interés es el costo de pedir prestado. Un préstamo con tasa alta cuesta mucho más con el tiempo. Pagar más del mínimo reduce el total que paga. Lea siempre el costo total antes de aceptar un préstamo.
+    quiz:
+      - id: q1
+        prompt: {en: "What should you write down first in a budget?", es: "¿Qué debe anotar primero en un presupuesto?"}
+        choices:
+          - {en: "Your income", es: "Sus ingresos"}
+          - {en: "Your wants", es: "Sus gustos"}
+          - {en: "Your debts only", es: "Solo sus deudas"}
+        answer: 0
+      - id: q2
+        prompt: {en: "If spending is higher than income, what should you change first?", es: "Si los gastos superan los ingresos, ¿qué debe cambiar primero?"}
+        choices:
+          - {en: "Needs such as food", es: "Necesidades como la comida"}
+          - {en: "Wants", es: "Los gustos"}
+          - {en: "Nothing", es: "Nada"}
+        answer: 1
+      - id: q3
+        prompt: {en: "Why keep savings in a separate place?", es: "¿Por qué guardar los ahorros aparte?"}
+        choices:
+          - {en: "So they are not spent by accident", es: "Para no gastarlos por accidente"}
+          - {en: "So they earn more interest on debt", es: "Para que generen más interés en la deuda"}
+          - {en: "It makes no difference", es: "No hay diferencia"}
+        answer: 0
+      - id: q4
+        prompt: {en: "What is interest?", es: "¿Qué es el interés?"}
+        choices:
+          - {en: "A gift from the bank", es: "Un regalo del banco"}
+          - {en: "The cost of borrowing money", es: "El costo de pedir dinero prestado"}
+          - {en: "A kind of savings account", es: "Un tipo de cuenta de ahorros"}
+        answer: 1
+      - id: q5
+        prompt: {en: "Paying more than the minimum on a loan usually...?", es: "Pagar más del mínimo de un préstamo normalmente...?"}
+        choices:
+          - {en: "Reduces the total you pay", es: "Reduce el total que paga"}
+          - {en: "Increases the interest rate", es: "Aumenta la tasa de interés"}
+          - {en: "Cancels the loan", es: "Cancela el préstamo"}
+        answer: 0
+  - code: WORKMATH
+    level: advanced
+    title: {en: "Workplace Math", es: "Matemáticas para el trabajo"}
+    pass_mark: 0.6
+    lessons:
+      - id: hours
+        title: {en: "Hours and pay", es: "Horas y pago"}
+        body:
+          en: Pay for a shift is hours worked times the hourly rate. Eight hours at twelve dollars an hour is ninety-six dollars before deductions.
+          es: El pago de un turno es las horas trabajadas por la tarifa por hora. Ocho horas a doce dólares la hora son noventa y seis dólares antes de deducciones.
+    quiz:
+      - id: q1
+        prompt: {en: "Six hours at ten dollars an hour is how much?", es: "¿Cuánto son seis horas a diez dólares la hora?"}
+        choices:
+          - {en: "16 dollars", es: "16 dólares"}
+          - {en: "60 dollars", es: "60 dólares"}
+          - {en: "600 dollars", es: "600 dólares"}
+        answer: 1
+      - id: q2
+        prompt: {en: "Pay before deductions is also called...?", es: "El pago antes de deducciones también se llama...?"}
+        choices:
+          - {en: "Gross pay", es: "Pago bruto"}
+          - {en: "Net pay", es: "Pago neto"}
+          - {en: "Tips", es: "Propinas"}
+        answer: 0

@@ -1,9 +1,12 @@
 """Load seed data into Postgres (idempotent: skips if config already seeded)."""
 
+from datetime import UTC, datetime
+
 from sqlalchemy.orm import Session
 
 from isd.auth import hash_device_token, hash_password
 from isd.models import Cell, ConfigVersion, Contact, Device, DeviceAssignment, Resident, Staff
+from isd.services import commissary, points
 from isd.services.audit import SYSTEM, append_audit
 from isd.services.config_store import get_current
 
@@ -15,18 +18,33 @@ def dev_device_token(cell: str) -> str:
     return f"dev-device-token-{cell}"
 
 
+def ensure_config(session: Session, config: dict) -> None:
+    """Adds any config section that is missing (older databases gain new sections)."""
+    for name, payload in config.items():
+        if get_current(session, name) is None:
+            session.add(ConfigVersion(name=name, version=1, payload=payload, reason="initial seed"))
+            session.flush()
+            append_audit(
+                session,
+                SYSTEM,
+                "config_change",
+                "config",
+                name,
+                "CONFIG_SEED",
+                payload={"version": 1},
+            )
+
+
 def seed_database(session: Session, data: dict) -> bool:
     if get_current(session, "tiers"):
+        ensure_config(session, data["config"])
         return False
     pw_hash = hash_password(DEV_PASSWORD)
     for s in data["staff"]:
         session.add(Staff(username=s["username"], role=s["role"], password_hash=pw_hash))
-    for name, payload in data["config"].items():
-        session.add(ConfigVersion(name=name, version=1, payload=payload, reason="initial seed"))
-        append_audit(
-            session, SYSTEM, "config_change", "config", name, "CONFIG_SEED", payload={"version": 1}
-        )
+    ensure_config(session, data["config"])
     session.flush()
+    now = datetime.now(UTC)
     codes: dict[str, Resident] = {}
     for r in data["residents"]:
         res = Resident(
@@ -54,6 +72,22 @@ def seed_database(session: Session, data: dict) -> bool:
             "SEED_ASSIGN",
             payload={"device": device.code, "cell": cell.code},
         )
-    for c in data["contacts"]:
-        session.add(Contact(resident_id=codes[c["resident_id"]].id, name=c["name"], type=c["type"]))
+    for i, c in enumerate(data["contacts"]):
+        session.add(
+            Contact(
+                resident_id=codes[c["resident_id"]].id,
+                name=c["name"],
+                type=c["type"],
+                phone_ref=f"555-01{i:02d}",
+            )
+        )
+    session.flush()
+    for r in data["residents"]:  # starting points and a small family deposit
+        res = codes[r["id"]]
+        if r["points"]:
+            points.record_points(
+                session, SYSTEM, res.id, "seed_adjustment", r["points"], "system", now
+            )
+            points.evaluate_tier(session, res.id, now)
+        commissary.deposit(session, SYSTEM, res.id, 2500, "seed", f"seed-{r['id']}", now)
     return True

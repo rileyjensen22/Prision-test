@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { BackLink, Card, EndTime, Time, reasonTitle } from './components'
+import { money } from './features/helpers'
 import { useResident } from './ResidentContext'
 
 const ALWAYS_ORDER = [
@@ -18,7 +19,7 @@ const ALWAYS_ORDER = [
 ] // request_staff is the persistent button, so it is not repeated as a tile
 
 export function Home() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { view, features } = useResident()
   if (!view) return null
   const { tier } = view
@@ -117,11 +118,16 @@ export function Home() {
             {view.allowances.map((a) => (
               <li key={`${a.feature}-${a.unit}`} data-testid={`allowance-${a.feature}`}>
                 {t(`feature.${a.feature}`)}:{' '}
-                {t('home.left', {
-                  left: a.limit - a.used,
-                  limit: a.limit,
-                  unit: t(`units.${a.unit}`),
-                })}{' '}
+                {a.unit === 'dollars'
+                  ? t('home.leftMoney', {
+                      left: money(Math.round((a.limit - a.used) * 100), i18n.language),
+                      limit: money(a.limit * 100, i18n.language),
+                    })
+                  : t('home.left', {
+                      left: a.limit - a.used,
+                      limit: a.limit,
+                      unit: t(`units.${a.unit}`),
+                    })}{' '}
                 {a.period === 'day' ? t('home.perDay') : t('home.perWeek')}
               </li>
             ))}
