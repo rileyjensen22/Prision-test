@@ -5,11 +5,19 @@ on:
 jobs:
   api:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres_dev_only }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e "api[dev]"
+      - run: PGPASSWORD=postgres_dev_only psql -h localhost -U postgres -q -f scripts/db-init.sql
       - run: ruff check api scripts && ruff format --check api scripts
       - run: cd api && pytest -q
   web:

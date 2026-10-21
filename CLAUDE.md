@@ -232,6 +232,8 @@ Work one phase at a time. Don't start the next until the current phase's tests p
 ### Commands (create in Phase 0, then keep accurate)
 
 ```
+make db-local # (no Docker) create dev DB roles on a local Postgres
+make migrate  # alembic upgrade head
 make dev      # run api + web + postgres
 make test     # pytest + vitest + playwright
 make seed     # synthetic residents, staff, config

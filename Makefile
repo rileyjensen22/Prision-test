@@ -1,4 +1,6 @@
-.PHONY: dev test seed lint format simulate-week export-public-log install clean
+DB_SUPERUSER ?= postgres
+
+.PHONY: db-local migrate dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -19,7 +21,13 @@ test: $(VENV)/.installed  ## pytest + vitest + playwright
 	cd web && npm test
 	cd web && npm run e2e
 
-seed: $(VENV)/.installed
+db-local:  ## create dev roles + database on a local Postgres (run as root/postgres)
+	su $(DB_SUPERUSER) -c "psql -q -f $(CURDIR)/scripts/db-init.sql"
+
+migrate: $(VENV)/.installed
+	cd api && ../$(PY) -m alembic upgrade head
+
+seed: $(VENV)/.installed migrate
 	$(PY) scripts/seed.py
 
 lint: $(VENV)/.installed

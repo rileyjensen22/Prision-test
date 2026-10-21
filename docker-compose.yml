@@ -2,19 +2,20 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: isd
-      POSTGRES_PASSWORD: isd_dev_only
-      POSTGRES_DB: isd
+      POSTGRES_PASSWORD: postgres_dev_only
     ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U isd"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       retries: 10
   api:
     build: ./api
     environment:
-      DATABASE_URL: postgresql+psycopg://isd:isd_dev_only@db:5432/isd
+      DATABASE_URL: postgresql+psycopg://isd_app:isd_app_dev_only@db:5432/isd
+      MIGRATION_DATABASE_URL: postgresql+psycopg://isd:isd_dev_only@db:5432/isd
     ports: ["8000:8000"]
     depends_on:
       db: { condition: service_healthy }

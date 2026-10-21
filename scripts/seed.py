@@ -1,18 +1,17 @@
-"""Generate synthetic seed data (no real names/IDs). Phase 0: writes var/seed.json.
-
-Phase 1 will load the same data into Postgres via the data model.
-"""
+"""Generate synthetic seed data (no real names/IDs); write var/seed.json and load Postgres."""
 
 import json
 import random
-import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "api"))
-
-from argon2 import PasswordHasher
+from isd import settings
 from isd.config_loader import load_config
+from isd.seed_db import seed_database
+from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session
+
+ROOT = Path(__file__).resolve().parents[1]
 
 ROLES = [
     "officer",
@@ -28,14 +27,11 @@ ROLES = [
 def build_seed(seed: int = 1) -> dict:
     rng = random.Random(seed)
     config = load_config()
-    ph = PasswordHasher()
-    dev_hash = ph.hash("dev-password-not-secret")
     staff = [
         {
             "id": f"STAFF-{i + 1:03d}",
             "username": f"{role}{i + 1}",
             "role": role,
-            "password_hash": dev_hash,
         }
         for i, role in enumerate(ROLES)
     ]
@@ -73,8 +69,19 @@ def main() -> None:
     data = build_seed()
     out.write_text(json.dumps(data, indent=2, sort_keys=True))
     print(
-        f"Seeded {len(data['staff'])} staff, {len(data['residents'])} residents -> {out}"
+        f"Wrote {len(data['staff'])} staff, {len(data['residents'])} residents -> {out}"
     )
+    try:
+        with (
+            Session(create_engine(settings.MIGRATION_DATABASE_URL)) as session,
+            session.begin(),
+        ):
+            loaded = seed_database(session, data)
+        print("Database seeded." if loaded else "Database already seeded; skipped.")
+    except OperationalError as exc:  # DB unreachable: JSON output is still written
+        print(
+            f"Database not seeded ({type(exc).__name__}); is Postgres up? (make db-local)"
+        )
 
 
 if __name__ == "__main__":
