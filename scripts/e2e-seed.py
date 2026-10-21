@@ -15,11 +15,21 @@ from isd.models import Cell, Contact, Device, DeviceAssignment, Resident, Staff
 from isd.services import commissary, points, sanctions
 from isd.services.audit import SYSTEM, Actor
 from isd.services.config_store import set_config
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
 ROOT = Path(__file__).resolve().parents[1]
+STAFF_PASSWORD = "e2e-pass"
+STAFF = {  # key used by the Playwright helpers -> account
+    "e2e_officer": "officer",
+    "e2e_colleague": "officer",
+    "e2e_heavy": "officer",
+    "e2e_sup1": "supervisor",
+    "e2e_sup2": "supervisor",
+    "e2e_admin": "admin",
+    "e2e_auditor": "auditor",
+}
 DB = os.environ.get("E2E_DB", "isd_e2e")
 OUT = ROOT / "web" / "e2e" / ".fixtures.json"
 
@@ -47,6 +57,10 @@ def main() -> None:
         for name, payload in load_config().items():
             set_config(s, SYSTEM, name, payload, "e2e seed")
         pw = hash_password("pw")
+        staff_pw = hash_password(STAFF_PASSWORD)
+        for username, role in STAFF.items():
+            s.add(Staff(username=username, role=role, password_hash=staff_pw))
+        s.flush()
 
         def new_officer(
             key: str,
@@ -126,9 +140,30 @@ def main() -> None:
         resident("gina", start_points=60, contacts=("family", "attorney"))
         resident("hal", funds=5000)  # commissary shopper, tier 1
         resident("ivy", contacts=("family", "attorney"))  # call flows
-    OUT.write_text(
-        json.dumps({"tokens": tokens, "generated_at": now.isoformat()}, indent=2)
-    )
+        resident("jo")  # staff e2e: sanction -> confirmation -> appeal -> overturn
+        resident(
+            "kim"
+        )  # staff e2e: supervisor-issued sanction; staff-controlled settings
+        # One officer who records far more than peers, so the outlier view has something to flag
+        resident("zed")
+        heavy = Actor(
+            s.execute(select(Staff.id).where(Staff.username == "e2e_heavy")).scalar(),
+            "officer",
+        )
+        zed_id = s.execute(
+            select(Resident.id).where(Resident.code == "E2E-ZED")
+        ).scalar()
+        for i in range(8):
+            sanctions.issue_sanction(
+                s, heavy, zed_id, "CELL_MESS", now - timedelta(minutes=10 + i)
+            )
+    fixtures = {
+        "tokens": tokens,
+        "staff": STAFF,
+        "staff_password": STAFF_PASSWORD,
+        "generated_at": now.isoformat(),
+    }
+    OUT.write_text(json.dumps(fixtures, indent=2))
     print(f"e2e database {DB} ready; fixtures -> {OUT}")
 
 

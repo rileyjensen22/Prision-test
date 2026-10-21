@@ -27,14 +27,17 @@ ROLES = [
 def build_seed(seed: int = 1) -> dict:
     rng = random.Random(seed)
     config = load_config()
-    staff = [
-        {
-            "id": f"STAFF-{i + 1:03d}",
-            "username": f"{role}{i + 1}",
-            "role": role,
-        }
-        for i, role in enumerate(ROLES)
-    ]
+    seen: dict[str, int] = {}
+    staff = []
+    for i, role in enumerate(ROLES):
+        seen[role] = seen.get(role, 0) + 1
+        staff.append(
+            {
+                "id": f"STAFF-{i + 1:03d}",
+                "username": f"{role}{seen[role]}",
+                "role": role,
+            }
+        )
     residents = [
         {
             "id": f"RES-{i + 1:04d}",

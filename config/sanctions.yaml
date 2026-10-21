@@ -1,6 +1,8 @@
 version: 1
 officer_weekly_immediate_sanction_cap: 3
 appeal_review_hours: 72
+# Outlier view (CLAUDE.md section 6): compare each staff member with same-role peers over a window.
+outlier: {window_days: 30, z_threshold: 2.0, min_peers: 3, min_count: 3}
 # severity (minor|major) picks the point deduction; confirmation: officer_immediate | supervisor_always | supervisor_evidence | system_event_supervisor
 infractions:
   DISRUPT: {label: Disruptive behavior,          scope: communication,  duration_hours: 24,  confirmation: officer_immediate, severity: minor}

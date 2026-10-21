@@ -88,6 +88,14 @@ class EngineConfig:
 
 
 def validate_sanctions(payload: dict) -> None:
+    o = payload.get("outlier")
+    if o is not None and not (
+        o["window_days"] > 0
+        and o["z_threshold"] > 0
+        and o["min_peers"] >= 2
+        and o["min_count"] >= 1
+    ):
+        raise ValueError("outlier settings out of range")
     for code, rule in payload["infractions"].items():
         if rule["scope"] not in SCOPES:
             raise ValueError(f"{code}: unknown scope {rule['scope']!r}")

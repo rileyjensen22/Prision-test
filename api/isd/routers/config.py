@@ -13,6 +13,19 @@ from isd.services.audit import Actor
 router = APIRouter(prefix="/config", tags=["config"])
 
 
+@router.get("")
+def list_sections(
+    _: Staff = Depends(require_roles(*ROLES)), db: Session = Depends(get_db)
+) -> list[dict]:
+    from isd.config_loader import CONFIG_FILES
+
+    out = []
+    for name in CONFIG_FILES:
+        row = config_store.get_current(db, name)
+        out.append({"name": name, "version": row.version if row else None})
+    return out
+
+
 @router.get("/{name}")
 def get_config(
     name: str, _: Staff = Depends(require_roles(*ROLES)), db: Session = Depends(get_db)

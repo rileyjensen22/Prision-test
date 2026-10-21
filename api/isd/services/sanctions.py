@@ -13,7 +13,7 @@ from isd.engine.authority import (
     decide_issue,
 )
 from isd.engine.config import EngineConfig
-from isd.models import Appeal, PointEvent, Sanction
+from isd.models import Appeal, PointEvent, Sanction, Staff
 from isd.services.audit import Actor, append_audit
 from isd.services.entitlement_service import load_engine_config
 from isd.services.points import evaluate_tier, record_points
@@ -74,6 +74,10 @@ def issue_sanction(
     rule = cfg.infractions.get(infraction_code)
     if rule is None:
         raise AuthorityError("UNKNOWN_CODE", f"unknown infraction code {infraction_code!r}")
+    if evidence is not None and evidence.reporter_id is not None:
+        reporter = session.get(Staff, evidence.reporter_id)
+        if reporter is None or not reporter.active:
+            raise AuthorityError("EVIDENCE_REQUIRED", "reporter must be an active staff member")
     decision = decide_issue(
         rule, actor.role, actor.id, evidence, _immediate_count(session, actor.id, now), cfg
     )
