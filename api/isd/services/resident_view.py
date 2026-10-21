@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from isd.engine.calls import minutes_used
 from isd.engine.features import BASELINE_FEATURES
+from isd.engine.sandbox import SandboxOverrides, apply_to_settings
 from isd.models import Appeal, Resident
 from isd.schemas import (
     AllowanceOut,
@@ -33,11 +34,15 @@ _ALLOWANCES = [  # feature, limit key, period, unit
 
 
 def build_resident_view(
-    session: Session, resident_id: int, at_time: datetime, simulation: bool = False
+    session: Session,
+    resident_id: int,
+    at_time: datetime,
+    simulation: bool = False,
+    overrides: SandboxOverrides | None = None,
 ) -> ResidentView:
     cfg = load_engine_config(session)
     resident = session.get(Resident, resident_id)
-    ent = get_entitlements(session, resident_id, at_time, cfg)
+    ent = get_entitlements(session, resident_id, at_time, cfg, overrides)
     compliance = get_current(session, "compliance").payload
     ttl = timedelta(minutes=int(compliance["entitlement_snapshot_ttl_minutes"]))
     valid_until = min(filter(None, [ent.next_change_at, at_time + ttl]))
@@ -69,13 +74,8 @@ def build_resident_view(
     }
     return ResidentView(
         resident_code=resident.code,
-        settings=ResidentSettings(
-            language=resident.language,
-            text_size=resident.text_size,
-            reading_level=resident.reading_level,
-            captions=resident.captions,
-        ),
-        tier=_tier(session, resident_id, ent, cfg, at_time),
+        settings=ResidentSettings(**_settings(resident, overrides)),
+        tier=_tier(session, resident_id, ent, cfg, at_time, overrides),
         features=features,
         allowances=[
             AllowanceOut(
@@ -94,8 +94,20 @@ def build_resident_view(
     )
 
 
-def _tier(session, resident_id, ent, cfg, at_time) -> TierOut:
+def _settings(resident: Resident, overrides: SandboxOverrides | None) -> dict:
+    base = {
+        "language": resident.language,
+        "text_size": resident.text_size,
+        "reading_level": resident.reading_level,
+        "captions": resident.captions,
+    }
+    return apply_to_settings(base, overrides) if overrides else base
+
+
+def _tier(session, resident_id, ent, cfg, at_time, overrides=None) -> TierOut:
     points = total_points(session, resident_id, at_time)
+    if overrides is not None and overrides.tier is not None:
+        points = cfg.thresholds[overrides.tier - 1]  # show the points a tier-N resident would have
     earned = ent.earned_tier
     nxt = earned + 1 if earned < 10 else None
     return TierOut(
@@ -105,7 +117,8 @@ def _tier(session, resident_id, ent, cfg, at_time) -> TierOut:
         points=points,
         next_tier=nxt,
         points_to_next=max(0, cfg.thresholds[earned] - points) if nxt else None,
-        capped_by_ceiling=bool(nxt and nxt > ent.ceiling_tier),
+        # True whenever the resident has earned everything their ceiling allows
+        capped_by_ceiling=ent.ceiling_tier < 10 and ent.earned_tier >= ent.ceiling_tier,
     )
 
 

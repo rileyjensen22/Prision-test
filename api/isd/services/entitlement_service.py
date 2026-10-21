@@ -13,6 +13,7 @@ from isd.engine.entitlements import (
     SanctionFact,
     compute_entitlements,
 )
+from isd.engine.sandbox import SandboxOverrides, apply_to_facts
 from isd.models import Contact, OffenseFlag, Resident, Sanction, TierHistory
 from isd.services.config_store import get_current
 
@@ -39,14 +40,7 @@ def earned_tier(session: Session, resident_id: int, at_time: datetime) -> int:
     return row or 1
 
 
-def get_entitlements(
-    session: Session, resident_id: int, at_time: datetime, cfg: EngineConfig | None = None
-) -> Entitlements:
-    """Everything the resident can use at `at_time`, with a reason for every lock.
-
-    Performs no writes, so sandbox / time-travel views are safe (CLAUDE.md 9.1).
-    """
-    cfg = cfg or load_engine_config(session)
+def load_facts(session: Session, resident_id: int, at_time: datetime) -> ResidentFacts:
     resident = session.get(Resident, resident_id)
     if resident is None:
         raise LookupError(f"resident {resident_id} not found")
@@ -61,7 +55,7 @@ def get_entitlements(
     blocked = session.execute(
         select(Contact.id).where(Contact.resident_id == resident_id, Contact.blocked.is_(True))
     ).scalars()
-    facts = ResidentFacts(
+    return ResidentFacts(
         earned_tier=earned_tier(session, resident_id, at_time),
         prior_returns=resident.prior_returns,
         offenses=tuple(OffenseFact(o.offense_category, o.next_review_at) for o in offenses),
@@ -72,4 +66,22 @@ def get_entitlements(
         ),
         blocked_contact_ids=tuple(blocked),
     )
+
+
+def get_entitlements(
+    session: Session,
+    resident_id: int,
+    at_time: datetime,
+    cfg: EngineConfig | None = None,
+    overrides: SandboxOverrides | None = None,
+) -> Entitlements:
+    """Everything the resident can use at `at_time`, with a reason for every lock.
+
+    Performs no writes, so sandbox / time-travel views are safe (CLAUDE.md 9.1).
+    `overrides` (sandbox only) change the inputs, never the rules.
+    """
+    cfg = cfg or load_engine_config(session)
+    facts = load_facts(session, resident_id, at_time)
+    if overrides is not None:
+        facts = apply_to_facts(facts, overrides, cfg, at_time)
     return compute_entitlements(facts, cfg, at_time)

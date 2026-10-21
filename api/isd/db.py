@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from isd import settings
@@ -17,3 +17,17 @@ def get_db() -> Iterator[Session]:
         except Exception:
             session.rollback()
             raise
+
+
+def get_readonly_db() -> Iterator[Session]:
+    """A session whose transaction the database itself refuses to write in, and never commits.
+
+    Used by sandbox ("view as") so that "no writes, no side effects" is enforced by Postgres,
+    not just by careful code.
+    """
+    with SessionLocal() as session:
+        session.execute(text("SET TRANSACTION READ ONLY"))
+        try:
+            yield session
+        finally:
+            session.rollback()

@@ -7,9 +7,11 @@ import AuditLog from './pages/AuditLog'
 import ConfigEditor from './pages/ConfigEditor'
 import Confirmations from './pages/Confirmations'
 import Dashboard from './pages/Dashboard'
+import Mirror from './pages/Mirror'
 import Outliers from './pages/Outliers'
 import ResidentDetail from './pages/ResidentDetail'
 import Roster from './pages/Roster'
+import ViewAs from './pages/ViewAs'
 
 const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
 const NAV: { to: string; label: string; roles?: Role[] }[] = [
@@ -18,6 +20,8 @@ const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff/confirmations', label: 'Confirmations', roles: SUPERVISION },
   { to: '/staff/appeals', label: 'Appeals', roles: SUPERVISION },
   { to: '/staff/outliers', label: 'Outliers', roles: SUPERVISION },
+  { to: '/staff/view-as', label: 'View as' },
+  { to: '/staff/mirror', label: 'Live mirror', roles: SUPERVISION },
   { to: '/staff/config', label: 'Config' },
   { to: '/staff/audit', label: 'Audit log', roles: ['admin', 'auditor'] },
 ]
@@ -86,6 +90,15 @@ function Shell() {
             element={
               <Guard roles={SUPERVISION}>
                 <Outliers />
+              </Guard>
+            }
+          />
+          <Route path="view-as" element={<ViewAs />} />
+          <Route
+            path="mirror"
+            element={
+              <Guard roles={SUPERVISION}>
+                <Mirror />
               </Guard>
             }
           />

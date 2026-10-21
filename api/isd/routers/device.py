@@ -71,3 +71,20 @@ def request_staff(
     except IntegrityError as e:  # concurrent replay of the same client_id
         raise HTTPException(409, "duplicate request") from e
     return {"request_id": row.id, "duplicate": False}
+
+
+class ScreenIn(BaseModel):
+    path: str
+
+
+@router.post("/screen", status_code=204)
+def report_screen(
+    body: ScreenIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+) -> None:
+    """The kiosk tells us which screen it is on, so a logged live mirror can follow along."""
+    from isd.engine.mirror import is_valid_screen_path
+    from isd.services.mirror import record_screen
+
+    if not is_valid_screen_path(body.path):
+        raise HTTPException(422, "invalid screen path")
+    record_screen(db, ctx.device, body.path, datetime.now(UTC))

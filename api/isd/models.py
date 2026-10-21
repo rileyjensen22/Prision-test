@@ -83,6 +83,8 @@ class Device(Base):
     code: Mapped[str] = mapped_column(String(32), unique=True)
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     token_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    current_screen: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    screen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class DeviceAssignment(Base):
@@ -313,3 +315,19 @@ class TrustLedger(Base):
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class MirrorSession(Base):
+    """A staff member watching a device's screen. Every session is logged (CLAUDE.md 9.1)."""
+
+    __tablename__ = "mirror_sessions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), index=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    device_id: Mapped[int] = mapped_column(ForeignKey("devices.id"))
+    reason: Mapped[str] = mapped_column(Text)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    end_reason: Mapped[str | None] = mapped_column(String(16), nullable=True)  # manual|timeout|idle
+    frames_served: Mapped[int] = mapped_column(Integer, default=0)

@@ -14,3 +14,10 @@ Stub created in Phase 0; filled in Phase 7. See `config/compliance.yaml` and CLA
 - **Trust account rules.** Deposit limits, holds, fees, refunds on release, escheat, and who may spend from the account differ by state. The mock ledger is only a model of balances.
 - **Commissary restrictions by offense** use placeholder categories. Real categories and item rules come from the customer.
 - **Education credit.** Points for courses are a behavior incentive. Whether course completion can also count toward earned-time or certificates is a separate legal question.
+
+## Added in Phase 6 (UNVERIFIED; confirm with counsel)
+
+- **Resident notice for screen mirroring.** The device does not currently tell the resident when staff are mirroring it. Whether notice is required (or prohibited for security reasons), and what the disclosure should say, varies by jurisdiction and policy. Every session is logged with a reason so it can be reviewed either way.
+- **What counts as a private screen.** v1 redacts attorney calls and the legal, grievance, medical and mental-health services. Counsel should confirm the list (for example religious services, and PREA reporting channels) and whether any of it should be viewable under supervision.
+- **Who may mirror, and why.** v1 allows supervisors and admins with a written reason. A real policy may need a stated purpose list, second approval, or limits per resident.
+- **Retention of mirror logs.** Session records follow the audit log (kept indefinitely in v1). No screen images or content are captured or stored.

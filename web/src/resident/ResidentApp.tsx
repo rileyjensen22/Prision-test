@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Route, Routes, useNavigate } from 'react-router-dom'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import { RequestStaffDialog } from './RequestStaff'
 import { ResidentProvider, useResident } from './ResidentContext'
@@ -8,13 +8,13 @@ import { Calls } from './features/Calls'
 import { Commissary } from './features/Commissary'
 import { Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
+import { TEXT_SIZE } from './theme'
 import { useInactivity } from './useInactivity'
-
-const TEXT_SIZE = { normal: 'text-2xl', large: 'text-3xl', xlarge: 'text-4xl' } as const
 
 function Shell() {
   const { t } = useTranslation()
-  const { status, view, online, stale, pending } = useResident()
+  const { status, view, online, stale, pending, request } = useResident()
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const [dialog, setDialog] = useState(false)
   const goHome = useCallback(() => {
@@ -22,6 +22,16 @@ function Shell() {
     navigate('/resident', { replace: true })
   }, [navigate])
   useInactivity(view?.ui.inactivity_return_home_seconds ?? 90, goHome)
+
+  useEffect(() => {
+    // Tell the server which screen this is, so a logged live mirror can follow along.
+    // Best effort: failing (offline) must never affect the resident.
+    if (status === 'ready')
+      void request('/device/screen', {
+        method: 'POST',
+        body: JSON.stringify({ path: pathname }),
+      }).catch(() => {})
+  }, [pathname, status, request])
 
   useEffect(() => {
     // Kiosk: no context menu or drag-and-drop navigation.

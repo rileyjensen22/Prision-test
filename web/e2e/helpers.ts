@@ -30,3 +30,15 @@ export async function staffLogin(page: Page, username: string, path = '/staff') 
   await page.getByRole('button', { name: 'Sign in' }).click()
   await page.getByTestId('whoami').waitFor()
 }
+
+/** Logs in over the API (no browser UI) and returns auth headers, for checking server-side facts. */
+export async function apiHeaders(
+  request: import('@playwright/test').APIRequestContext,
+  username: string,
+) {
+  const r = await request.post('/api/auth/login', {
+    data: { username, password: fixtures().staff_password },
+  })
+  const { token } = await r.json()
+  return { Authorization: `Bearer ${token}` }
+}

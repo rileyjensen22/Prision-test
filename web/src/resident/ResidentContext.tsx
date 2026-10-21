@@ -15,7 +15,7 @@ const POLL_MS = 30_000
 
 type Status = 'loading' | 'ready' | 'no-device' | 'unassigned'
 
-interface Ctx {
+export interface Ctx {
   status: Status
   view: ResidentView | null
   features: Record<string, Feature>
@@ -32,7 +32,7 @@ interface Ctx {
   ) => Promise<'sent' | 'queued' | 'duplicate'>
 }
 
-const ResidentCtx = createContext<Ctx | null>(null)
+export const ResidentCtx = createContext<Ctx | null>(null)
 
 /** Server time minus device time, measured at the last successful fetch. */
 function readOffset(): number {
@@ -165,4 +165,38 @@ export function useResident(): Ctx {
   const ctx = useContext(ResidentCtx)
   if (!ctx) throw new Error('useResident outside provider')
   return ctx
+}
+
+export class SimulationBlocked extends Error {
+  constructor() {
+    super('This is a simulation: nothing is sent or saved.')
+  }
+}
+
+/** Feeds the resident screens a fixed ResidentView (sandbox and live mirror). No network, no writes. */
+export function StaticResidentProvider({
+  view,
+  children,
+}: {
+  view: ResidentView
+  children: ReactNode
+}) {
+  const value = useMemo<Ctx>(
+    () => ({
+      status: 'ready',
+      view,
+      features: view.features,
+      online: true,
+      stale: false,
+      now: Date.parse(view.generated_at), // time travel: "now" is the simulated moment
+      pending: 0,
+      refresh: async () => {},
+      request: async () => {
+        throw new SimulationBlocked()
+      },
+      submit: async () => 'sent', // shows what the resident would see; nothing is delivered
+    }),
+    [view],
+  )
+  return <ResidentCtx.Provider value={value}>{children}</ResidentCtx.Provider>
 }

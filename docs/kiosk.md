@@ -32,3 +32,7 @@ The device caches its last `ResidentView` with a `valid_until` time: the next sa
 - After `valid_until` with no connection: the device **fails closed**. Only protected-baseline features stay open, and everything else shows "Paused until the connection returns".
 - "Request staff" and appeals work offline. They are saved in a local queue with a client id and delivered in order when the connection returns (the API ignores duplicates).
 - Expiry is judged against **server time**: the device records its clock offset on every successful fetch, so a wrong or drifting device clock cannot extend the cache.
+
+## Screen reporting (for the staff live mirror)
+
+On every screen change the kiosk sends only the route (for example `/resident/tier`) to `POST /device/screen`, best effort and silent if offline. The server never stores the route of private services (law library, grievances, medical, mental health); it stores `/resident/redacted` instead. No screen content, keystrokes, or images are sent.

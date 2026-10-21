@@ -9,3 +9,5 @@ public_log_enabled: false
 offline_alert_minutes: 30
 inactivity_return_home_seconds: 90
 entitlement_snapshot_ttl_minutes: 60
+mirror_max_minutes: 15
+mirror_idle_seconds: 60
