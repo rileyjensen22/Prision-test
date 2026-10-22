@@ -35,6 +35,8 @@ Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<
 
 The daily job also pays work earnings into residents' trust accounts, tops up work tasks, and runs the **nightly reconciliation** (`make reconcile` runs only that). A mismatch makes the job exit with status 2 (so cron or monitoring can alert), writes a `reconciliation_mismatch` audit entry, and shows as a red banner on the staff dashboard and on the Finance page. Nothing is changed automatically: investigate and fix with a correcting entry, then run `make reconcile` again.
 
+Welfare flags are also swept every 15 minutes (`make welfare-sweep`, `scripts/welfare-sweep.py`) so a flag that nobody has acknowledged within `escalate_after_minutes` (default 12 hours) reaches a supervisor even when no one has the staff app open; opening the Welfare page or the dashboard runs the same sweep.
+
 Both are safe to repeat. If the daily job is missed, run it for each missed day (`run_daily(..., for_day=...)`); clean days are never awarded twice.
 
 ## Backups and restore

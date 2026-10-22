@@ -7,7 +7,11 @@ import { errorCode } from './helpers'
 
 interface Slot {
   slot: string
-  kind: 'indoor' | 'outdoor'
+  kind: 'indoor' | 'outdoor' | 'program' | 'visit'
+  title: string | null
+  minutes: number
+  block_id: number | null
+  cancelled: boolean
   allowed: boolean
   booked: boolean
   spaces: number
@@ -31,13 +35,13 @@ export function Rec() {
     void load()
   }, [request])
 
-  async function act(slot: string, what: 'book' | 'cancel') {
+  async function act(slot: string, block: number | null, what: 'book' | 'cancel') {
     if (!day) return
     setError(null)
     try {
       await request(`/device/rec/${what}`, {
         method: 'POST',
-        body: JSON.stringify({ day: day.day, slot }),
+        body: JSON.stringify({ day: day.day, slot, block_id: block }),
       })
     } catch (e) {
       const code = errorCode(e)
@@ -58,12 +62,22 @@ export function Rec() {
       )}
       <ul className="space-y-3">
         {(day?.slots ?? []).map((s) => (
-          <li key={s.slot}>
-            <Card data-testid={`slot-${s.slot}`} data-allowed={s.allowed} data-booked={s.booked}>
+          <li key={`${s.slot}-${s.kind}`}>
+            <Card
+              data-testid={`slot-${s.slot}`}
+              data-kind={s.kind}
+              data-allowed={s.allowed}
+              data-booked={s.booked}
+            >
               <p className="text-xl font-semibold">
-                {s.slot} · {t(`rec.${s.kind}`)}
+                {s.slot} · {s.title ?? t(`rec.${s.kind}`)}
               </p>
-              {!s.allowed ? (
+              <p className="opacity-80">
+                {t(`rec.${s.kind}`)} · {t('rec.minutes', { n: s.minutes })}
+              </p>
+              {s.cancelled ? (
+                <p data-testid="slot-cancelled">{t('rec.cancelledBlock')}</p>
+              ) : !s.allowed ? (
                 <p>🔒 {t('rec.locked')}</p>
               ) : (
                 <div className="mt-2 flex items-center gap-3">
@@ -72,7 +86,7 @@ export function Rec() {
                     <>
                       <span>✓ {t('rec.booked')}</span>
                       <button
-                        onClick={() => void act(s.slot, 'cancel')}
+                        onClick={() => void act(s.slot, s.block_id, 'cancel')}
                         className="min-h-14 rounded-lg border-2 border-white px-5 py-3"
                       >
                         {t('rec.cancel')}
@@ -80,7 +94,7 @@ export function Rec() {
                     </>
                   ) : (
                     <button
-                      onClick={() => void act(s.slot, 'book')}
+                      onClick={() => void act(s.slot, s.block_id, 'book')}
                       className="min-h-14 rounded-lg bg-green-700 px-5 py-3 font-semibold"
                     >
                       {t('rec.book')}

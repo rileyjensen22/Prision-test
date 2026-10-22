@@ -33,6 +33,7 @@ class AckIn(BaseModel):
     resident_id: int
     flag_type: str
     note: str
+    action: str = "checked_in"
 
 
 @router.post("/welfare/ack", status_code=201)
@@ -41,11 +42,24 @@ def welfare_ack(
 ) -> dict:
     try:
         a = welfare.acknowledge(
-            db, Actor(staff.id, staff.role), body.resident_id, body.flag_type, body.note, _now()
+            db,
+            Actor(staff.id, staff.role),
+            body.resident_id,
+            body.flag_type,
+            body.note,
+            _now(),
+            body.action,
         )
-    except ValueError as e:
-        raise HTTPException(422, str(e)) from e
+    except welfare.WelfareError as e:
+        status = 403 if e.code == "NEEDS_SUPERVISOR" else 409 if e.code == "NO_OPEN_FLAG" else 422
+        raise HTTPException(status, {"code": e.code, "message": str(e)}) from e
     return {"id": a.id}
+
+
+@router.get("/out-of-cell/below-minimum")
+def below_minimum(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> list[dict]:
+    """Residents whose last finished day was under the minimum (for the dashboard)."""
+    return out_of_cell.below_minimum(db, _now())
 
 
 class OutOfCellIn(BaseModel):

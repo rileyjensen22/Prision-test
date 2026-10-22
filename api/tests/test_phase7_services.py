@@ -225,6 +225,7 @@ def test_acknowledging_a_flag_quiets_it_for_a_while_and_is_audited(
 ):
     nurse = make_staff("officer")
     rid = make_resident()
+    assign(owner, rid, 40)  # flags are tracked for residents with a device
     add_calls(owner, rid, add_contact(rid), range(8, 28))
     record_ooc(owner, rid)
     assert "no_contact" in flag_types(owner, rid, 40)
@@ -618,8 +619,11 @@ def test_baseline_indoor_slots_are_always_open_outdoor_needs_a_high_tier(
     today = NOW.date()
     view = rec.day_view(owner, rid, today, NOW)
     assert view["baseline_minutes"] == 60
-    kinds = {(s["kind"], s["allowed"]) for s in view["slots"]}
+    kinds = {(s["kind"], s["allowed"]) for s in view["slots"] if s["kind"] in ("indoor", "outdoor")}
     assert kinds == {("indoor", True), ("outdoor", False)}
+    programs = {s["title"]: s["allowed"] for s in view["slots"] if s["kind"] == "program"}
+    assert programs == {"Life skills class": True, "Workplace math": False}  # advanced is tier 3+
+    assert all(s["allowed"] for s in view["slots"] if s["kind"] == "visit")
     rec.book(owner, rid, today, "09:00", NOW)
     with pytest.raises(rec.RecDenied) as e:
         rec.book(owner, rid, today, "09:00", NOW)

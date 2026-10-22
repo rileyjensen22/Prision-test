@@ -20,7 +20,7 @@ from isd.models import (
     Staff,
     TierHistory,
 )
-from isd.services import welfare
+from isd.services import out_of_cell, welfare
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements, load_engine_config
 from isd.services.points import total_points
@@ -364,6 +364,7 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
     ro = roster(session, now)
     appeals = appeals_queue(session, viewer_id, viewer_role, now)
     show_outliers = viewer_role in ("supervisor", "admin", "auditor")
+    flags = welfare.all_flags(session, now)
     return {
         "residents": len(ro),
         "pending_confirmations": session.execute(
@@ -373,7 +374,9 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
         "overdue_appeals": sum(a["overdue"] for a in appeals),
         "offline_devices": sum(r["offline"] for r in ro),
         "outlier_flags": outliers(session, now)["flagged"] if show_outliers else None,
-        "welfare_flags": len(welfare.all_flags(session, now)),
+        "welfare_flags": len(flags),
+        "welfare_escalated": sum(f["escalated"] for r in flags for f in r["flags"]),
+        "below_minimum": len(out_of_cell.below_minimum(session, now)),
         # None until a reconciliation has run (or for roles that do not see finance)
         "ledger_ok": _ledger_ok(session) if show_outliers else None,
     }

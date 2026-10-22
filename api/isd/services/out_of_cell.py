@@ -67,3 +67,38 @@ def window(
     first = today - timedelta(days=days - 1)
     got = by_day(session, resident_id, first, today)
     return [(first + timedelta(days=i), got.get(first + timedelta(days=i))) for i in range(days)]
+
+
+def below_minimum(session: Session, now: datetime, within_days: int = 3) -> list[dict]:
+    """Residents whose most recent finished day (yesterday or a little earlier) is under the
+    configured minimum. A day with nothing recorded is not counted here (the welfare check
+    reports unrecorded days separately)."""
+    from isd.models import DeviceAssignment
+    from isd.services.config_store import get_current
+
+    minimum = int(get_current(session, "compliance").payload["min_out_of_cell_minutes_per_day"])
+    today = now.date()
+    out = []
+    residents = session.execute(
+        select(Resident.id, Resident.code)
+        .join(DeviceAssignment, DeviceAssignment.resident_id == Resident.id)
+        .group_by(Resident.id, Resident.code)
+        .order_by(Resident.code)
+    ).all()
+    for rid, code in residents:
+        recorded = [
+            (d, m)
+            for d, m in window(session, rid, today - timedelta(days=1), within_days)
+            if m is not None
+        ]
+        if recorded and recorded[-1][1] < minimum:
+            out.append(
+                {
+                    "resident_id": rid,
+                    "resident": code,
+                    "day": recorded[-1][0].isoformat(),
+                    "minutes": recorded[-1][1],
+                    "minimum": minimum,
+                }
+            )
+    return out

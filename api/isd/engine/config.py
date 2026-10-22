@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from isd.engine.features import NON_BASELINE_FEATURES, SCOPES
+from isd.engine.features import ALL_FEATURES, NON_BASELINE_FEATURES, SCOPES
 from isd.engine.reading import CATALOG_FEATURE
 
 
@@ -152,15 +152,31 @@ def validate_welfare(payload: dict) -> None:
         raise ValueError("drop_ratio must be between 0 and 1")
     if payload["no_contact_days"] < 1 or payload["min_baseline_per_day"] < 0:
         raise ValueError("no_contact_days must be positive and min_baseline_per_day non-negative")
+    if payload["escalate_after_minutes"] < 1 or payload["ack_suppress_days"] < 1:
+        raise ValueError("escalate_after_minutes and ack_suppress_days must be positive")
+
+
+def _check_time(slot: str) -> None:
+    hh, _, mm = slot.partition(":")
+    if not (hh.isdigit() and mm.isdigit() and 0 <= int(hh) < 24 and 0 <= int(mm) < 60):
+        raise ValueError(f"bad slot time {slot!r}; use HH:MM")
 
 
 def validate_rec(payload: dict) -> None:
-    if payload["capacity"] < 1:
-        raise ValueError("capacity must be positive")
+    if payload["capacity"] < 1 or payload["indoor_minutes"] < 1 or payload["outdoor_minutes"] < 1:
+        raise ValueError("capacity and block lengths must be positive")
+    if not 1 <= payload["generate_days_ahead"] <= 31:
+        raise ValueError("generate_days_ahead must be between 1 and 31")
     for slot in (*payload["indoor_slots"], *payload["outdoor_slots"]):
-        hh, _, mm = slot.partition(":")
-        if not (hh.isdigit() and mm.isdigit() and 0 <= int(hh) < 24 and 0 <= int(mm) < 60):
-            raise ValueError(f"bad slot time {slot!r}; use HH:MM")
+        _check_time(slot)
+    for entry in (*payload["programs"], *payload["visits"]):
+        _check_time(entry["start"])
+        if entry["minutes"] < 1 or entry["capacity"] < 1 or not entry["title"].strip():
+            raise ValueError(
+                f"program or visit {entry.get('title')!r} needs a title, minutes, capacity"
+            )
+        if "feature" in entry and entry["feature"] not in ALL_FEATURES:
+            raise ValueError(f"unknown feature {entry['feature']!r}")
 
 
 def validate_reading(payload: dict) -> None:

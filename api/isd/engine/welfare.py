@@ -3,7 +3,7 @@
 import statistics
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 @dataclass(frozen=True)
@@ -105,3 +105,48 @@ def out_of_cell_flags(
     if trailing >= unrecorded_days:
         flags.append(WelfareFlag("out_of_cell_unrecorded", "info", {"days": trailing}))
     return flags
+
+
+@dataclass(frozen=True)
+class FlagRow:
+    """A stored welfare flag, as far as the lifecycle rules need to know."""
+
+    id: int
+    type: str
+    status: str  # open | acknowledged | cleared
+    raised_at: datetime
+    acknowledged_at: datetime | None = None
+    escalated_at: datetime | None = None
+
+
+def plan_flag_sync(
+    detected: set[str],
+    rows: Sequence[FlagRow],
+    now: datetime,
+    suppress_days: int,
+    escalate_minutes: int,
+) -> list[tuple[str, str, int | None]]:
+    """What to do so stored flags match what is detected now: ("raise" | "escalate" | "clear",
+    flag type, row id). Only the latest flag of each kind counts. An unacknowledged flag escalates
+    once after `escalate_minutes`; an acknowledged one stays quiet for `suppress_days` and returns
+    if the condition is still there."""
+    latest: dict[str, FlagRow] = {}
+    for r in sorted(rows, key=lambda r: r.id):
+        latest[r.type] = r
+    actions: list[tuple[str, str, int | None]] = []
+    for kind in sorted(detected):
+        r = latest.get(kind)
+        if r is None or r.status == "cleared":
+            actions.append(("raise", kind, None))
+        elif r.status == "open":
+            due = r.raised_at + timedelta(minutes=escalate_minutes)
+            if r.escalated_at is None and now >= due:
+                actions.append(("escalate", kind, r.id))
+        elif r.acknowledged_at is not None and now >= r.acknowledged_at + timedelta(
+            days=suppress_days
+        ):
+            actions.append(("raise", kind, None))
+    for kind, r in sorted(latest.items()):
+        if kind not in detected and r.status in ("open", "acknowledged"):
+            actions.append(("clear", kind, r.id))
+    return actions

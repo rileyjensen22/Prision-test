@@ -69,8 +69,18 @@ test('offline: saved texts still open, unsaved ones do not, and a lock still app
   await page.getByRole('button', { name: 'Back to the list' }).click()
 
   await context.setOffline(true)
-  await page.clock.fastForward('00:40') // the next poll fails, so the device knows it is offline
-  await expect(page.getByTestId('reading-offline')).toBeVisible()
+  // each poll that fails tells the device it is offline; keep nudging the clock until it knows
+  await expect(async () => {
+    await page.clock.fastForward('00:35')
+    await expect(page.getByTestId('reading-offline')).toBeVisible({ timeout: 1500 })
+    await expect(page.getByTestId('reading-tortoise-hare')).toHaveAttribute(
+      'data-allowed',
+      'false',
+      {
+        timeout: 1500,
+      },
+    )
+  }).toPass({ timeout: 20_000 })
   await expect(page.getByTestId('reading-lion-mouse')).toHaveAttribute('data-allowed', 'true')
   await expect(page.getByTestId('reading-tortoise-hare')).toHaveAttribute('data-allowed', 'false')
   await expect(page.getByTestId('reading-tortoise-hare')).toContainText('not saved')

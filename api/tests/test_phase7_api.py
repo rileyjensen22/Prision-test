@@ -163,6 +163,8 @@ def test_chess_reading_rec_over_http(client, kiosk, boost):
     assert day["baseline_minutes"] == 60 and {s["kind"] for s in day["slots"]} == {
         "indoor",
         "outdoor",
+        "program",
+        "visit",
     }
     book = {"day": day["day"], "slot": "09:00"}
     assert client.post("/device/rec/book", json=book, headers=dh(token)).status_code == 201
@@ -256,7 +258,9 @@ def test_out_of_cell_and_welfare_endpoints(client, kiosk, account, staff_tokens)
         client.post("/staff/welfare/ack", json={**ack, "note": "x"}, headers=officer).status_code
         == 422
     )
-    assert client.post("/staff/welfare/ack", json=ack, headers=officer).status_code == 201
+    # a brand-new resident has no open flag to acknowledge
+    none = client.post("/staff/welfare/ack", json=ack, headers=officer)
+    assert none.status_code == 409 and none.json()["detail"]["code"] == "NO_OPEN_FLAG"
 
 
 def test_timeline_endpoint_roles_and_logging(client, kiosk, account, staff_tokens):

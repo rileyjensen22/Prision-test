@@ -11,6 +11,8 @@ interface Summary {
   offline_devices: number
   outlier_flags: number | null
   welfare_flags: number
+  welfare_escalated: number
+  below_minimum: number
   ledger_ok: boolean | null
 }
 interface Ev {
@@ -68,7 +70,7 @@ export default function Dashboard() {
         </p>
       )}
       {s && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat id="stat-residents" label="Residents" value={s.residents} to="/staff/roster" />
           <Stat
             id="stat-pending"
@@ -89,6 +91,20 @@ export default function Dashboard() {
             label="Devices offline"
             value={s.offline_devices}
             to="/staff/roster"
+            warn
+          />
+          <Stat
+            id="stat-escalated"
+            label="Escalated welfare flags"
+            value={s.welfare_escalated}
+            to="/staff/welfare"
+            warn
+          />
+          <Stat
+            id="stat-below-minimum"
+            label="Below out-of-cell minimum"
+            value={s.below_minimum}
+            to="/staff/out-of-cell"
             warn
           />
           <Stat

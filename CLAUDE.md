@@ -243,6 +243,7 @@ make db-local # (no Docker) create dev DB roles on a local Postgres
 make migrate  # alembic upgrade head
 make daily    # daily job: clean-day points, tier checks (delayed drops), cleanup
 make reconcile  # nightly check: balances match their ledgers (exit 2 on mismatch)
+make welfare-sweep  # raise/escalate/clear welfare flags (run every 15 min)
 make secrets-check  # fail if anything that looks like a secret is committed
 make dev      # run api + web + postgres
 make test     # pytest + vitest + playwright

@@ -12,8 +12,10 @@ import Dashboard from './pages/Dashboard'
 import Finance from './pages/Finance'
 import Mirror from './pages/Mirror'
 import Monitoring from './pages/Monitoring'
+import OutOfCell from './pages/OutOfCell'
 import Outliers from './pages/Outliers'
 import ResidentDetail from './pages/ResidentDetail'
+import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
 import ViewAs from './pages/ViewAs'
 import Welfare from './pages/Welfare'
@@ -22,6 +24,8 @@ const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
 const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff', label: 'Dashboard' },
   { to: '/staff/roster', label: 'Roster' },
+  { to: '/staff/out-of-cell', label: 'Out of cell' },
+  { to: '/staff/schedule', label: 'Schedule' },
   { to: '/staff/welfare', label: 'Welfare' },
   { to: '/staff/contacts', label: 'Contacts', roles: ['officer', 'supervisor', 'admin'] },
   { to: '/staff/monitoring', label: 'Monitoring', roles: SUPERVISION },
@@ -112,6 +116,8 @@ function Shell() {
               </Guard>
             }
           />
+          <Route path="out-of-cell" element={<OutOfCell />} />
+          <Route path="schedule" element={<Schedule />} />
           <Route path="welfare" element={<Welfare />} />
           <Route
             path="contacts"

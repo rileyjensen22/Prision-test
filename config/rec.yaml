@@ -1,5 +1,17 @@
-# Out-of-cell time slots (stub). Indoor slots are part of the protected baseline; outdoor needs the outdoor_rec feature.
-version: 1
+# The default day for every unit: recreation, programs and visits. Staff can add or cancel blocks
+# for a unit-day; this template is used when a day has no blocks of its own yet.
+# Who may sign up comes from `feature` through get_entitlements: indoor time is part of the
+# protected baseline, outdoor time needs the outdoor_rec feature (tiers 9 and 10), and a program
+# needs the feature it names. Visits are arranged by the facility.
+version: 2
 capacity: 6
 indoor_slots: ["09:00", "13:30", "18:00"]
+indoor_minutes: 60
 outdoor_slots: ["10:00", "15:00"]
+outdoor_minutes: 60
+programs:
+  - {start: "11:00", minutes: 60, capacity: 8, title: "Life skills class", feature: basic_education}
+  - {start: "16:30", minutes: 60, capacity: 8, title: "Workplace math", feature: advanced_education}
+visits:
+  - {start: "14:00", minutes: 45, capacity: 4, title: "Family visiting"}
+generate_days_ahead: 7

@@ -78,6 +78,7 @@ class Cell(Base):
     __tablename__ = "cells"
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True)
+    unit: Mapped[str] = mapped_column(String(16), default="A", server_default="A")
 
 
 class Device(Base):
@@ -378,6 +379,9 @@ class WelfareAck(Base):
     staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"))
     note: Mapped[str] = mapped_column(Text)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    action: Mapped[str] = mapped_column(
+        String(32), default="checked_in", server_default="checked_in"
+    )
 
 
 class Message(Base):
@@ -690,11 +694,87 @@ class RecBooking(Base):
     __tablename__ = "rec_bookings"
     __table_args__ = (
         UniqueConstraint("resident_id", "day", "slot", name="uq_rec_booking"),
-        CheckConstraint("kind IN ('indoor', 'outdoor')", name="ck_rec_kind"),
+        CheckConstraint("kind IN ('indoor', 'outdoor', 'program', 'visit')", name="ck_rec_kind"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
     day: Mapped[date] = mapped_column(Date)
     slot: Mapped[str] = mapped_column(String(5))
     kind: Mapped[str] = mapped_column(String(8))
+    block_id: Mapped[int | None] = mapped_column(
+        ForeignKey("schedule_blocks.id"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+BLOCK_KINDS = ("indoor", "outdoor", "program", "visit")
+
+
+class ScheduleBlock(Base):
+    """One scheduled block for a unit on a day: indoor or outdoor recreation, a program, a visit.
+    Who may sign up comes from `required_feature` through get_entitlements (never from the tier)."""
+
+    __tablename__ = "schedule_blocks"
+    __table_args__ = (
+        UniqueConstraint("unit", "day", "kind", "start", name="uq_schedule_block"),
+        CheckConstraint(f"kind IN {BLOCK_KINDS}", name="ck_block_kind"),
+        CheckConstraint("status IN ('scheduled', 'cancelled')", name="ck_block_status"),
+        CheckConstraint("minutes > 0 AND capacity > 0", name="ck_block_positive"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    unit: Mapped[str] = mapped_column(String(16), index=True)
+    day: Mapped[date] = mapped_column(Date, index=True)
+    kind: Mapped[str] = mapped_column(String(8))
+    start: Mapped[str] = mapped_column(String(5))  # HH:MM, facility local time as entered
+    minutes: Mapped[int] = mapped_column(Integer)
+    capacity: Mapped[int] = mapped_column(Integer)
+    title: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    required_feature: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    status: Mapped[str] = mapped_column(String(10), default="scheduled")
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class OutOfCellEvent(Base):
+    """An officer's tap-out or tap-in. Append-only; time out of the cell comes from these."""
+
+    __tablename__ = "out_of_cell_events"
+    __table_args__ = (
+        CheckConstraint("event IN ('out', 'in')", name="ck_ooce_event"),
+        CheckConstraint(
+            "activity IN ('indoor', 'outdoor', 'program', 'visit', 'other')",
+            name="ck_ooce_activity",
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    event: Mapped[str] = mapped_column(String(3))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    activity: Mapped[str] = mapped_column(String(8))
+    block_id: Mapped[int | None] = mapped_column(ForeignKey("schedule_blocks.id"), nullable=True)
+    entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WelfareFlag(Base):
+    """A welfare flag staff must acknowledge. Stored so it can be tracked and escalated."""
+
+    __tablename__ = "welfare_flags"
+    __table_args__ = (
+        CheckConstraint("status IN ('open', 'acknowledged', 'cleared')", name="ck_wflag_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    flag_type: Mapped[str] = mapped_column(String(32))
+    severity: Mapped[str] = mapped_column(String(10))
+    detail: Mapped[dict] = mapped_column(
+        JSONB, default=dict
+    )  # includes the resident's own baseline
+    status: Mapped[str] = mapped_column(String(12), default="open")
+    raised_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    escalated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    action: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cleared_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

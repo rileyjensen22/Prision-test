@@ -56,6 +56,7 @@ from isd.models import (
     Staff,
     TierHistory,
     TrustLedger,
+    WelfareFlag,
 )
 from isd.seed_db import ensure_reference_data
 from isd.services import (
@@ -68,6 +69,7 @@ from isd.services import (
     jobs,
     mirror,
     monitoring,
+    movement,
     out_of_cell,
     points,
     public_log,
@@ -75,6 +77,7 @@ from isd.services import (
     rec,
     reconcile,
     sanctions,
+    schedule,
     staff_requests,
     texting,
     video_bookings,
@@ -93,6 +96,9 @@ EXPECTED = (
     CallDenied,
     OrderError,
     texting.TextDenied,
+    movement.MovementError,
+    welfare.WelfareError,
+    schedule.ScheduleError,
     ContactInvalid,
     education.EducationError,
     chess.ChessDenied,
@@ -513,6 +519,28 @@ class Simulation:
             )
             if sanc:
                 self.attempt("self_confirm", sanctions.confirm_sanction, s, sup, sanc.id, now)
+        if rng.random() < 0.5:  # officers walk a few residents out and bring them back
+            officer = rng.choice(self.officers)
+            ids = rng.sample(self.residents, 3)
+            activity = rng.choice(["indoor", "outdoor", "program"])
+            self.attempt("movement_out", movement.bulk_out, s, officer, ids, activity, now)
+            back = now + timedelta(minutes=rng.randint(20, 70))
+            self.attempt("movement_in", movement.bulk_in, s, officer, ids, back)
+        if rng.random() < 0.3:  # staff handle some welfare flags; the rest wait and escalate
+            for row in welfare.all_flags(s, now)[:2]:
+                flag = row["flags"][0]
+                who = rng.choice([*self.officers, *self.supervisors])
+                self.attempt(
+                    "welfare_ack",
+                    welfare.acknowledge,
+                    s,
+                    who,
+                    row["resident_id"],
+                    flag["type"],
+                    "checked in on the resident",
+                    now,
+                    "checked_in",
+                )
         if rng.random() < 0.3:  # a supervisor works the monitoring queue (flags are review items)
             sup = rng.choice(self.supervisors)
             for row in monitoring.queue(s, flagged_only=True, limit=3):
@@ -942,6 +970,24 @@ class Simulation:
             )
         )
 
+        # welfare: a flag nobody handled in time went to a supervisor, and only they handled it
+        window = timedelta(minutes=get_current(s, "welfare").payload["escalate_after_minutes"])
+        stored = s.execute(select(WelfareFlag)).scalars().all()
+        senior = {a.id for a in (*self.supervisors, self.admin)}
+        late = [f for f in stored if f.status == "open" and f.raised_at <= end - window]
+        wrong = [
+            f
+            for f in stored
+            if f.escalated_at and f.status == "acknowledged" and f.acknowledged_by not in senior
+        ]
+        add(
+            Check(
+                "unacknowledged welfare flags escalate on time; escalated ones go to a supervisor",
+                not any(f.escalated_at is None for f in late) and not wrong,
+                f"{len(stored)} flags, {sum(f.escalated_at is not None for f in stored)} escalated",
+            )
+        )
+
         # money: work earnings and the trust ledger reconcile, every night and now
         from isd.models import ReconciliationRun
 
@@ -1028,6 +1074,8 @@ class Simulation:
             "job_join",
             "job_leave",
             "work_submit",
+            "movement_out",
+            "welfare_ack",
             "staff_request",
             "sanction_issue",
             "sanction_confirm",

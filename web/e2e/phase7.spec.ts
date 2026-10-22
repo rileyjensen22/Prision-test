@@ -115,6 +115,8 @@ test('welfare: a resident who went quiet is flagged, and a check-in is recorded'
     .click()
   await panel.getByTestId('flag-no_contact').getByRole('button', { name: 'I checked in…' }).click()
   await expect(panel.getByRole('button', { name: 'Record check-in' })).toBeDisabled()
+  await expect(panel.getByTestId('escalated')).toHaveCount(0) // not old enough to escalate
+  await panel.getByLabel('Action taken').selectOption('referred_mental_health')
   await panel
     .getByLabel('What was done')
     .fill('Spoke with the resident at the door; they were unwell')

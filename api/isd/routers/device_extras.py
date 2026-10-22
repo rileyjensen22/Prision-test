@@ -357,6 +357,7 @@ def job_leave(
 class RecIn(BaseModel):
     day: date
     slot: str
+    block_id: int | None = None
 
 
 @router.get("/rec")
@@ -374,7 +375,7 @@ def rec_book(
     body: RecIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ):
     try:
-        rec.book(db, ctx.resident_id, body.day, body.slot, _now())
+        rec.book(db, ctx.resident_id, body.day, body.slot, _now(), body.block_id)
     except rec.RecDenied as e:
         raise _err(e) from e
     return {"booked": True}
@@ -384,4 +385,4 @@ def rec_book(
 def rec_cancel(
     body: RecIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ):
-    return {"cancelled": rec.cancel(db, ctx.resident_id, body.day, body.slot)}
+    return {"cancelled": rec.cancel(db, ctx.resident_id, body.day, body.slot, body.block_id)}

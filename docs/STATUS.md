@@ -1,6 +1,6 @@
 # Status
 
-Last updated: Phase 12 (jobs). Everything below was checked by running the code, not from memory.
+Last updated: Phase 13 (scheduling and welfare). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
@@ -22,7 +22,8 @@ Last updated: Phase 12 (jobs). Everything below was checked by running the code,
 | 10 Reading and chess | **Reading built; chess deferred** | Reader (page, text size, bookmarks, progress sync, offline cache), approved-source catalog, baseline legal and religious texts, optional book points (default 0). Chess is untouched on the owner's instruction. |
 | 11 Texting and video | **Built** | Contact requests and approvals, delivery states, keyword flags (review items only), monitored-message review with reasons, attorney messages unreadable by any role, `VideoProvider` with a WebRTC loopback demo, scheduled video, recording retention, on-device tamper detection. See `docs/DECISIONS.md`. |
 | 12 Jobs | **Built** | Partner interface (mock), screened public-domain/synthetic tasks, work log, earnings ledger with config split, nightly payouts to the trust account, nightly reconciliation with alerts, Finance page and partner dashboard, sanction-pause flag (off). |
-| 13 to 16 | **Not started** | |
+| 13 Scheduling and welfare | **Built** | Per-unit schedule (recreation, programs, visits) with entitlement-based eligibility, officer tap-out/in with bulk actions, who-is-out roster, scheduled-vs-actual report, audited daily export, below-minimum on the dashboard, stored welfare flags that must be acknowledged with an action and escalate to a supervisor after a set time. |
+| 14 to 16 | **Not started** | |
 
 ## Phases 0 to 8
 

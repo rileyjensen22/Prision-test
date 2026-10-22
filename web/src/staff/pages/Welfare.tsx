@@ -6,6 +6,8 @@ import { useAuth } from '../auth'
 import { Badge, Btn, ErrorLine, Notice, Page, Panel, useLoad } from '../ui'
 
 interface Flag {
+  id: number
+  escalated: boolean
   type: string
   severity: string
   message: string
@@ -40,13 +42,20 @@ export default function Welfare() {
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Row[]>('/staff/welfare')
   const canAck = user && ['officer', 'supervisor', 'admin'].includes(user.role)
+  const canHandleEscalated = !!user && ['supervisor', 'admin'].includes(user.role)
   const [open, setOpen] = useState<string | null>(null)
   const [note, setNote] = useState('')
+  const [action, setAction] = useState('checked_in')
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
 
   async function ack(r: Row, f: Flag) {
     try {
-      await post('/staff/welfare/ack', { resident_id: r.resident_id, flag_type: f.type, note })
+      await post('/staff/welfare/ack', {
+        resident_id: r.resident_id,
+        flag_type: f.type,
+        note,
+        action,
+      })
       setMsg({ kind: 'ok', text: `Recorded. This flag stays quiet for a few days.` })
       setOpen(null)
       setNote('')
@@ -80,11 +89,32 @@ export default function Welfare() {
             {r.flags.map((f) => (
               <li key={f.type} data-testid={`flag-${f.type}`}>
                 <Badge tone={f.severity === 'attention' ? 'amber' : 'gray'}>{f.severity}</Badge>{' '}
+                {f.escalated && (
+                  <Badge tone="red" data-testid="escalated">
+                    escalated to a supervisor
+                  </Badge>
+                )}{' '}
                 <strong>{f.message}</strong>
                 <div className="text-sm text-gray-700">{describe(f)}</div>
+                {f.escalated && !canHandleEscalated && (
+                  <p className="mt-1 text-sm text-gray-600">A supervisor must handle this flag.</p>
+                )}
                 {canAck &&
+                  (f.escalated ? canHandleEscalated : true) &&
                   (open === `${r.code}:${f.type}` ? (
                     <div className="mt-2 flex flex-wrap gap-2">
+                      <select
+                        aria-label="Action taken"
+                        value={action}
+                        onChange={(e) => setAction(e.target.value)}
+                        className="rounded border px-2 py-1"
+                      >
+                        <option value="checked_in">Checked in with the resident</option>
+                        <option value="referred_medical">Referred to medical</option>
+                        <option value="referred_mental_health">Referred to mental health</option>
+                        <option value="adjusted_schedule">Adjusted their schedule</option>
+                        <option value="no_concern">No concern after looking</option>
+                      </select>
                       <input
                         aria-label="What was done"
                         placeholder="What was done?"

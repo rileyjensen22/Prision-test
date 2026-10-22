@@ -93,6 +93,7 @@ def main() -> None:
             funds=0,
             assigned_days_ago=0,
             quiet_after_days=None,
+            unit="A",
         ):
             r = Resident(
                 code=f"E2E-{key.upper()}",
@@ -100,7 +101,10 @@ def main() -> None:
                 language=lang,
                 prior_returns=prior,
             )
-            cell, dev = Cell(code=f"E2E-{key}"), Device(code=f"E2E-DEV-{key}")
+            cell, dev = (
+                Cell(code=f"E2E-{key}", unit=unit),
+                Device(code=f"E2E-DEV-{key}"),
+            )
             tokens[key] = f"e2e-token-{key}"
             dev.token_hash = hash_device_token(tokens[key])
             s.add_all([r, cell, dev])
@@ -201,6 +205,8 @@ def main() -> None:
         resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
         resident("cam")  # receives a cell-camera event
         resident("wren")  # tier 1: voluntary work, earnings
+        resident("uma", unit="B")  # unit B: schedule and out-of-cell tests
+        resident("val", unit="B")
         resident(
             "ola", start_points=450, contacts=("family", "attorney")
         )  # tier 4: monitored texting and the keyword-flag review

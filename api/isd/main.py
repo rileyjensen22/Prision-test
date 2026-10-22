@@ -14,6 +14,7 @@ from isd.routers import (
     mock,
     staff_comms,
     staff_extras,
+    staff_floor,
     staff_ops,
     staff_residents,
     view_as,
@@ -41,6 +42,7 @@ app.include_router(staff_residents.router)
 app.include_router(mock.router)
 app.include_router(staff_ops.router)
 app.include_router(staff_extras.router)
+app.include_router(staff_floor.router)
 app.include_router(staff_comms.router)
 app.include_router(view_as.router)
 
