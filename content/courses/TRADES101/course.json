@@ -1,0 +1,28 @@
+{
+  "level": "advanced",
+  "languages": [
+    "en"
+  ],
+  "reading_levels": [
+    "standard"
+  ],
+  "title": {
+    "en": "Trade Basics: Safety and Tools"
+  },
+  "summary": {
+    "en": "Staying safe on a work site and reading a tape measure."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [
+    "NUM101"
+  ],
+  "quiz": {
+    "draw": 4
+  },
+  "code": "TRADES101",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "safety",
+    "tape-measure"
+  ]
+}

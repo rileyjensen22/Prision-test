@@ -51,6 +51,7 @@ from isd.models import (
     OffenseFlag,
     OutOfCellLog,
     PointEvent,
+    QuizSession,
     Resident,
     Sanction,
     Staff,
@@ -328,11 +329,17 @@ class Simulation:
             c = self.course
             for le in c["lessons"]:
                 self.attempt("lesson", education.complete_lesson, s, rid, c["code"], le["id"], now)
-            answers = [
-                q["answer"] if rng.random() < 0.8 else rng.randrange(len(q["choices"]))
-                for q in c["quiz"]
-            ]
-            self.attempt("quiz", education.submit_quiz, s, rid, c["code"], answers, now)
+            paper = self.attempt("quiz_start", education.start_quiz, s, rid, c["code"], now)
+            if paper:
+                bank = {q["id"]: q for q in c["quiz"]["bank"]}
+                drawn = s.get(QuizSession, paper["quiz_id"]).questions
+                answers = []
+                for q in drawn:
+                    right = q["order"].index(bank[q["id"]]["answer"])
+                    answers.append(right if rng.random() < 0.8 else rng.randrange(len(q["order"])))
+                self.attempt(
+                    "quiz", education.submit_quiz, s, rid, c["code"], paper["quiz_id"], answers, now
+                )
         elif what in ("call", "video"):
             contact = rng.choice(contacts)
             call = self.attempt(

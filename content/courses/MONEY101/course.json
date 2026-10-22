@@ -1,0 +1,30 @@
+{
+  "level": "basic",
+  "languages": [
+    "en",
+    "es"
+  ],
+  "reading_levels": [
+    "standard"
+  ],
+  "title": {
+    "en": "Everyday Money Basics",
+    "es": "Fundamentos del dinero diario"
+  },
+  "summary": {
+    "en": "Budgeting, saving, and understanding debt.",
+    "es": "Presupuesto, ahorro y cómo entender la deuda."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [],
+  "quiz": {
+    "draw": 5
+  },
+  "code": "MONEY101",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "budget",
+    "saving",
+    "debt"
+  ]
+}

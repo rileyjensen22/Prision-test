@@ -1,0 +1,136 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "In 3,482, what is the 4 worth?",
+        "es": "En 3,482, ¿cuánto vale el 4?"
+      },
+      "choices": [
+        {
+          "en": "400",
+          "es": "400"
+        },
+        {
+          "en": "40",
+          "es": "40"
+        },
+        {
+          "en": "4",
+          "es": "4"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "3,482 rounded to the nearest hundred is...?",
+        "es": "3,482 redondeado a la centena más cercana es...?"
+      },
+      "choices": [
+        {
+          "en": "3,500",
+          "es": "3,500"
+        },
+        {
+          "en": "3,400",
+          "es": "3,400"
+        },
+        {
+          "en": "3,000",
+          "es": "3,000"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "What is 25 percent as a fraction?",
+        "es": "¿Qué fracción es el 25 por ciento?"
+      },
+      "choices": [
+        {
+          "en": "One quarter",
+          "es": "Un cuarto"
+        },
+        {
+          "en": "One half",
+          "es": "Un medio"
+        },
+        {
+          "en": "One third",
+          "es": "Un tercio"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "What is ten percent of 80?",
+        "es": "¿Cuánto es el diez por ciento de 80?"
+      },
+      "choices": [
+        {
+          "en": "8",
+          "es": "8"
+        },
+        {
+          "en": "10",
+          "es": "10"
+        },
+        {
+          "en": "80",
+          "es": "80"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "How many inches are in a foot?",
+        "es": "¿Cuántas pulgadas hay en un pie?"
+      },
+      "choices": [
+        {
+          "en": "12",
+          "es": "12"
+        },
+        {
+          "en": "10",
+          "es": "10"
+        },
+        {
+          "en": "16",
+          "es": "16"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q6",
+      "prompt": {
+        "en": "How many feet are in a yard?",
+        "es": "¿Cuántos pies hay en una yarda?"
+      },
+      "choices": [
+        {
+          "en": "3",
+          "es": "3"
+        },
+        {
+          "en": "12",
+          "es": "12"
+        },
+        {
+          "en": "2",
+          "es": "2"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

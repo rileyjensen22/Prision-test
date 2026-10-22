@@ -131,18 +131,25 @@ def validate_commissary(payload: dict) -> None:
 
 
 def validate_courses(payload: dict) -> None:
-    codes = set()
+    """The courses section: shared settings plus each course in the shape course_format builds."""
+    from isd.course_format import validate_course_set
+
+    quiz = payload["quiz_defaults"]
+    if any(not isinstance(quiz[k], int) or quiz[k] < 1 for k in quiz):
+        raise ValueError("quiz_defaults must be positive whole numbers")
     for c in payload["courses"]:
-        if c["code"] in codes:
-            raise ValueError(f"duplicate course {c['code']}")
-        codes.add(c["code"])
-        if c["level"] not in ("basic", "advanced", "program"):
-            raise ValueError(f"{c['code']}: unknown level {c['level']!r}")
-        if not 0 < c["pass_mark"] <= 1 or not c["lessons"] or not c["quiz"]:
-            raise ValueError(f"{c['code']}: needs lessons, quiz questions, and pass_mark in (0, 1]")
-        for q in c["quiz"]:
+        bank = c["quiz"]["bank"]
+        if not c["lessons"] or not bank:
+            raise ValueError(f"{c['code']}: needs lessons and quiz questions")
+        if not 0 < c["pass_mark"] <= 1 or c["level"] not in ("basic", "advanced", "program"):
+            raise ValueError(f"{c['code']}: bad level or pass_mark")
+        draw = c["quiz"].get("draw", quiz["draw"])
+        if draw > len(bank):
+            raise ValueError(f"{c['code']}: draws {draw} questions from a bank of {len(bank)}")
+        for q in bank:
             if not 0 <= q["answer"] < len(q["choices"]):
                 raise ValueError(f"{c['code']}/{q['id']}: answer index out of range")
+    validate_course_set(payload["courses"], payload)
 
 
 def validate_welfare(payload: dict) -> None:

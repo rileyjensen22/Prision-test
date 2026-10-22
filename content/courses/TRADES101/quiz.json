@@ -1,0 +1,94 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "Near very loud machines you should wear...?"
+      },
+      "choices": [
+        {
+          "en": "Hearing protection"
+        },
+        {
+          "en": "Sandals"
+        },
+        {
+          "en": "A scarf"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "What should you do if you have not been shown how to use a tool?"
+      },
+      "choices": [
+        {
+          "en": "Not use it until you are shown"
+        },
+        {
+          "en": "Try it quickly"
+        },
+        {
+          "en": "Lend it to someone"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "What should you do when you notice a hazard?"
+      },
+      "choices": [
+        {
+          "en": "Report it right away"
+        },
+        {
+          "en": "Ignore it"
+        },
+        {
+          "en": "Wait a week"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "How many parts is an inch divided into on most tape measures?"
+      },
+      "choices": [
+        {
+          "en": "Sixteen"
+        },
+        {
+          "en": "Ten"
+        },
+        {
+          "en": "Three"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "Why measure again before cutting?"
+      },
+      "choices": [
+        {
+          "en": "To be sure the number is right"
+        },
+        {
+          "en": "To waste time"
+        },
+        {
+          "en": "It is not needed"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

@@ -20,7 +20,12 @@ router = APIRouter(prefix="/device", tags=["device-features"])
 
 def _conflict(e: Exception) -> HTTPException:
     status = 404 if getattr(e, "code", "") == "NOT_FOUND" else 409
-    return HTTPException(status, {"code": getattr(e, "code", "ERROR"), "message": str(e)})
+    detail = {"code": getattr(e, "code", "ERROR"), "message": str(e)}
+    retry_at = getattr(e, "retry_at", None)
+    if retry_at is not None:  # pacing rules always say when they end
+        detail["retry_at"] = retry_at.isoformat()
+    detail.update(getattr(e, "extra", {}))
+    return HTTPException(status, detail)
 
 
 def _now() -> datetime:
@@ -56,8 +61,21 @@ def complete_lesson(
         raise _conflict(e) from e
 
 
+@router.post("/courses/{code}/quiz/start", status_code=201)
+def start_quiz(
+    code: str, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    """A fresh randomised quiz paper, or the open one. Starting counts as an attempt."""
+    try:
+        return education.start_quiz(db, ctx.resident_id, code, _now())
+    except EducationError as e:
+        raise _conflict(e) from e
+
+
 class QuizIn(BaseModel):
-    answers: list[int]
+    model_config = ConfigDict(extra="forbid")
+    quiz_id: int
+    answers: list[int] = Field(max_length=100)
 
 
 @router.post("/courses/{code}/quiz")
@@ -68,7 +86,22 @@ def submit_quiz(
     db: Session = Depends(get_db),
 ):
     try:
-        return education.submit_quiz(db, ctx.resident_id, code, body.answers, _now())
+        return education.submit_quiz(db, ctx.resident_id, code, body.quiz_id, body.answers, _now())
+    except EducationError as e:
+        raise _conflict(e) from e
+
+
+@router.get("/certificates")
+def certificates(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    return education.certificates_for(db, ctx.resident_id)
+
+
+@router.get("/certificates/{serial}")
+def certificate(
+    serial: str, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        return education.certificate(db, ctx.resident_id, serial)
     except EducationError as e:
         raise _conflict(e) from e
 

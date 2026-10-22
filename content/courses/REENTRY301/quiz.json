@@ -1,0 +1,94 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "What belongs on a first-weeks list?"
+      },
+      "choices": [
+        {
+          "en": "Identification papers, a place to stay, a phone number, and a work appointment"
+        },
+        {
+          "en": "Only entertainment"
+        },
+        {
+          "en": "Nothing"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "A good way to start is to...?"
+      },
+      "choices": [
+        {
+          "en": "Do the easiest item today"
+        },
+        {
+          "en": "Wait until everything is perfect"
+        },
+        {
+          "en": "Do nothing"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "Who can be part of your support?"
+      },
+      "choices": [
+        {
+          "en": "Family, a mentor, programs, and community groups"
+        },
+        {
+          "en": "No one"
+        },
+        {
+          "en": "Only strangers"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "When should you ask for help?"
+      },
+      "choices": [
+        {
+          "en": "Early, saying clearly what you need"
+        },
+        {
+          "en": "Never"
+        },
+        {
+          "en": "Only in a crisis"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "Why write down your supports?"
+      },
+      "choices": [
+        {
+          "en": "So you know who to call"
+        },
+        {
+          "en": "To forget them"
+        },
+        {
+          "en": "It does nothing"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

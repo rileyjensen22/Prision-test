@@ -72,3 +72,23 @@ export async function auditCountExcludingLogins(
 ): Promise<number> {
   return (await allAuditEntries(request, headers)).filter((e) => e.action !== 'login').length
 }
+
+/**
+ * Answers the paper on screen. Questions and choices are drawn and shuffled per attempt, so look
+ * each question up in the course's quiz bank by its prompt and click the right (or a wrong) choice.
+ */
+export async function answerQuiz(page: Page, course: string, mode: 'right' | 'wrong' = 'right') {
+  const bank = JSON.parse(
+    readFileSync(join(process.cwd(), '..', 'content', 'courses', course, 'quiz.json'), 'utf8'),
+  ).questions as { prompt: { en: string }; choices: { en: string }[]; answer: number }[]
+  await page.getByTestId('question-0').waitFor()
+  const count = await page.locator('[data-testid^="question-"]').count()
+  for (let i = 0; i < count; i++) {
+    const box = page.getByTestId(`question-${i}`)
+    const legend = (await box.locator('legend').innerText()).replace(/^\d+\.\s*/, '')
+    const q = bank.find((b) => b.prompt.en === legend)
+    if (!q) throw new Error(`question not in bank: ${legend}`)
+    const pick = mode === 'right' ? q.answer : (q.answer + 1) % q.choices.length
+    await box.getByText(q.choices[pick].en, { exact: true }).check()
+  }
+}

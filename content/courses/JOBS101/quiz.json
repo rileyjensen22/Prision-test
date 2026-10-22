@@ -1,0 +1,136 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "How long should a résumé usually be?",
+        "es": "¿Cuánto debe medir normalmente un currículo?"
+      },
+      "choices": [
+        {
+          "en": "One page",
+          "es": "Una página"
+        },
+        {
+          "en": "Ten pages",
+          "es": "Diez páginas"
+        },
+        {
+          "en": "One line",
+          "es": "Una línea"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "Which job do you list first?",
+        "es": "¿Qué empleo se pone primero?"
+      },
+      "choices": [
+        {
+          "en": "The most recent",
+          "es": "El más reciente"
+        },
+        {
+          "en": "The oldest",
+          "es": "El más antiguo"
+        },
+        {
+          "en": "Any one",
+          "es": "Cualquiera"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "Good résumé lines start with...?",
+        "es": "Las buenas líneas de un currículo empiezan con...?"
+      },
+      "choices": [
+        {
+          "en": "Action words",
+          "es": "Verbos de acción"
+        },
+        {
+          "en": "Complaints",
+          "es": "Quejas"
+        },
+        {
+          "en": "Dates only",
+          "es": "Solo fechas"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "In an interview, a good answer is...?",
+        "es": "En una entrevista, una buena respuesta es...?"
+      },
+      "choices": [
+        {
+          "en": "Honest, with a short example",
+          "es": "Honesta, con un ejemplo breve"
+        },
+        {
+          "en": "As long as possible",
+          "es": "Lo más larga posible"
+        },
+        {
+          "en": "A guess",
+          "es": "Una suposición"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "If asked about your past, you can...?",
+        "es": "Si le preguntan por su pasado, puede...?"
+      },
+      "choices": [
+        {
+          "en": "Explain what you learned",
+          "es": "Explicar lo que aprendió"
+        },
+        {
+          "en": "Refuse to answer",
+          "es": "Negarse a responder"
+        },
+        {
+          "en": "Change the subject",
+          "es": "Cambiar de tema"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q6",
+      "prompt": {
+        "en": "When there is a problem at work, you should...?",
+        "es": "Cuando hay un problema en el trabajo, debe...?"
+      },
+      "choices": [
+        {
+          "en": "Speak calmly and describe what happened",
+          "es": "Hablar con calma y describir lo que pasó"
+        },
+        {
+          "en": "Blame someone",
+          "es": "Culpar a alguien"
+        },
+        {
+          "en": "Say nothing",
+          "es": "No decir nada"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

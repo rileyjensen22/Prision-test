@@ -1,0 +1,32 @@
+{
+  "level": "advanced",
+  "languages": [
+    "en",
+    "es"
+  ],
+  "reading_levels": [
+    "standard"
+  ],
+  "title": {
+    "en": "Job Readiness",
+    "es": "Preparación para el trabajo"
+  },
+  "summary": {
+    "en": "Résumés, interviews, and working well with others.",
+    "es": "Currículos, entrevistas y cómo trabajar bien con otros."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [
+    "LIT101"
+  ],
+  "quiz": {
+    "draw": 4
+  },
+  "code": "JOBS101",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "resume",
+    "interview",
+    "workplace"
+  ]
+}

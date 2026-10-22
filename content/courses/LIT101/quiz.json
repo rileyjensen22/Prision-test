@@ -1,0 +1,136 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "What is the main idea of a paragraph?",
+        "es": "¿Qué es la idea principal de un párrafo?"
+      },
+      "choices": [
+        {
+          "en": "What the paragraph is mostly about",
+          "es": "De qué trata sobre todo el párrafo"
+        },
+        {
+          "en": "The longest sentence",
+          "es": "La oración más larga"
+        },
+        {
+          "en": "The last word",
+          "es": "La última palabra"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "Which sentences give details?",
+        "es": "¿Qué oraciones dan detalles?"
+      },
+      "choices": [
+        {
+          "en": "The ones that support the main idea",
+          "es": "Las que apoyan la idea principal"
+        },
+        {
+          "en": "Only the first sentence",
+          "es": "Solo la primera oración"
+        },
+        {
+          "en": "None of them",
+          "es": "Ninguna"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "\"The road was treacherous, with ice and sharp turns.\" What does treacherous mean?",
+        "es": "\"El camino era traicionero, con hielo y curvas cerradas.\" ¿Qué significa traicionero?"
+      },
+      "choices": [
+        {
+          "en": "Dangerous",
+          "es": "Peligroso"
+        },
+        {
+          "en": "Quiet",
+          "es": "Tranquilo"
+        },
+        {
+          "en": "Short",
+          "es": "Corto"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "Where do context clues come from?",
+        "es": "¿De dónde vienen las pistas del contexto?"
+      },
+      "choices": [
+        {
+          "en": "The words around a new word",
+          "es": "Las palabras alrededor de una palabra nueva"
+        },
+        {
+          "en": "The page number",
+          "es": "El número de página"
+        },
+        {
+          "en": "The title only",
+          "es": "Solo el título"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "What should you do before starting written instructions?",
+        "es": "¿Qué debe hacer antes de empezar unas instrucciones escritas?"
+      },
+      "choices": [
+        {
+          "en": "Read all the steps",
+          "es": "Leer todos los pasos"
+        },
+        {
+          "en": "Skip to the last step",
+          "es": "Saltar al último paso"
+        },
+        {
+          "en": "Start anywhere",
+          "es": "Empezar por donde sea"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q6",
+      "prompt": {
+        "en": "Why check the last step when you finish?",
+        "es": "¿Por qué revisar el último paso al terminar?"
+      },
+      "choices": [
+        {
+          "en": "To be sure you did everything",
+          "es": "Para asegurarse de haber hecho todo"
+        },
+        {
+          "en": "To start again",
+          "es": "Para empezar de nuevo"
+        },
+        {
+          "en": "It is not useful",
+          "es": "No sirve de nada"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

@@ -1,8 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { openKiosk } from './helpers'
-
-const ANSWERS = [0, 1, 0, 1, 0] // sample course MONEY101
+import { answerQuiz, openKiosk } from './helpers'
 
 test('demo loop: finishing the sample course raises tier and call minutes', async ({ page }) => {
   await openKiosk(page, 'gina')
@@ -21,10 +19,10 @@ test('demo loop: finishing the sample course raises tier and call minutes', asyn
   await page.getByRole('button', { name: 'Next' }).click()
   await expect(page.getByTestId('lesson')).toContainText('Lesson 3 of 3')
   await page.getByRole('button', { name: 'Take the quiz' }).click()
+  await page.getByTestId('begin-quiz').click()
 
   await expect(page.getByRole('button', { name: 'Submit answers' })).toBeDisabled()
-  for (const [i, a] of ANSWERS.entries())
-    await page.getByTestId(`question-${i}`).getByRole('radio').nth(a).check()
+  await answerQuiz(page, 'MONEY101')
   await page.getByRole('button', { name: 'Submit answers' }).click()
 
   await expect(page.getByTestId('quiz-result')).toContainText('You passed!')
@@ -42,8 +40,8 @@ test('wrong answers earn nothing and can be retried', async ({ page }) => {
   await page.getByTestId('course-MONEY101').getByRole('button', { name: 'Start' }).click()
   for (const label of ['Next', 'Next', 'Take the quiz'])
     await page.getByRole('button', { name: label }).click()
-  for (let i = 0; i < 5; i++)
-    await page.getByTestId(`question-${i}`).getByRole('radio').nth(2).check()
+  await page.getByTestId('begin-quiz').click()
+  await answerQuiz(page, 'MONEY101', 'wrong')
   await page.getByRole('button', { name: 'Submit answers' }).click()
   await expect(page.getByTestId('quiz-result')).toContainText('Not yet')
   await expect(page.getByTestId('points-earned')).toHaveCount(0)

@@ -1,0 +1,31 @@
+{
+  "level": "basic",
+  "languages": [
+    "en",
+    "es"
+  ],
+  "reading_levels": [
+    "standard",
+    "simple"
+  ],
+  "title": {
+    "en": "Reading Basics",
+    "es": "Lectura básica"
+  },
+  "summary": {
+    "en": "Find the main idea, work out new words, and follow written instructions.",
+    "es": "Encuentre la idea principal, deduzca palabras nuevas y siga instrucciones escritas."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [],
+  "quiz": {
+    "draw": 4
+  },
+  "code": "LIT101",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "main-idea",
+    "context-clues",
+    "instructions"
+  ]
+}

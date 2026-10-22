@@ -4,6 +4,7 @@ from pathlib import Path
 
 import yaml
 
+from isd.courses_loader import COURSES_DIR, assemble, load_courses
 from isd.engine.config import (
     validate_commissary,
     validate_courses,
@@ -33,11 +34,14 @@ CONFIG_FILES = (
 )
 
 
-def load_config(config_dir: Path = CONFIG_DIR) -> dict[str, dict]:
+def load_config(config_dir: Path = CONFIG_DIR, courses_dir: Path | None = None) -> dict[str, dict]:
     config = {}
     for name in CONFIG_FILES:
         with (config_dir / f"{name}.yaml").open() as f:
             config[name] = yaml.safe_load(f)
+    # The course list comes from the folders under content/courses, not from the yaml.
+    kinds = set(config["points"]["events"])
+    config["courses"] = assemble(config["courses"], load_courses(courses_dir or COURSES_DIR), kinds)
     validate_config(config)
     return config
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { api, errorText, fmt, post, put } from '../api'
 import { useAuth } from '../auth'
@@ -418,6 +418,11 @@ export default function ResidentDetail() {
           points · cell {d.cell ?? '—'} · device {d.device ?? '—'} · prior returns {d.prior_returns}
         </p>
       </Panel>
+      <p>
+        <Link to={`/staff/residents/${d.resident_id}/certificates`} className="underline">
+          Certificates
+        </Link>
+      </p>
       {canRecord && <IssueSanction residentId={d.resident_id} onDone={() => void reload()} />}
       <Panel title="Sanctions">
         <Table data-testid="sanction-history">

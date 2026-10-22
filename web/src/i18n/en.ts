@@ -70,6 +70,7 @@ const en = {
     appealDuplicate: 'You already have an appeal open for this.',
   },
   code: {
+    PREREQUISITE: 'Finish an earlier course first',
     DISRUPT: 'Disruptive behavior',
     CELL_MESS: 'Cell cleanliness',
     STAFF_DISRESPECT: 'Disrespect to staff',
@@ -129,6 +130,26 @@ const en = {
     tierUp: 'You moved up: Tier {{from}} to Tier {{to}}.',
     callsUp: 'Phone calls: {{from}} to {{to}} minutes per day.',
     retry: 'Try the quiz again',
+    myCertificates: 'My certificates',
+    viewCertificate: 'View certificate',
+    noCertificates: 'No certificates yet. Pass a course quiz to earn one.',
+    certificateOf: 'Certificate of completion',
+    finishFirst: 'Finish first: {{titles}}',
+    offlineCopy:
+      'You are offline. Your lessons are saved and your progress will be sent when you reconnect. The quiz needs a connection.',
+    back: 'Back',
+    quizInfo: '{{count}} questions. You need {{mark}} percent to pass.',
+    beginQuiz: 'Begin the quiz',
+    rereadLessons: 'Read the lessons again',
+    cooldown: 'Take a short break. You can try again at {{time}}. The lessons are always open.',
+    exhausted:
+      'You have used your tries for now. You can try again at {{time}}. The lessons are always open.',
+    tryAgainAt: 'You can try again at {{time}}. The lessons are always open.',
+    err: {
+      EXPIRED: 'That quiz timed out. Begin a new one.',
+      LESSONS_INCOMPLETE: 'Finish all the lessons first.',
+      ERROR: 'Something went wrong. Please try again.',
+    },
     lockedHint: 'Locked',
   },
   calls: {

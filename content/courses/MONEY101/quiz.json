@@ -1,0 +1,114 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "What should you write down first in a budget?",
+        "es": "¿Qué debe anotar primero en un presupuesto?"
+      },
+      "choices": [
+        {
+          "en": "Your income",
+          "es": "Sus ingresos"
+        },
+        {
+          "en": "Your wants",
+          "es": "Sus gustos"
+        },
+        {
+          "en": "Your debts only",
+          "es": "Solo sus deudas"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "If spending is higher than income, what should you change first?",
+        "es": "Si los gastos superan los ingresos, ¿qué debe cambiar primero?"
+      },
+      "choices": [
+        {
+          "en": "Needs such as food",
+          "es": "Necesidades como la comida"
+        },
+        {
+          "en": "Wants",
+          "es": "Los gustos"
+        },
+        {
+          "en": "Nothing",
+          "es": "Nada"
+        }
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "Why keep savings in a separate place?",
+        "es": "¿Por qué guardar los ahorros aparte?"
+      },
+      "choices": [
+        {
+          "en": "So they are not spent by accident",
+          "es": "Para no gastarlos por accidente"
+        },
+        {
+          "en": "So they earn more interest on debt",
+          "es": "Para que generen más interés en la deuda"
+        },
+        {
+          "en": "It makes no difference",
+          "es": "No hay diferencia"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "What is interest?",
+        "es": "¿Qué es el interés?"
+      },
+      "choices": [
+        {
+          "en": "A gift from the bank",
+          "es": "Un regalo del banco"
+        },
+        {
+          "en": "The cost of borrowing money",
+          "es": "El costo de pedir dinero prestado"
+        },
+        {
+          "en": "A kind of savings account",
+          "es": "Un tipo de cuenta de ahorros"
+        }
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "Paying more than the minimum on a loan usually...?",
+        "es": "Pagar más del mínimo de un préstamo normalmente...?"
+      },
+      "choices": [
+        {
+          "en": "Reduces the total you pay",
+          "es": "Reduce el total que paga"
+        },
+        {
+          "en": "Increases the interest rate",
+          "es": "Aumenta la tasa de interés"
+        },
+        {
+          "en": "Cancels the loan",
+          "es": "Cancela el préstamo"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

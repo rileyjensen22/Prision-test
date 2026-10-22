@@ -283,6 +283,44 @@ class CourseProgress(Base):
     course_code: Mapped[str] = mapped_column(String(32))
     lessons_done: Mapped[list[str]] = mapped_column(JSONB, default=list)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_lesson: Mapped[str | None] = mapped_column(String(40), nullable=True)  # where to resume
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class QuizSession(Base):
+    """One quiz paper: which questions were drawn and in what order their choices were shown.
+    The answers stay on the server. A paper is resumable until it expires."""
+
+    __tablename__ = "quiz_sessions"
+    __table_args__ = (
+        CheckConstraint("status IN ('open', 'submitted', 'expired')", name="ck_quiz_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    course_code: Mapped[str] = mapped_column(String(32))
+    questions: Mapped[list] = mapped_column(JSONB)  # [{"id": ..., "order": [bank choice numbers]}]
+    attempt_no: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(10), default="open")
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+
+class Certificate(Base):
+    """Proof a resident finished a course. One per resident and course; never edited."""
+
+    __tablename__ = "certificates"
+    __table_args__ = (UniqueConstraint("resident_id", "course_code", name="uq_certificate"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    serial: Mapped[str] = mapped_column(String(32), unique=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    course_code: Mapped[str] = mapped_column(String(32))
+    title: Mapped[dict] = mapped_column(JSONB)  # the course title when it was earned
+    level: Mapped[str] = mapped_column(String(10))
+    correct: Mapped[int] = mapped_column(Integer)
+    total: Mapped[int] = mapped_column(Integer)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class QuizAttempt(Base):

@@ -27,3 +27,26 @@ def documented_operations(app) -> set[tuple[str, str]]:
         for m in item
         if m.upper() in ("GET", "POST", "PUT", "PATCH", "DELETE")
     }
+
+
+def quiz_answers(session, paper_id: int, code: str, *, correct: bool = True) -> list[int]:
+    """The displayed choice numbers that are right (or all wrong) for a drawn quiz paper."""
+    from isd.models import QuizSession
+    from isd.services import education
+
+    paper = session.get(QuizSession, paper_id)
+    bank = {q["id"]: q for q in education._course(session, code)["quiz"]["bank"]}
+    out = []
+    for q in paper.questions:
+        right = q["order"].index(bank[q["id"]]["answer"])
+        out.append(right if correct else (right + 1) % len(q["order"]))
+    return out
+
+
+def take_quiz(session, resident_id: int, code: str, now, *, correct: bool = True, rng=None):
+    """Starts a paper and hands it in. Returns the result of submit_quiz."""
+    from isd.services import education
+
+    paper = education.start_quiz(session, resident_id, code, now, rng)
+    answers = quiz_answers(session, paper["quiz_id"], code, correct=correct)
+    return education.submit_quiz(session, resident_id, code, paper["quiz_id"], answers, now)

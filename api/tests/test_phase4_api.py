@@ -8,6 +8,7 @@ from isd import providers
 from isd.models import CallRecord, Contact
 from isd.services import commissary, points
 from isd.services.audit import SYSTEM
+from tests.helpers import quiz_answers
 
 pytestmark = pytest.mark.usefixtures("committed_config")
 ANSWERS = [0, 1, 0, 1, 0]
@@ -45,24 +46,35 @@ def test_education_demo_loop_over_http(client, kiosk, owner_engine):
     assert next(a for a in before["allowances"] if a["feature"] == "calls")["limit"] == 15
 
     courses = client.get("/device/courses", headers=hdr(token)).json()
-    assert {c["code"]: c["allowed"] for c in courses} == {"MONEY101": True, "WORKMATH": False}
+    allowed = {c["code"]: c["allowed"] for c in courses}
+    assert allowed["MONEY101"] and allowed["LIT101"] and allowed["NUM101"]  # basic: open to all
+    assert not allowed["WORKMATH"] and not allowed["JOBS101"]  # advanced, with prerequisites
     course = client.get("/device/courses/MONEY101", headers=hdr(token)).json()
     assert "answer" not in str(course)
     assert client.get("/device/courses/WORKMATH", headers=hdr(token)).status_code == 409
-    early = client.post(
-        "/device/courses/MONEY101/quiz", json={"answers": ANSWERS}, headers=hdr(token)
-    )
+    early = client.post("/device/courses/MONEY101/quiz/start", headers=hdr(token))
     assert early.status_code == 409 and early.json()["detail"]["code"] == "LESSONS_INCOMPLETE"
     for lesson in course["lessons"]:
         r = client.post(
             f"/device/courses/MONEY101/lessons/{lesson['id']}/complete", headers=hdr(token)
         )
         assert r.status_code == 200
+    paper = client.post("/device/courses/MONEY101/quiz/start", headers=hdr(token)).json()
+    assert "answer" not in str(paper) and len(paper["questions"]) == 5
+    with Session(owner_engine) as s:
+        answers = quiz_answers(s, paper["quiz_id"], "MONEY101")
+    bad = client.post(
+        "/device/courses/MONEY101/quiz", json={"quiz_id": paper["quiz_id"]}, headers=hdr(token)
+    )
+    assert bad.status_code == 422
     res = client.post(
-        "/device/courses/MONEY101/quiz", json={"answers": ANSWERS}, headers=hdr(token)
+        "/device/courses/MONEY101/quiz",
+        json={"quiz_id": paper["quiz_id"], "answers": answers},
+        headers=hdr(token),
     )
     assert res.status_code == 200 and res.json()["passed"]
     assert res.json()["calls_minutes_before"] == 15 and res.json()["calls_minutes_after"] == 20
+    assert res.json()["certificate"].startswith("MONEY101-")
 
     after = client.get("/device/view", headers=hdr(token)).json()
     assert after["tier"]["effective"] == 2

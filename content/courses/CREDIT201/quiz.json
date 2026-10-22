@@ -1,0 +1,94 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "A credit report records...?"
+      },
+      "choices": [
+        {
+          "en": "How you have paid back what you borrowed"
+        },
+        {
+          "en": "Your favorite foods"
+        },
+        {
+          "en": "Where you work"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "Paying on time usually...?"
+      },
+      "choices": [
+        {
+          "en": "Helps your credit record"
+        },
+        {
+          "en": "Hurts your credit record"
+        },
+        {
+          "en": "Changes nothing"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "What should you do if you see a mistake on your report?"
+      },
+      "choices": [
+        {
+          "en": "Ask for it to be corrected"
+        },
+        {
+          "en": "Ignore it"
+        },
+        {
+          "en": "Pay for it twice"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "What goes on a first-month cost list?"
+      },
+      "choices": [
+        {
+          "en": "Housing, food, transport, and phone"
+        },
+        {
+          "en": "Only entertainment"
+        },
+        {
+          "en": "Nothing"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q5",
+      "prompt": {
+        "en": "An emergency fund is...?"
+      },
+      "choices": [
+        {
+          "en": "Money set aside for surprise costs"
+        },
+        {
+          "en": "A kind of loan"
+        },
+        {
+          "en": "A bank fee"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

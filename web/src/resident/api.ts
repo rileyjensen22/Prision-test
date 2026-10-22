@@ -61,6 +61,12 @@ export function sendEvent(token: string, ev: QueuedEvent): Promise<unknown> {
       method: 'POST',
       body: JSON.stringify({ client_id: ev.client_id, ...ev.payload }),
     })
+  if (ev.type === 'lesson_complete')
+    return callApi(
+      token,
+      `/device/courses/${ev.payload.code}/lessons/${ev.payload.lesson_id}/complete`,
+      { method: 'POST' },
+    )
   if (ev.type === 'reading_progress')
     return callApi(token, `/device/reading/${ev.payload.item_id}/progress`, {
       method: 'PUT',

@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: db-local migrate daily reconcile welfare-sweep secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -48,6 +48,9 @@ reconcile: $(VENV)/.installed migrate  ## check balances against their ledgers (
 
 welfare-sweep: $(VENV)/.installed migrate  ## raise, escalate and clear welfare flags now (cron every 15 min)
 	$(PY) scripts/welfare-sweep.py
+
+courses-check: $(VENV)/.installed  ## validate every course folder under content/courses
+	$(PY) scripts/courses.py validate
 
 secrets-check:  ## fail if the repository contains anything that looks like a secret
 	$(PY) scripts/check-secrets.py

@@ -41,3 +41,10 @@ Stub created in Phase 0; filled in Phase 7. See `config/compliance.yaml` and CLA
 - **Reconciliation and money records.** The nightly check detects a mismatch but never corrects one; who investigates, how a correcting entry is approved, and how long ledgers and work logs must be kept are for the customer and counsel.
 - **Out-of-cell records and welfare escalation (unverified; counsel review).** The log of who is out of the cell, when and for what, the daily export, and the welfare flag history (including who handled each flag and what they did) are records regulators and lawyers may ask for; retention, access, and who may export them are for counsel and the customer. The 12-hour escalation time, the list of actions and the rule that an escalated flag needs a supervisor are placeholders. Visits are treated as facility-arranged and open to every resident; real visiting rules (approved visitors, restrictions, no-contact orders, security) are not modelled. The software records what officers enter; it cannot verify that a resident was actually let out.
 
+
+## Added in Phase 14 (UNVERIFIED; confirm with counsel before any deployment)
+
+- **Course content and licensing.** The eight sample courses are original text released as CC0 for the prototype. Real curricula need licensing, accuracy review, accessibility review (reading level, captions) and, for credits or certificates that carry weight, accreditation or a recognised partner.
+- **Quiz attempt limits and baseline education.** Basic education is part of the protected baseline. The quiz has an attempt limit and a cooldown to stop guessing; lessons never lock. Counsel should confirm that pacing a quiz is compatible with the baseline guarantee in the applicable rules.
+- **Certificates.** They are records of completion on this system only, not credentials. Whether a facility name, signature or state seal may appear is a customer and legal decision.
+- **Personal data in content.** Course text is screened for obvious personal data, but a human content review is still required before adding a course.

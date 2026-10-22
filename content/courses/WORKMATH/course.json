@@ -1,0 +1,31 @@
+{
+  "level": "advanced",
+  "languages": [
+    "en",
+    "es"
+  ],
+  "reading_levels": [
+    "standard"
+  ],
+  "title": {
+    "en": "Workplace Math",
+    "es": "Matemáticas para el trabajo"
+  },
+  "summary": {
+    "en": "Hours, pay, and overtime.",
+    "es": "Horas, pago y horas extra."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [
+    "NUM101"
+  ],
+  "quiz": {
+    "draw": 3
+  },
+  "code": "WORKMATH",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "hours",
+    "overtime"
+  ]
+}

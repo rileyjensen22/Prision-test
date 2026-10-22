@@ -3,6 +3,7 @@ export type QueuedEvent =
   | { type: 'request'; client_id: string; payload: { kind: string; created_at: string } }
   | { type: 'appeal'; client_id: string; payload: { sanction_id: number } }
   | { type: 'reading_progress'; client_id: string; payload: { item_id: string; page: number } }
+  | { type: 'lesson_complete'; client_id: string; payload: { code: string; lesson_id: string } }
   | {
       type: 'reading_bookmark'
       client_id: string

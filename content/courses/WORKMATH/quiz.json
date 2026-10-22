@@ -1,0 +1,92 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": {
+        "en": "Six hours at ten dollars an hour is how much?",
+        "es": "¿Cuánto son seis horas a diez dólares la hora?"
+      },
+      "choices": [
+        {
+          "en": "16 dollars",
+          "es": "16 dólares"
+        },
+        {
+          "en": "60 dollars",
+          "es": "60 dólares"
+        },
+        {
+          "en": "600 dollars",
+          "es": "600 dólares"
+        }
+      ],
+      "answer": 1
+    },
+    {
+      "id": "q2",
+      "prompt": {
+        "en": "Pay before deductions is also called...?",
+        "es": "El pago antes de deducciones también se llama...?"
+      },
+      "choices": [
+        {
+          "en": "Gross pay",
+          "es": "Pago bruto"
+        },
+        {
+          "en": "Net pay",
+          "es": "Pago neto"
+        },
+        {
+          "en": "Tips",
+          "es": "Propinas"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q3",
+      "prompt": {
+        "en": "Overtime at one and a half times a ten-dollar rate pays...?",
+        "es": "Las horas extra a una vez y media de una tarifa de diez dólares pagan...?"
+      },
+      "choices": [
+        {
+          "en": "15 dollars an hour",
+          "es": "15 dólares la hora"
+        },
+        {
+          "en": "20 dollars an hour",
+          "es": "20 dólares la hora"
+        },
+        {
+          "en": "10 dollars an hour",
+          "es": "10 dólares la hora"
+        }
+      ],
+      "answer": 0
+    },
+    {
+      "id": "q4",
+      "prompt": {
+        "en": "Why keep a note of your hours?",
+        "es": "¿Por qué anotar sus horas?"
+      },
+      "choices": [
+        {
+          "en": "To check your pay",
+          "es": "Para revisar su pago"
+        },
+        {
+          "en": "It is required by law",
+          "es": "Lo exige la ley"
+        },
+        {
+          "en": "To work fewer hours",
+          "es": "Para trabajar menos horas"
+        }
+      ],
+      "answer": 0
+    }
+  ]
+}

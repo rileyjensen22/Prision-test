@@ -1,0 +1,29 @@
+{
+  "level": "program",
+  "languages": [
+    "en"
+  ],
+  "reading_levels": [
+    "standard"
+  ],
+  "title": {
+    "en": "Reentry Ready Certificate"
+  },
+  "summary": {
+    "en": "Bringing work, money, and support together for the first months at home."
+  },
+  "pass_mark": 0.7,
+  "prerequisites": [
+    "JOBS101",
+    "CREDIT201"
+  ],
+  "quiz": {
+    "draw": 4
+  },
+  "code": "REENTRY301",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "first-weeks",
+    "support"
+  ]
+}

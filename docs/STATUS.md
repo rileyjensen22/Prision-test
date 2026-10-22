@@ -1,17 +1,17 @@
 # Status
 
-Last updated: Phase 13 (scheduling and welfare). Everything below was checked by running the code, not from memory.
+Last updated: Phase 14 (education depth). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
 | Check | Result |
 |---|---|
-| `pytest` (API, engine, security, simulation) | 266 passed |
-| `vitest` | 41 passed |
-| Playwright e2e | 41 passed |
+| `pytest` (API, engine, security, simulation) | 425 passed |
+| `vitest` | 56 passed |
+| Playwright e2e | 57 passed |
 | `make lint` (ruff, tsc, eslint, prettier) | clean (after fixing an unused import and formatting in the phone-demo files) |
 | `make secrets-check` | no secrets found |
-| `make simulate-week` | 20 of 20 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
+| `make simulate-week` | 22 of 22 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
 | Audit-chain verifier | passes (run by the simulated week; also by the audit tests) |
 
 ## Phases 9 onward (v1.1)
@@ -23,7 +23,8 @@ Last updated: Phase 13 (scheduling and welfare). Everything below was checked by
 | 11 Texting and video | **Built** | Contact requests and approvals, delivery states, keyword flags (review items only), monitored-message review with reasons, attorney messages unreadable by any role, `VideoProvider` with a WebRTC loopback demo, scheduled video, recording retention, on-device tamper detection. See `docs/DECISIONS.md`. |
 | 12 Jobs | **Built** | Partner interface (mock), screened public-domain/synthetic tasks, work log, earnings ledger with config split, nightly payouts to the trust account, nightly reconciliation with alerts, Finance page and partner dashboard, sanction-pause flag (off). |
 | 13 Scheduling and welfare | **Built** | Per-unit schedule (recreation, programs, visits) with entitlement-based eligibility, officer tap-out/in with bulk actions, who-is-out roster, scheduled-vs-actual report, audited daily export, below-minimum on the dashboard, stored welfare flags that must be acknowledged with an action and escalate to a supervisor after a set time. |
-| 14 to 16 | **Not started** | |
+| 14 Education depth | **Built** | Course folders with validator CLI, prerequisites, resume, offline lesson progress, certificates (device list, staff print page), 8 sample courses (5 with Spanish, 2 with a simple level), random question draw with shuffled choices, attempt limit and cooldown, points mapped by level through config. |
+| 15 to 16 | **Not started** | |
 
 ## Phases 0 to 8
 

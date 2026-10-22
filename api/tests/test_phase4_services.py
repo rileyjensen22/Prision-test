@@ -15,8 +15,7 @@ from isd.services.audit import SYSTEM, verify_chain
 from isd.services.education import EducationError
 from isd.services.entitlement_service import get_entitlements
 from tests.conftest import NOW
-
-ANSWERS = [0, 1, 0, 1, 0]  # correct answers for MONEY101
+from tests.helpers import take_quiz
 
 
 @pytest.fixture
@@ -57,7 +56,7 @@ def test_sample_course_completion_raises_tier_and_call_minutes(owner, seeded, ma
     give_points(owner, rid, 60)
     assert get_entitlements(owner, rid, NOW).features["calls"].limits["minutes_per_day"] == 15
     finish_lessons(owner, rid)
-    r = education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW)
+    r = take_quiz(owner, rid, "MONEY101", NOW)
     assert r["passed"] and r["points_awarded"] == 50
     assert (r["tier_before"], r["tier_after"]) == (1, 2)
     assert (r["calls_minutes_before"], r["calls_minutes_after"]) == (15, 20)
@@ -68,8 +67,8 @@ def test_sample_course_completion_raises_tier_and_call_minutes(owner, seeded, ma
 def test_completion_awards_points_only_once(owner, seeded, make_resident):
     rid = make_resident()
     finish_lessons(owner, rid)
-    first = education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW)
-    again = education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW + timedelta(hours=1))
+    first = take_quiz(owner, rid, "MONEY101", NOW)
+    again = take_quiz(owner, rid, "MONEY101", NOW + timedelta(hours=1))
     assert first["points_awarded"] == 50 and again["points_awarded"] == 0
     assert again["already_completed"] is True
     assert points.total_points(owner, rid, NOW + timedelta(days=1)) == 50
@@ -78,22 +77,27 @@ def test_completion_awards_points_only_once(owner, seeded, make_resident):
 def test_quiz_rules(owner, seeded, make_resident):
     rid = make_resident()
     with pytest.raises(EducationError) as e:
-        education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW)
+        education.start_quiz(owner, rid, "MONEY101", NOW)
     assert e.value.code == "LESSONS_INCOMPLETE"
     finish_lessons(owner, rid)
+    paper = education.start_quiz(owner, rid, "MONEY101", NOW)
     with pytest.raises(EducationError) as e:
-        education.submit_quiz(owner, rid, "MONEY101", [0, 0], NOW)
+        education.submit_quiz(owner, rid, "MONEY101", paper["quiz_id"], [0, 0], NOW)
     assert e.value.code == "BAD_ANSWERS"
-    fail = education.submit_quiz(owner, rid, "MONEY101", [2, 0, 1, 0, 2], NOW)
+    fail = take_quiz(owner, rid, "MONEY101", NOW, correct=False)  # resumes the open paper
     assert not fail["passed"] and fail["points_awarded"] == 0
     assert points.total_points(owner, rid, NOW) == 0
-    assert education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW)["passed"]  # retry works
+    later = NOW + timedelta(minutes=11)  # after the cooldown
+    assert take_quiz(owner, rid, "MONEY101", later)["passed"]  # retry works
 
 
 def test_course_content_never_includes_answers(owner, seeded, make_resident):
-    course = education.get_course(owner, make_resident(), "MONEY101", NOW)
-    assert all("answer" not in q for q in course["quiz"])
-    assert "answer" not in str(course)
+    rid = make_resident()
+    course = education.get_course(owner, rid, "MONEY101", NOW)
+    assert "answer" not in str(course) and "prompt" not in str(course["quiz"])
+    finish_lessons(owner, rid)
+    paper = education.start_quiz(owner, rid, "MONEY101", NOW)
+    assert "answer" not in str(paper) and "order" not in str(paper)
 
 
 def test_advanced_course_gated_but_basic_is_baseline(owner, seeded, make_resident, make_staff):
@@ -105,6 +109,11 @@ def test_advanced_course_gated_but_basic_is_baseline(owner, seeded, make_residen
         education.get_course(owner, rid, "WORKMATH", NOW)
     assert e.value.code == "FEATURE_LOCKED"
     give_points(owner, rid, 300)  # tier 3
+    with pytest.raises(EducationError) as e:  # the course it builds on comes first
+        education.get_course(owner, rid, "WORKMATH", NOW)
+    assert e.value.code == "PREREQ_MISSING"
+    finish_lessons(owner, rid, "NUM101")
+    assert take_quiz(owner, rid, "NUM101", NOW)["passed"]
     assert education.get_course(owner, rid, "WORKMATH", NOW)["code"] == "WORKMATH"
     # a total lock-out sanction removes advanced education but never basic education
     officer, sup = make_staff("officer"), make_staff("supervisor")
@@ -118,7 +127,7 @@ def test_advanced_course_gated_but_basic_is_baseline(owner, seeded, make_residen
     listing = {c["code"]: c for c in education.list_courses(owner, rid, NOW)}
     assert listing["MONEY101"]["allowed"] and not listing["WORKMATH"]["allowed"]
     finish_lessons(owner, rid)  # basic course still works while fully sanctioned
-    assert education.submit_quiz(owner, rid, "MONEY101", ANSWERS, NOW)["passed"]
+    assert take_quiz(owner, rid, "MONEY101", NOW)["passed"]
 
 
 # ======================= calls =======================

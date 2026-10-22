@@ -42,6 +42,7 @@ Customers: other correctional facilities, and facilities we run ourselves. Initi
 /api            FastAPI app (routers, services, engine, interfaces, mocks)
 /web            React app (resident + staff)
 /config         seed YAML: tiers, points, sanctions, offenses, compliance
+/content        course folders (docs/courses.md)
 /docs           ASSUMPTIONS.md, DECISIONS.md, kiosk.md, architecture.md
 /scripts        seed, simulate-week, export-public-log, daily-job, check-secrets, rotate-device-token
 /deploy         example reverse-proxy config (untested example)
@@ -244,6 +245,7 @@ make migrate  # alembic upgrade head
 make daily    # daily job: clean-day points, tier checks (delayed drops), cleanup
 make reconcile  # nightly check: balances match their ledgers (exit 2 on mismatch)
 make welfare-sweep  # raise/escalate/clear welfare flags (run every 15 min)
+make courses-check  # validate course folders under content/courses
 make secrets-check  # fail if anything that looks like a secret is committed
 make dev      # run api + web + postgres
 make test     # pytest + vitest + playwright

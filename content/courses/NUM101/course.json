@@ -1,0 +1,31 @@
+{
+  "level": "basic",
+  "languages": [
+    "en",
+    "es"
+  ],
+  "reading_levels": [
+    "standard",
+    "simple"
+  ],
+  "title": {
+    "en": "Everyday Numbers",
+    "es": "Números de todos los días"
+  },
+  "summary": {
+    "en": "Place value, fractions and percentages, and measuring.",
+    "es": "Valor posicional, fracciones y porcentajes, y cómo medir."
+  },
+  "pass_mark": 0.6,
+  "prerequisites": [],
+  "quiz": {
+    "draw": 4
+  },
+  "code": "NUM101",
+  "license": "Original text written for this project and dedicated to the public domain (CC0)",
+  "lessons": [
+    "place-value",
+    "fractions-percent",
+    "measuring"
+  ]
+}

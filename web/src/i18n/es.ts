@@ -75,6 +75,7 @@ const es: Dict = {
     appealDuplicate: 'Ya tiene una apelación abierta para esto.',
   },
   code: {
+    PREREQUISITE: 'Termine primero un curso anterior',
     DISRUPT: 'Conducta perturbadora',
     CELL_MESS: 'Limpieza de la celda',
     STAFF_DISRESPECT: 'Falta de respeto al personal',
@@ -134,7 +135,28 @@ const es: Dict = {
     already: 'Ya terminó este curso.',
     tierUp: 'Subió de nivel: del Nivel {{from}} al Nivel {{to}}.',
     callsUp: 'Llamadas telefónicas: de {{from}} a {{to}} minutos por día.',
-    retry: 'Intentar el examen otra vez',
+    retry: 'Repetir el examen',
+    myCertificates: 'Mis certificados',
+    viewCertificate: 'Ver certificado',
+    noCertificates: 'Aún no tiene certificados. Apruebe el examen de un curso para obtener uno.',
+    certificateOf: 'Certificado de finalización',
+    finishFirst: 'Termine primero: {{titles}}',
+    offlineCopy:
+      'No hay conexión. Sus lecciones están guardadas y su avance se enviará al reconectarse. El examen necesita conexión.',
+    back: 'Atrás',
+    quizInfo: '{{count}} preguntas. Necesita {{mark}} por ciento para aprobar.',
+    beginQuiz: 'Comenzar el examen',
+    rereadLessons: 'Leer las lecciones otra vez',
+    cooldown:
+      'Haga una pausa corta. Puede intentarlo de nuevo a las {{time}}. Las lecciones siempre están abiertas.',
+    exhausted:
+      'Usó sus intentos por ahora. Puede intentarlo de nuevo a las {{time}}. Las lecciones siempre están abiertas.',
+    tryAgainAt: 'Puede intentarlo de nuevo a las {{time}}. Las lecciones siempre están abiertas.',
+    err: {
+      EXPIRED: 'Ese examen se agotó. Comience uno nuevo.',
+      LESSONS_INCOMPLETE: 'Termine primero todas las lecciones.',
+      ERROR: 'Algo salió mal. Inténtelo de nuevo.',
+    },
     lockedHint: 'Bloqueado',
   },
   calls: {

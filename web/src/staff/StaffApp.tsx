@@ -18,6 +18,7 @@ import ResidentDetail from './pages/ResidentDetail'
 import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
 import ViewAs from './pages/ViewAs'
+import Certificates from './pages/Certificates'
 import Welfare from './pages/Welfare'
 
 const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
@@ -83,6 +84,7 @@ function Shell() {
           <Route index element={<Dashboard />} />
           <Route path="roster" element={<Roster />} />
           <Route path="residents/:id" element={<ResidentDetail />} />
+          <Route path="residents/:id/certificates" element={<Certificates />} />
           <Route
             path="confirmations"
             element={

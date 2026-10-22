@@ -10,7 +10,16 @@ from sqlalchemy.orm import Session
 from isd.auth import require_roles
 from isd.db import get_db
 from isd.models import ROLES, JobEnrollment, JobListing, JobPartner, Resident, Staff
-from isd.services import earnings, jobs, out_of_cell, reading, reconcile, timeline, welfare
+from isd.services import (
+    earnings,
+    education,
+    jobs,
+    out_of_cell,
+    reading,
+    reconcile,
+    timeline,
+    welfare,
+)
 from isd.services.audit import Actor
 
 router = APIRouter(prefix="/staff", tags=["staff-extras"])
@@ -54,6 +63,16 @@ def welfare_ack(
         status = 403 if e.code == "NEEDS_SUPERVISOR" else 409 if e.code == "NO_OPEN_FLAG" else 422
         raise HTTPException(status, {"code": e.code, "message": str(e)}) from e
     return {"id": a.id}
+
+
+@router.get("/residents/{resident_id}/certificates")
+def resident_certificates(
+    resident_id: int, _: Staff = Depends(ALL), db: Session = Depends(get_db)
+) -> list[dict]:
+    """Certificates a resident has earned, with what is needed to print them."""
+    if db.get(Resident, resident_id) is None:
+        raise HTTPException(404, "resident not found")
+    return education.certificates_for(db, resident_id)
 
 
 @router.get("/out-of-cell/below-minimum")
