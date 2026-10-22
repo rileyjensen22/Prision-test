@@ -239,6 +239,7 @@ GOOD = dict(
     database_url="postgresql+psycopg://app:x9@db/isd",
     migration_url="postgresql+psycopg://owner:y8@db/isd",
     sso_mock=False,
+    research_salt="r" * 20,
 )
 
 

@@ -1,17 +1,17 @@
 # Status
 
-Last updated: Phase 14 (education depth). Everything below was checked by running the code, not from memory.
+Last updated: Phase 15 (intake, reentry, outcomes). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
 | Check | Result |
 |---|---|
-| `pytest` (API, engine, security, simulation) | 425 passed |
-| `vitest` | 56 passed |
-| Playwright e2e | 57 passed |
+| `pytest` (API, engine, security, simulation) | 487 passed |
+| `vitest` | 59 passed |
+| Playwright e2e | 61 passed |
 | `make lint` (ruff, tsc, eslint, prettier) | clean (after fixing an unused import and formatting in the phone-demo files) |
 | `make secrets-check` | no secrets found |
-| `make simulate-week` | 22 of 22 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
+| `make simulate-week` | 26 of 26 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
 | Audit-chain verifier | passes (run by the simulated week; also by the audit tests) |
 
 ## Phases 9 onward (v1.1)
@@ -24,7 +24,8 @@ Last updated: Phase 14 (education depth). Everything below was checked by runnin
 | 12 Jobs | **Built** | Partner interface (mock), screened public-domain/synthetic tasks, work log, earnings ledger with config split, nightly payouts to the trust account, nightly reconciliation with alerts, Finance page and partner dashboard, sanction-pause flag (off). |
 | 13 Scheduling and welfare | **Built** | Per-unit schedule (recreation, programs, visits) with entitlement-based eligibility, officer tap-out/in with bulk actions, who-is-out roster, scheduled-vs-actual report, audited daily export, below-minimum on the dashboard, stored welfare flags that must be acknowledged with an action and escalate to a supervisor after a set time. |
 | 14 Education depth | **Built** | Course folders with validator CLI, prerequisites, resume, offline lesson progress, certificates (device list, staff print page), 8 sample courses (5 with Spanish, 2 with a simple level), random question draw with shuffled choices, attempt limit and cooldown, points mapped by level through config. |
-| 15 to 16 | **Not started** | |
+| 15 Intake, reentry, outcomes | **Built** | One audited intake step (settings, prior returns with source, offense categories, contacts, keep-separate, cell and device), release countdown on the device, reentry checklist and resources directory from config, cohort outcomes dashboard with outcome entry, pseudonymized researcher export (off by default), import-boundary tests for invariant 17. |
+| 16 | **Not started** | |
 
 ## Phases 0 to 8
 
@@ -51,7 +52,7 @@ All hold. Each has a test, and the simulated week re-checks 1, 2, 3, 4, 5, 6, 7,
 | # | Rule | State | Detail |
 |---|---|---|---|
 | 12 | Flags only create review items | **Holds, tested** | Keyword rules create `message_flags` rows only; the monitoring and texting code cannot reach the sanction service (tested) and sanction counts do not change. Welfare flags are review items too. |
-| 13 | Resident play: no free text, names, wagering, friends | **Partial** | The chess stub has no chat column, method or route (tested). Human play is a mock; there is no `keep_separate` table, no anonymous handles, no match log. Phase 10. |
+| 13 | Resident play: no free text, names, wagering, friends | **Partial** | The chess stub has no chat column, method or route (tested). Human play is a mock; the `keep_separate` table now exists (Phase 15, filled at intake) but no matchmaking reads it, no anonymous handles, no match log. Phase 10. |
 | 14 | Camera frames never stored; tamper on-device, only during a call | **Holds (fake camera only)** | Detection runs in the kiosk page on brightness numbers, only during an active call; the server accepts only `{signal, covered_ms}` for an active call; no binary column exists in the database. Tested in a browser with a fake camera; real kiosk cameras are untested. Earlier:  The tamper endpoint accepted a report for a call that had already ended and still raised a sanction. It now refuses (`NOT_ACTIVE`, tested). There is no real camera in v1, so on-device detection on a derived signal does not exist yet. Phase 11. |
 | 15 | Money paths append-only, nightly reconciliation | **Holds** | The trust ledger and the new earnings ledger are append-only (trigger plus revoked grants plus database checks); the daily job reconciles both every night and a mismatch raises an audit alert, a dashboard banner and a non-zero exit. |
 | 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Holds, one gap** | Messages, call-recording fetch (reason added in Phase 11), the activity timeline and mirroring all need a reason and are logged without content. There is still no screen for reviewing monitored calls. Earlier: | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |

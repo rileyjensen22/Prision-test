@@ -21,6 +21,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 from isd import providers
+from isd.analytics import service as outcome_service
 from isd.auth import hash_password
 from isd.config_loader import load_config
 from isd.engine.authority import AuthorityError, Evidence
@@ -77,6 +78,7 @@ from isd.services import (
     reading,
     rec,
     reconcile,
+    reentry,
     sanctions,
     schedule,
     staff_requests,
@@ -86,13 +88,18 @@ from isd.services import (
     work_tasks,
 )
 from isd.services import contacts as contact_service
+from isd.services import intake as intake_service
 from isd.services.audit import SYSTEM, Actor, verify_chain
 from isd.services.config_store import get_current, set_config
 from isd.services.entitlement_service import get_entitlements, load_engine_config
+from isd.services.intake import IntakeContact, IntakeRequest
 from isd.services.resident_view import build_resident_view
 
 # Refusals the rules are supposed to make. Anything not listed here is a bug and stops the run.
 EXPECTED = (
+    intake_service.IntakeError,
+    reentry.ReentryError,
+    outcome_service.OutcomeError,
     AuthorityError,
     CallDenied,
     OrderError,
@@ -199,6 +206,7 @@ class Simulation:
         self.residents: list[int] = []
         self.contacts: dict[int, list[Contact]] = {}
         self.names: set[str] = set()
+        self.admitted: list[int] = []
         self.course = None
 
     # ---------- helpers ----------
@@ -680,11 +688,82 @@ class Simulation:
                         self.resident_action(rid, self.stamp(now))
                 self.staff_actions(self.stamp(now))
                 self.s.commit()
+            if d == 2:
+                self.admissions_and_reentry(day_start + timedelta(hours=18))
             if d == 3:
                 self.sandbox_and_mirror(day_start + timedelta(hours=20))
             self.end_of_day(day_start.date(), day_start + timedelta(hours=23, minutes=30))
         self.verify(cfg.start + timedelta(days=cfg.days))
         return self.report
+
+    # ---------- intake, reentry and outcomes ----------
+    def admissions_and_reentry(self, now: datetime) -> None:
+        s = self.s
+        rng = random.Random(self.cfg.seed + 15)  # its own stream: other phases stay reproducible
+        sup = self.supervisors[0]
+        for n in range(2):
+            tag = uuid.uuid4().hex[:6]
+            cell, dev = Cell(code=f"SIM-C{tag}"), Device(code=f"SIM-D{tag}")
+            s.add_all([cell, dev])
+            s.flush()
+            req = IntakeRequest(
+                display_name=f"Synthetic Admit {tag}",
+                cell_code=cell.code,
+                device_code=dev.code,
+                reason="simulated admission",
+                prior_returns=n,
+                prior_returns_source="simulation" if n else None,
+                release_date=(now + timedelta(days=30 + n)).date(),
+                offense_categories=["PLACEHOLDER_CATEGORY_A"] if n else [],
+                contacts=[IntakeContact(f"Synthetic Kin {tag}", "family", "555-0150")],
+                keep_separate=[(s.get(Resident, rng.choice(self.residents)).code, "simulated")]
+                if n
+                else [],
+            )
+            resident = self.attempt("intake", intake_service.intake, s, sup, req, now)
+            if resident is not None:
+                self.admitted.append(resident.id)
+                self.names |= {resident.display_name, resident.code, cell.code, dev.code}
+        for rid in rng.sample(self.residents, min(6, len(self.residents))):
+            item = rng.choice(["ID_DOCUMENTS", "HOUSING", "EMPLOYMENT"])
+            status = rng.choice(["in_progress", "done", "not_needed"])
+            self.attempt(
+                "reentry_item",
+                reentry.record_item,
+                s,
+                rng.choice(self.officers),
+                rid,
+                item,
+                status,
+                None,
+                now,
+            )
+        for rid in rng.sample(self.residents, min(3, len(self.residents))):
+            self.attempt(
+                "release_date",
+                reentry.set_release_date,
+                s,
+                sup,
+                rid,
+                (now + timedelta(days=60)).date(),
+                "simulated",
+                now,
+            )
+        for rid in rng.sample(self.residents, min(10, len(self.residents))):
+            outcome = rng.choice(["no_return", "returned", "unknown"])
+            code = s.get(Resident, rid).code
+            self.attempt(
+                "outcome",
+                outcome_service.record_outcome,
+                s,
+                self.admin,
+                code,
+                6,
+                outcome,
+                "simulated record",
+                now,
+            )
+        s.commit()
 
     # ---------- sandbox and mirror ----------
     def sandbox_and_mirror(self, now: datetime) -> None:
@@ -726,6 +805,49 @@ class Simulation:
         )
 
     # ---------- the checks ----------
+    def verify_phase15(self, end: datetime) -> None:
+        s, add = self.s, self.report.checks.append
+        trail = {a for a in s.execute(select(AuditLog.action)).scalars()}
+        wanted = {"resident_intake", "device_assignment", "contact_added", "release_date_set"}
+        add(Check("intake leaves an audit trail", wanted <= trail and bool(self.admitted)))
+        homed = [r for r in self.admitted if build_resident_view(s, r, end).reentry is not None]
+        add(
+            Check(
+                "an admitted resident sees their release countdown",
+                len(homed) == len(self.admitted),
+            )
+        )
+        before = {
+            "sanctions": s.execute(select(func.count()).select_from(Sanction)).scalar(),
+            "tier_history": s.execute(select(func.count()).select_from(TierHistory)).scalar(),
+            "points": s.execute(select(func.count()).select_from(PointEvent)).scalar(),
+        }
+        set_config(
+            s,
+            SYSTEM,
+            "compliance",
+            {**get_current(s, "compliance").payload, "researcher_export_enabled": True},
+            "simulation: enable the researcher export",
+        )
+        outcome_service.dashboard(s, end)
+        data = outcome_service.export(s, self.admin, "simulation check", "sim-research-salt", end)
+        blob = repr(data["rows"])
+        codes = {r.code for r in s.execute(select(Resident)).scalars()}
+        leaked = sorted(n for n in (self.names | codes) if n in blob)
+        add(
+            Check(
+                "researcher export contains no names or codes",
+                not leaked and len(data["rows"]) >= len(self.residents),
+                f"{len(data['rows'])} rows" if not leaked else str(leaked[:5]),
+            )
+        )
+        after = {
+            "sanctions": s.execute(select(func.count()).select_from(Sanction)).scalar(),
+            "tier_history": s.execute(select(func.count()).select_from(TierHistory)).scalar(),
+            "points": s.execute(select(func.count()).select_from(PointEvent)).scalar(),
+        }
+        add(Check("analytics changed no tier, point or sanction", before == after))
+
     def verify(self, end: datetime) -> None:
         s, add = self.s, self.report.checks.append
         s.commit()
@@ -1032,6 +1154,8 @@ class Simulation:
             "UPDATE out_of_cell_log SET minutes = 0",
             "UPDATE audit_log SET action = 'x'",
             "UPDATE trust_ledger SET memo = 'x'",
+            "UPDATE reentry_events SET status = 'todo'",
+            "UPDATE outcome_records SET outcome = 'unknown'",
         ):
             try:
                 with s.begin_nested():
@@ -1063,6 +1187,9 @@ class Simulation:
         s.commit()
         add(Check("audit chain still verifies after the export", verify_chain(s).ok))
 
+        self.verify_phase15(end)
+        s.commit()
+
         # summary
         required = [
             "lesson",
@@ -1092,6 +1219,10 @@ class Simulation:
             "out_of_cell",
             "camera_event",
             "daily_clean_days",
+            "intake",
+            "reentry_item",
+            "release_date",
+            "outcome",
         ]
         denied = self.report.denied
 

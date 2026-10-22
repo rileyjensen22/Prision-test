@@ -19,12 +19,15 @@ import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
 import ViewAs from './pages/ViewAs'
 import Certificates from './pages/Certificates'
+import Intake from './pages/Intake'
+import Outcomes from './pages/Outcomes'
 import Welfare from './pages/Welfare'
 
 const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
 const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff', label: 'Dashboard' },
   { to: '/staff/roster', label: 'Roster' },
+  { to: '/staff/intake', label: 'Intake', roles: ['supervisor', 'admin'] },
   { to: '/staff/out-of-cell', label: 'Out of cell' },
   { to: '/staff/schedule', label: 'Schedule' },
   { to: '/staff/welfare', label: 'Welfare' },
@@ -37,6 +40,7 @@ const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff/mirror', label: 'Live mirror', roles: SUPERVISION },
   { to: '/staff/content', label: 'Content & jobs' },
   { to: '/staff/finance', label: 'Finance', roles: SUPERVISION },
+  { to: '/staff/outcomes', label: 'Outcomes', roles: SUPERVISION },
   { to: '/staff/config', label: 'Config' },
   { to: '/staff/audit', label: 'Audit log', roles: ['admin', 'auditor'] },
 ]
@@ -83,6 +87,22 @@ function Shell() {
         <Routes>
           <Route index element={<Dashboard />} />
           <Route path="roster" element={<Roster />} />
+          <Route
+            path="intake"
+            element={
+              <Guard roles={['supervisor', 'admin']}>
+                <Intake />
+              </Guard>
+            }
+          />
+          <Route
+            path="outcomes"
+            element={
+              <Guard roles={SUPERVISION}>
+                <Outcomes />
+              </Guard>
+            }
+          />
           <Route path="residents/:id" element={<ResidentDetail />} />
           <Route path="residents/:id/certificates" element={<Certificates />} />
           <Route

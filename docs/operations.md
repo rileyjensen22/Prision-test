@@ -9,6 +9,7 @@
 | `MIGRATION_DATABASE_URL` | the schema owner (`isd`): used only by migrations, seeds and the scripts | |
 | `SECRET_KEY` | signs staff tokens | random, 32+ characters |
 | `PUBLIC_LOG_SALT` | pseudonym key for the public log | random, kept outside the repository; changing it breaks linkage between exports |
+| `RESEARCH_SALT` | pseudonym key for the researcher export; must differ from `PUBLIC_LOG_SALT` | random, kept outside the repository |
 | `TOKEN_TTL_SECONDS` | staff idle timeout (default 1800) | |
 | `MAX_BODY_BYTES` | request size limit (default 1 MiB) | |
 | `SSO_MOCK_ENABLED` | mock sign-in | must be `false` |

@@ -15,6 +15,7 @@ from isd.engine.config import (
     validate_welfare,
 )
 from isd.engine.monitoring import validate_monitoring
+from isd.engine.reentry import validate_reentry
 from isd.jobs_config import validate_jobs  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
@@ -31,6 +32,7 @@ CONFIG_FILES = (
     "rec",
     "reading",
     "monitoring",
+    "reentry",
 )
 
 
@@ -49,6 +51,9 @@ def load_config(config_dir: Path = CONFIG_DIR, courses_dir: Path | None = None) 
 def validate_config(config: dict[str, dict]) -> None:
     for name, payload in config.items():
         validate_section(name, payload)
+    if "reentry" in config and "courses" in config:  # the reentry courses must exist
+        codes = {c["code"] for c in config["courses"]["courses"]}
+        validate_reentry(config["reentry"], codes)
 
 
 def validate_section(name: str, payload: dict) -> None:
@@ -72,6 +77,8 @@ def validate_section(name: str, payload: dict) -> None:
         validate_reading(payload)
     elif name == "monitoring":
         validate_monitoring(payload)
+    elif name == "reentry":
+        validate_reentry(payload)
     elif name not in CONFIG_FILES:
         raise ValueError(f"unknown config section: {name}")
 

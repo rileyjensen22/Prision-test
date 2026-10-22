@@ -18,6 +18,7 @@ from isd.services import (
     jobs,
     reading,
     rec,
+    reentry,
     texting,
     video_bookings,
     work_tasks,
@@ -386,3 +387,9 @@ def rec_cancel(
     body: RecIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ):
     return {"cancelled": rec.cancel(db, ctx.resident_id, body.day, body.slot, body.block_id)}
+
+
+# ---------------- reentry (information only, so not an entitlement feature) ----------------
+@router.get("/reentry")
+def reentry_view(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    return reentry.resident_view(db, ctx.resident_id, _now())

@@ -48,3 +48,11 @@ Stub created in Phase 0; filled in Phase 7. See `config/compliance.yaml` and CLA
 - **Quiz attempt limits and baseline education.** Basic education is part of the protected baseline. The quiz has an attempt limit and a cooldown to stop guessing; lessons never lock. Counsel should confirm that pacing a quiz is compatible with the baseline guarantee in the applicable rules.
 - **Certificates.** They are records of completion on this system only, not credentials. Whether a facility name, signature or state seal may appear is a customer and legal decision.
 - **Personal data in content.** Course text is screened for obvious personal data, but a human content review is still required before adding a course.
+
+## Added in Phase 15 (UNVERIFIED; confirm with counsel before any deployment)
+
+- **Intake data.** Name, prior-returns history and offense categories are sensitive. Who may enter and see them, where the prior-returns number is sourced from, and how errors are corrected are legal and policy questions. The audit log deliberately omits names and contact details.
+- **Keep-separate records.** Who may be kept apart, for what reasons and for how long (and whether a resident may be told) varies. The reason is staff-only and free text, so it must not hold case details a resident or researcher could see.
+- **Release date and the countdown.** Showing a release date to a resident can be wrong if the date changes (credit, detainers, holds). The device shows what staff entered; wording and who approves a change need review.
+- **Reentry checklist and resources.** The checklist and the resource directory are placeholders. A real directory needs vetting, accuracy owners and a refresh process; phone numbers shown to residents must be reachable under the facility's own call rules.
+- **Outcomes and research.** Outcome data comes from customer records and may be regulated (criminal history, privacy, research ethics, IRB). Pseudonymization with bands and small-group merging reduces but does not remove re-identification risk, especially for small facilities. The export is off by default; enabling it, data-sharing agreements and the research purpose need counsel and, for external researchers, ethics review.

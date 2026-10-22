@@ -71,6 +71,7 @@ class Resident(Base):
     captions: Mapped[bool] = mapped_column(Boolean, default=False)
     prior_returns: Mapped[int] = mapped_column(Integer, default=0)
     prior_returns_source: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    release_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = _now()
 
 
@@ -816,3 +817,51 @@ class WelfareFlag(Base):
     action: Mapped[str | None] = mapped_column(String(32), nullable=True)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     cleared_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class KeepSeparate(Base):
+    """Two residents who must never be paired or scheduled together. Stored once, a < b."""
+
+    __tablename__ = "keep_separate"
+    __table_args__ = (
+        CheckConstraint("resident_a_id < resident_b_id", name="ck_keep_separate_order"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_a_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    resident_b_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    added_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    added_at: Mapped[datetime] = _now()
+    reason: Mapped[str] = mapped_column(String(200))  # staff only; never shown to residents
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+
+
+class ReentryEvent(Base):
+    """Append-only checklist history; the latest event per item is its current state."""
+
+    __tablename__ = "reentry_events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    item_code: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(12))
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    at: Mapped[datetime] = _now()
+
+
+class OutcomeRecord(Base):
+    """Outcome data entered later from customer records. Append-only; a fix is a new row."""
+
+    __tablename__ = "outcome_records"
+    __table_args__ = (
+        CheckConstraint("window_months IN (6, 12, 24)", name="ck_outcome_window"),
+        CheckConstraint("outcome IN ('no_return', 'returned', 'unknown')", name="ck_outcome_value"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    window_months: Mapped[int] = mapped_column(Integer)
+    outcome: Mapped[str] = mapped_column(String(10))
+    source: Mapped[str] = mapped_column(String(80))
+    corrects_id: Mapped[int | None] = mapped_column(ForeignKey("outcome_records.id"), nullable=True)
+    entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    entered_at: Mapped[datetime] = _now()

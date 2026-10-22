@@ -78,3 +78,4 @@ class ResidentView(BaseModel):
     valid_until: datetime  # offline cache expires here; clients fail closed afterwards
     simulation: bool = False
     ui: UiConfig
+    reentry: dict | None = None  # release countdown, when staff have set a date

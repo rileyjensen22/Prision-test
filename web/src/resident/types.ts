@@ -62,4 +62,5 @@ export interface ResidentView {
   valid_until: string
   simulation: boolean
   ui: { inactivity_return_home_seconds: number }
+  reentry?: { release_date: string; days_left: number; weeks_left: number } | null
 }

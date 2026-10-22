@@ -22,6 +22,7 @@ from isd.schemas import (
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements, load_engine_config
 from isd.services.points import total_points
+from isd.services.reentry import release_countdown
 from isd.services.usage import (
     call_seconds_today,
     messages_sent_today,
@@ -98,6 +99,7 @@ def build_resident_view(
         ui=UiConfig(
             inactivity_return_home_seconds=int(compliance["inactivity_return_home_seconds"])
         ),
+        reentry=release_countdown(session, resident_id, at_time.date()),
     )
 
 

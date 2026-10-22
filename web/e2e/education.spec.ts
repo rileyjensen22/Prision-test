@@ -43,7 +43,9 @@ test('progress survives going offline in the middle of a lesson', async ({ page,
   await context.setOffline(false)
   await expect(async () => {
     await page.goto('/resident/feature/basic_education')
-    await expect(page.getByTestId('course-LIT101')).toContainText('2 of 3 lessons', { timeout: 3000 })
+    await expect(page.getByTestId('course-LIT101')).toContainText('2 of 3 lessons', {
+      timeout: 3000,
+    })
   }).toPass({ timeout: 20_000 })
   await page.getByTestId('course-LIT101').getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByTestId('lesson')).toContainText('Lesson 3 of') // resumes where they left off

@@ -12,6 +12,7 @@ import { Reading } from './features/Reading'
 import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
 import { Video } from './features/Video'
+import { Reentry } from './features/Reentry'
 import { CertificateView, Certificates, Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
 import { TEXT_SIZE } from './theme'
@@ -92,6 +93,7 @@ function Shell() {
             <Route path="feature/out_of_cell_minimum" element={<Rec />} />
             <Route path="jobs" element={<Jobs />} />
             <Route path="course/:code" element={<Course />} />
+            <Route path="reentry" element={<Reentry />} />
             <Route path="certificates" element={<Certificates />} />
             <Route path="certificate/:serial" element={<CertificateView />} />
             <Route path="feature/:name" element={<FeaturePage />} />

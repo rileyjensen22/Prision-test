@@ -1,0 +1,55 @@
+# Reentry checklist, courses and approved resources. Everything here is a SYNTHETIC placeholder:
+# the phone numbers are in the fictional 555-01xx range. Real resources come from the customer.
+version: 1
+checklist:
+  - code: ID_DOCUMENTS
+    title: {en: "Identification documents", es: "Documentos de identificación"}
+    detail:
+      en: "Birth certificate, Social Security card and a state ID are the ones most places ask for. Ask staff to start the requests early."
+      es: "El acta de nacimiento, la tarjeta del Seguro Social y una identificación estatal son los documentos que más piden. Pida al personal que inicie los trámites con tiempo."
+  - code: HOUSING
+    title: {en: "A place to stay", es: "Un lugar donde vivir"}
+    detail:
+      en: "Plan where you will stay on your first night and for the first months. The resources list has placeholder housing contacts."
+      es: "Planee dónde se quedará la primera noche y los primeros meses. La lista de recursos tiene contactos de vivienda de ejemplo."
+  - code: EMPLOYMENT
+    title: {en: "Work or training", es: "Trabajo o capacitación"}
+    detail:
+      en: "Finish the job readiness course and write down the skills and certificates you have earned."
+      es: "Termine el curso de preparación para el trabajo y anote las habilidades y certificados que ha obtenido."
+  - code: HEALTHCARE
+    title: {en: "Health care and medicine", es: "Atención médica y medicinas"}
+    detail:
+      en: "Ask medical staff about a supply of medicine and a clinic near where you will live."
+      es: "Pregunte al personal médico por un suministro de medicinas y una clínica cerca de donde vivirá."
+  - code: TRANSPORT
+    title: {en: "Getting there and getting around", es: "Cómo llegar y cómo moverse"}
+    detail:
+      en: "Know how you will travel on release day and how you will get to work or appointments."
+      es: "Sepa cómo viajará el día de su salida y cómo llegará al trabajo o a sus citas."
+courses: [JOBS101, CREDIT201, REENTRY301]
+resources:
+  - code: SAMPLE_HOUSING
+    category: housing
+    title: {en: "Sample Housing Help Line (placeholder)", es: "Línea de ayuda de vivienda de ejemplo (ejemplo)"}
+    description: {en: "A made-up listing showing where a real housing contact would appear.", es: "Un listado inventado que muestra dónde aparecería un contacto real de vivienda."}
+    phone: "555-0101"
+    languages: [en, es]
+  - code: SAMPLE_WORK
+    category: employment
+    title: {en: "Sample Workforce Center (placeholder)", es: "Centro de empleo de ejemplo (ejemplo)"}
+    description: {en: "A made-up listing for help with resumes and job searching.", es: "Un listado inventado para ayuda con currículos y búsqueda de empleo."}
+    phone: "555-0102"
+    languages: [en, es]
+  - code: SAMPLE_ID
+    category: documents
+    title: {en: "Sample ID Assistance (placeholder)", es: "Ayuda con documentos de ejemplo (ejemplo)"}
+    description: {en: "A made-up listing for replacing identification documents.", es: "Un listado inventado para reemplazar documentos de identificación."}
+    phone: "555-0103"
+    languages: [en]
+  - code: SAMPLE_HEALTH
+    category: health
+    title: {en: "Sample Community Clinic (placeholder)", es: "Clínica comunitaria de ejemplo (ejemplo)"}
+    description: {en: "A made-up listing for low-cost health care.", es: "Un listado inventado para atención médica de bajo costo."}
+    phone: "555-0104"
+    languages: [en, es]

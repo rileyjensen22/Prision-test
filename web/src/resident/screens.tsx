@@ -162,8 +162,26 @@ export function Home() {
         </ul>
       </Card>
 
+      {view.reentry && (
+        <Link to="/resident/reentry" data-testid="release-countdown" className="block">
+          <Card>
+            <p className="text-lg">{t('reentry.countdownLabel')}</p>
+            <p className="text-4xl font-bold">
+              {t('reentry.daysLeft', { count: view.reentry.days_left })}
+            </p>
+          </Card>
+        </Link>
+      )}
+
       <Card>
         <h2 className="mb-3 text-2xl font-bold">{t('home.optional')}</h2>
+        <Link
+          to="/resident/reentry"
+          data-testid="reentry-link"
+          className="mb-3 block min-h-16 rounded-xl border-2 border-slate-400 p-4 text-xl"
+        >
+          {t('home.reentryLink')}
+        </Link>
         <Link
           to="/resident/jobs"
           data-testid="jobs-link"

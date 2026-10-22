@@ -15,7 +15,9 @@ from isd.routers import (
     staff_comms,
     staff_extras,
     staff_floor,
+    staff_intake,
     staff_ops,
+    staff_outcomes,
     staff_residents,
     view_as,
 )
@@ -45,6 +47,8 @@ app.include_router(staff_extras.router)
 app.include_router(staff_floor.router)
 app.include_router(staff_comms.router)
 app.include_router(view_as.router)
+app.include_router(staff_intake.router)
+app.include_router(staff_outcomes.router)
 
 
 @app.get("/health")

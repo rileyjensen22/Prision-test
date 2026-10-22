@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api, errorText, fmt, post, put } from '../api'
 import { useAuth } from '../auth'
 import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import ReentryPanel from './ReentryPanel'
 
 interface Detail {
   resident_id: number
@@ -418,6 +419,11 @@ export default function ResidentDetail() {
           points · cell {d.cell ?? '—'} · device {d.device ?? '—'} · prior returns {d.prior_returns}
         </p>
       </Panel>
+      <ReentryPanel
+        residentId={d.resident_id}
+        canRecord={!!canRecord || user?.role === 'admin'}
+        canSetDate={!!user && ['supervisor', 'admin'].includes(user.role)}
+      />
       <p>
         <Link to={`/staff/residents/${d.resident_id}/certificates`} className="underline">
           Certificates
