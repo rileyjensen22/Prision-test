@@ -1,2775 +1,2758 @@
 {
- "scenarios": {
-  "alice": {
-   "label": "locked",
-   "before": {
-    "/device/view": {
-     "resident_code": "E2E-ALICE",
-     "settings": {
-      "language": "en",
-      "text_size": "normal",
-      "reading_level": "standard",
-      "captions": false
-     },
-     "tier": {
-      "earned": 3,
-      "ceiling": 10,
-      "effective": 3,
-      "points": 375,
-      "next_tier": 4,
-      "points_to_next": 75,
-      "capped_by_ceiling": false
-     },
-     "features": {
-      "advanced_education": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "attorney_calls": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "basic_education": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "calls": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "DISRUPT",
-         "source": "sanction",
-         "how_to_appeal": "appeal",
-         "ends_at": "2026-10-22T11:35:40.365339Z",
-         "detail": "",
-         "params": {},
-         "sanction_id": 1
-        }
-       ]
-      },
-      "chess_engine": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "chess_human": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 5",
-         "params": {
-          "tier": 5
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "commissary": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "dollars_per_week": 40
-       },
-       "reasons": []
-      },
-      "emergency_contact": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "grievances_appeals": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "legal_materials": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "medical_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "mental_health_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "out_of_cell_minimum": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {
-        "minutes_per_day": 60
-       },
-       "reasons": []
-      },
-      "outdoor_rec": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 9",
-         "params": {
-          "tier": 9
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_expanded": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_general": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "religious_texts": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "request_staff": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "texting": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
+  "scenarios": {
+    "alice": {
+      "label": "locked",
+      "before": {
+        "/device/view": {
+          "resident_code": "E2E-ALICE",
+          "settings": {
+            "language": "en",
+            "text_size": "normal",
+            "reading_level": "standard",
+            "captions": false
+          },
+          "tier": {
+            "earned": 3,
+            "ceiling": 10,
+            "effective": 3,
+            "points": 375,
+            "next_tier": 4,
+            "points_to_next": 75,
+            "capped_by_ceiling": false
+          },
+          "features": {
+            "advanced_education": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "attorney_calls": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "basic_education": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "calls": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "DISRUPT",
+                  "source": "sanction",
+                  "how_to_appeal": "appeal",
+                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "detail": "",
+                  "params": {},
+                  "sanction_id": 1
+                }
+              ]
+            },
+            "chess_engine": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "chess_human": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 5",
+                  "params": {
+                    "tier": 5
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "commissary": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "dollars_per_week": 40
+              },
+              "reasons": []
+            },
+            "emergency_contact": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "grievances_appeals": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "legal_materials": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "medical_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "mental_health_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "out_of_cell_minimum": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {
+                "minutes_per_day": 60
+              },
+              "reasons": []
+            },
+            "outdoor_rec": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 9",
+                  "params": {
+                    "tier": 9
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_expanded": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_general": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "religious_texts": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "request_staff": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "texting": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                },
+                {
+                  "code": "DISRUPT",
+                  "source": "sanction",
+                  "how_to_appeal": "appeal",
+                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "detail": "",
+                  "params": {},
+                  "sanction_id": 1
+                }
+              ]
+            },
+            "video": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 6",
+                  "params": {
+                    "tier": 6
+                  },
+                  "sanction_id": null
+                },
+                {
+                  "code": "DISRUPT",
+                  "source": "sanction",
+                  "how_to_appeal": "appeal",
+                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "detail": "",
+                  "params": {},
+                  "sanction_id": 1
+                }
+              ]
+            }
+          },
+          "allowances": [
+            {
+              "feature": "commissary",
+              "period": "week",
+              "unit": "dollars",
+              "limit": 40,
+              "used": 0.0
+            }
+          ],
+          "locks": [
+            {
+              "key": "sanction:1:",
+              "code": "DISRUPT",
+              "source": "sanction",
+              "features": ["calls", "texting", "video"],
+              "ends_at": "2026-10-22T11:35:40.365339Z",
+              "detail": "",
+              "params": {},
+              "how_to_appeal": "appeal",
+              "sanction_id": 1,
+              "appeal_open": false
+            }
+          ],
+          "generated_at": "2026-10-21T12:36:31.817579Z",
+          "valid_until": "2026-10-21T13:36:31.817579Z",
+          "simulation": false,
+          "ui": {
+            "inactivity_return_home_seconds": 90
+          }
         },
-        {
-         "code": "DISRUPT",
-         "source": "sanction",
-         "how_to_appeal": "appeal",
-         "ends_at": "2026-10-22T11:35:40.365339Z",
-         "detail": "",
-         "params": {},
-         "sanction_id": 1
-        }
-       ]
-      },
-      "video": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 6",
-         "params": {
-          "tier": 6
-         },
-         "sanction_id": null
+        "/device/contacts": [],
+        "/device/commissary": {
+          "allowed": true,
+          "reasons": [],
+          "balance_cents": 0,
+          "weekly_limit_cents": 4000,
+          "spent_this_week_cents": 0,
+          "items": [
+            {
+              "code": "SOAP",
+              "name": {
+                "en": "Bar soap",
+                "es": "Jab\u00f3n en barra"
+              },
+              "price_cents": 125,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "TOOTHPASTE",
+              "name": {
+                "en": "Toothpaste",
+                "es": "Pasta dental"
+              },
+              "price_cents": 210,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "PAD",
+              "name": {
+                "en": "Writing pad",
+                "es": "Bloc de notas"
+              },
+              "price_cents": 175,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "STAMPS",
+              "name": {
+                "en": "Postage stamps (book)",
+                "es": "Sellos postales (libreta)"
+              },
+              "price_cents": 800,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "SNACK",
+              "name": {
+                "en": "Snack pack",
+                "es": "Paquete de bocadillos"
+              },
+              "price_cents": 350,
+              "category": "food",
+              "min_tier": 2,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "COFFEE",
+              "name": {
+                "en": "Instant coffee",
+                "es": "Caf\u00e9 instant\u00e1neo"
+              },
+              "price_cents": 450,
+              "category": "food",
+              "min_tier": 3,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "HEADPHONES",
+              "name": {
+                "en": "Headphones",
+                "es": "Aud\u00edfonos"
+              },
+              "price_cents": 1200,
+              "category": "electronics",
+              "min_tier": 4,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            }
+          ]
         },
-        {
-         "code": "DISRUPT",
-         "source": "sanction",
-         "how_to_appeal": "appeal",
-         "ends_at": "2026-10-22T11:35:40.365339Z",
-         "detail": "",
-         "params": {},
-         "sanction_id": 1
+        "/device/courses": [
+          {
+            "code": "MONEY101",
+            "level": "basic",
+            "title": {
+              "en": "Everyday Money Basics",
+              "es": "Fundamentos del dinero diario"
+            },
+            "lessons": 3,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "code": "WORKMATH",
+            "level": "advanced",
+            "title": {
+              "en": "Workplace Math",
+              "es": "Matem\u00e1ticas para el trabajo"
+            },
+            "lessons": 1,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": true,
+            "reasons": []
+          }
+        ],
+        "/device/courses/MONEY101": {
+          "code": "MONEY101",
+          "level": "basic",
+          "title": {
+            "en": "Everyday Money Basics",
+            "es": "Fundamentos del dinero diario"
+          },
+          "lessons": [
+            {
+              "id": "budget",
+              "title": {
+                "en": "Making a simple budget",
+                "es": "C\u00f3mo hacer un presupuesto sencillo"
+              },
+              "body": {
+                "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
+                "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
+              }
+            },
+            {
+              "id": "saving",
+              "title": {
+                "en": "Saving a little each week",
+                "es": "Ahorrar un poco cada semana"
+              },
+              "body": {
+                "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
+                "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
+              }
+            },
+            {
+              "id": "debt",
+              "title": {
+                "en": "Understanding debt and interest",
+                "es": "Entender la deuda y los intereses"
+              },
+              "body": {
+                "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
+                "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
+              }
+            }
+          ],
+          "quiz": [
+            {
+              "id": "q1",
+              "prompt": {
+                "en": "What should you write down first in a budget?",
+                "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
+              },
+              "choices": [
+                {
+                  "en": "Your income",
+                  "es": "Sus ingresos"
+                },
+                {
+                  "en": "Your wants",
+                  "es": "Sus gustos"
+                },
+                {
+                  "en": "Your debts only",
+                  "es": "Solo sus deudas"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": {
+                "en": "If spending is higher than income, what should you change first?",
+                "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
+              },
+              "choices": [
+                {
+                  "en": "Needs such as food",
+                  "es": "Necesidades como la comida"
+                },
+                {
+                  "en": "Wants",
+                  "es": "Los gustos"
+                },
+                {
+                  "en": "Nothing",
+                  "es": "Nada"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": {
+                "en": "Why keep savings in a separate place?",
+                "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
+              },
+              "choices": [
+                {
+                  "en": "So they are not spent by accident",
+                  "es": "Para no gastarlos por accidente"
+                },
+                {
+                  "en": "So they earn more interest on debt",
+                  "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
+                },
+                {
+                  "en": "It makes no difference",
+                  "es": "No hay diferencia"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": {
+                "en": "What is interest?",
+                "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
+              },
+              "choices": [
+                {
+                  "en": "A gift from the bank",
+                  "es": "Un regalo del banco"
+                },
+                {
+                  "en": "The cost of borrowing money",
+                  "es": "El costo de pedir dinero prestado"
+                },
+                {
+                  "en": "A kind of savings account",
+                  "es": "Un tipo de cuenta de ahorros"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": {
+                "en": "Paying more than the minimum on a loan usually...?",
+                "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
+              },
+              "choices": [
+                {
+                  "en": "Reduces the total you pay",
+                  "es": "Reduce el total que paga"
+                },
+                {
+                  "en": "Increases the interest rate",
+                  "es": "Aumenta la tasa de inter\u00e9s"
+                },
+                {
+                  "en": "Cancels the loan",
+                  "es": "Cancela el pr\u00e9stamo"
+                }
+              ]
+            }
+          ],
+          "lessons_done": [],
+          "completed": false
+        },
+        "/device/jobs": {
+          "pay_split": {
+            "facility_pct": 30,
+            "resident_pct": 60,
+            "deductions_pct": 10
+          },
+          "jobs": [
+            {
+              "id": 1,
+              "code": "TRANSCRIBE",
+              "title": "Transcribe public-domain books",
+              "task_type": "transcription_public_domain",
+              "description": "Type up public-domain book pages. No personal data is involved.",
+              "enrolled": false
+            },
+            {
+              "id": 2,
+              "code": "CAPTION",
+              "title": "Caption educational videos",
+              "task_type": "captioning",
+              "description": "Write captions for course videos.",
+              "enrolled": false
+            }
+          ]
+        },
+        "/device/rec": {
+          "day": "2026-10-21",
+          "baseline_minutes": 60,
+          "slots": [
+            {
+              "slot": "09:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "13:30",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "18:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "10:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "15:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            }
+          ]
+        },
+        "/device/reading": [
+          {
+            "id": "tortoise-hare",
+            "title": "The Tortoise and the Hare (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "lion-mouse",
+            "title": "The Lion and the Mouse (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "preamble",
+            "title": "Preamble to the Constitution of the United States",
+            "author": "United States, 1787 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          },
+          {
+            "id": "gettysburg",
+            "title": "The Gettysburg Address (opening)",
+            "author": "Abraham Lincoln, 1863 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          }
+        ],
+        "/device/reading/tortoise-hare": {
+          "id": "tortoise-hare",
+          "title": "The Tortoise and the Hare (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+        },
+        "/device/reading/lion-mouse": {
+          "id": "lion-mouse",
+          "title": "The Lion and the Mouse (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+        },
+        "/device/reading/preamble": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
+        },
+        "/device/reading/gettysburg": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
         }
-       ]
       }
-     },
-     "allowances": [
-      {
-       "feature": "commissary",
-       "period": "week",
-       "unit": "dollars",
-       "limit": 40,
-       "used": 0.0
-      }
-     ],
-     "locks": [
-      {
-       "key": "sanction:1:",
-       "code": "DISRUPT",
-       "source": "sanction",
-       "features": [
-        "calls",
-        "texting",
-        "video"
-       ],
-       "ends_at": "2026-10-22T11:35:40.365339Z",
-       "detail": "",
-       "params": {},
-       "how_to_appeal": "appeal",
-       "sanction_id": 1,
-       "appeal_open": false
-      }
-     ],
-     "generated_at": "2026-10-21T12:36:31.817579Z",
-     "valid_until": "2026-10-21T13:36:31.817579Z",
-     "simulation": false,
-     "ui": {
-      "inactivity_return_home_seconds": 90
-     }
     },
-    "/device/contacts": [],
-    "/device/commissary": {
-     "allowed": true,
-     "reasons": [],
-     "balance_cents": 0,
-     "weekly_limit_cents": 4000,
-     "spent_this_week_cents": 0,
-     "items": [
-      {
-       "code": "SOAP",
-       "name": {
-        "en": "Bar soap",
-        "es": "Jab\u00f3n en barra"
-       },
-       "price_cents": 125,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
+    "gina": {
+      "label": "loop",
+      "before": {
+        "/device/view": {
+          "resident_code": "E2E-GINA",
+          "settings": {
+            "language": "en",
+            "text_size": "normal",
+            "reading_level": "standard",
+            "captions": false
+          },
+          "tier": {
+            "earned": 1,
+            "ceiling": 10,
+            "effective": 1,
+            "points": 60,
+            "next_tier": 2,
+            "points_to_next": 40,
+            "capped_by_ceiling": false
+          },
+          "features": {
+            "advanced_education": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 3",
+                  "params": {
+                    "tier": 3
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "attorney_calls": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "basic_education": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "calls": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "minutes_per_day": 15
+              },
+              "reasons": []
+            },
+            "chess_engine": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 2",
+                  "params": {
+                    "tier": 2
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "chess_human": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 5",
+                  "params": {
+                    "tier": 5
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "commissary": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "dollars_per_week": 20
+              },
+              "reasons": []
+            },
+            "emergency_contact": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "grievances_appeals": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "legal_materials": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "medical_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "mental_health_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "out_of_cell_minimum": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {
+                "minutes_per_day": 60
+              },
+              "reasons": []
+            },
+            "outdoor_rec": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 9",
+                  "params": {
+                    "tier": 9
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_expanded": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_general": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "religious_texts": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "request_staff": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "texting": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "video": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 6",
+                  "params": {
+                    "tier": 6
+                  },
+                  "sanction_id": null
+                }
+              ]
+            }
+          },
+          "allowances": [
+            {
+              "feature": "calls",
+              "period": "day",
+              "unit": "minutes",
+              "limit": 15,
+              "used": 0.0
+            },
+            {
+              "feature": "commissary",
+              "period": "week",
+              "unit": "dollars",
+              "limit": 20,
+              "used": 0.0
+            }
+          ],
+          "locks": [],
+          "generated_at": "2026-10-21T12:36:32.033656Z",
+          "valid_until": "2026-10-21T13:36:32.033656Z",
+          "simulation": false,
+          "ui": {
+            "inactivity_return_home_seconds": 90
+          }
+        },
+        "/device/contacts": [
+          {
+            "id": 1,
+            "name": "Synthetic family gina",
+            "type": "family",
+            "available": true
+          },
+          {
+            "id": 2,
+            "name": "Synthetic attorney gina",
+            "type": "attorney",
+            "available": true
+          }
+        ],
+        "/device/commissary": {
+          "allowed": true,
+          "reasons": [],
+          "balance_cents": 0,
+          "weekly_limit_cents": 2000,
+          "spent_this_week_cents": 0,
+          "items": [
+            {
+              "code": "SOAP",
+              "name": {
+                "en": "Bar soap",
+                "es": "Jab\u00f3n en barra"
+              },
+              "price_cents": 125,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "TOOTHPASTE",
+              "name": {
+                "en": "Toothpaste",
+                "es": "Pasta dental"
+              },
+              "price_cents": 210,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "PAD",
+              "name": {
+                "en": "Writing pad",
+                "es": "Bloc de notas"
+              },
+              "price_cents": 175,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "STAMPS",
+              "name": {
+                "en": "Postage stamps (book)",
+                "es": "Sellos postales (libreta)"
+              },
+              "price_cents": 800,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "SNACK",
+              "name": {
+                "en": "Snack pack",
+                "es": "Paquete de bocadillos"
+              },
+              "price_cents": 350,
+              "category": "food",
+              "min_tier": 2,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            },
+            {
+              "code": "COFFEE",
+              "name": {
+                "en": "Instant coffee",
+                "es": "Caf\u00e9 instant\u00e1neo"
+              },
+              "price_cents": 450,
+              "category": "food",
+              "min_tier": 3,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            },
+            {
+              "code": "HEADPHONES",
+              "name": {
+                "en": "Headphones",
+                "es": "Aud\u00edfonos"
+              },
+              "price_cents": 1200,
+              "category": "electronics",
+              "min_tier": 4,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            }
+          ]
+        },
+        "/device/courses": [
+          {
+            "code": "MONEY101",
+            "level": "basic",
+            "title": {
+              "en": "Everyday Money Basics",
+              "es": "Fundamentos del dinero diario"
+            },
+            "lessons": 3,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "code": "WORKMATH",
+            "level": "advanced",
+            "title": {
+              "en": "Workplace Math",
+              "es": "Matem\u00e1ticas para el trabajo"
+            },
+            "lessons": 1,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 3
+                },
+                "ends_at": null,
+                "source": "tier"
+              }
+            ]
+          }
+        ],
+        "/device/courses/MONEY101": {
+          "code": "MONEY101",
+          "level": "basic",
+          "title": {
+            "en": "Everyday Money Basics",
+            "es": "Fundamentos del dinero diario"
+          },
+          "lessons": [
+            {
+              "id": "budget",
+              "title": {
+                "en": "Making a simple budget",
+                "es": "C\u00f3mo hacer un presupuesto sencillo"
+              },
+              "body": {
+                "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
+                "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
+              }
+            },
+            {
+              "id": "saving",
+              "title": {
+                "en": "Saving a little each week",
+                "es": "Ahorrar un poco cada semana"
+              },
+              "body": {
+                "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
+                "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
+              }
+            },
+            {
+              "id": "debt",
+              "title": {
+                "en": "Understanding debt and interest",
+                "es": "Entender la deuda y los intereses"
+              },
+              "body": {
+                "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
+                "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
+              }
+            }
+          ],
+          "quiz": [
+            {
+              "id": "q1",
+              "prompt": {
+                "en": "What should you write down first in a budget?",
+                "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
+              },
+              "choices": [
+                {
+                  "en": "Your income",
+                  "es": "Sus ingresos"
+                },
+                {
+                  "en": "Your wants",
+                  "es": "Sus gustos"
+                },
+                {
+                  "en": "Your debts only",
+                  "es": "Solo sus deudas"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": {
+                "en": "If spending is higher than income, what should you change first?",
+                "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
+              },
+              "choices": [
+                {
+                  "en": "Needs such as food",
+                  "es": "Necesidades como la comida"
+                },
+                {
+                  "en": "Wants",
+                  "es": "Los gustos"
+                },
+                {
+                  "en": "Nothing",
+                  "es": "Nada"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": {
+                "en": "Why keep savings in a separate place?",
+                "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
+              },
+              "choices": [
+                {
+                  "en": "So they are not spent by accident",
+                  "es": "Para no gastarlos por accidente"
+                },
+                {
+                  "en": "So they earn more interest on debt",
+                  "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
+                },
+                {
+                  "en": "It makes no difference",
+                  "es": "No hay diferencia"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": {
+                "en": "What is interest?",
+                "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
+              },
+              "choices": [
+                {
+                  "en": "A gift from the bank",
+                  "es": "Un regalo del banco"
+                },
+                {
+                  "en": "The cost of borrowing money",
+                  "es": "El costo de pedir dinero prestado"
+                },
+                {
+                  "en": "A kind of savings account",
+                  "es": "Un tipo de cuenta de ahorros"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": {
+                "en": "Paying more than the minimum on a loan usually...?",
+                "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
+              },
+              "choices": [
+                {
+                  "en": "Reduces the total you pay",
+                  "es": "Reduce el total que paga"
+                },
+                {
+                  "en": "Increases the interest rate",
+                  "es": "Aumenta la tasa de inter\u00e9s"
+                },
+                {
+                  "en": "Cancels the loan",
+                  "es": "Cancela el pr\u00e9stamo"
+                }
+              ]
+            }
+          ],
+          "lessons_done": [],
+          "completed": false
+        },
+        "/device/jobs": {
+          "pay_split": {
+            "facility_pct": 30,
+            "resident_pct": 60,
+            "deductions_pct": 10
+          },
+          "jobs": [
+            {
+              "id": 1,
+              "code": "TRANSCRIBE",
+              "title": "Transcribe public-domain books",
+              "task_type": "transcription_public_domain",
+              "description": "Type up public-domain book pages. No personal data is involved.",
+              "enrolled": false
+            },
+            {
+              "id": 2,
+              "code": "CAPTION",
+              "title": "Caption educational videos",
+              "task_type": "captioning",
+              "description": "Write captions for course videos.",
+              "enrolled": false
+            }
+          ]
+        },
+        "/device/rec": {
+          "day": "2026-10-21",
+          "baseline_minutes": 60,
+          "slots": [
+            {
+              "slot": "09:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "13:30",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "18:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "10:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "15:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            }
+          ]
+        },
+        "/device/reading": [
+          {
+            "id": "tortoise-hare",
+            "title": "The Tortoise and the Hare (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "lion-mouse",
+            "title": "The Lion and the Mouse (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "preamble",
+            "title": "Preamble to the Constitution of the United States",
+            "author": "United States, 1787 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          },
+          {
+            "id": "gettysburg",
+            "title": "The Gettysburg Address (opening)",
+            "author": "Abraham Lincoln, 1863 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          }
+        ],
+        "/device/reading/tortoise-hare": {
+          "id": "tortoise-hare",
+          "title": "The Tortoise and the Hare (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+        },
+        "/device/reading/lion-mouse": {
+          "id": "lion-mouse",
+          "title": "The Lion and the Mouse (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+        },
+        "/device/reading/preamble": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
+        },
+        "/device/reading/gettysburg": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
+        },
+        "/device/messages?contact_id=1": [],
+        "/device/messages?contact_id=2": []
       },
-      {
-       "code": "TOOTHPASTE",
-       "name": {
-        "en": "Toothpaste",
-        "es": "Pasta dental"
-       },
-       "price_cents": 210,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "PAD",
-       "name": {
-        "en": "Writing pad",
-        "es": "Bloc de notas"
-       },
-       "price_cents": 175,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "STAMPS",
-       "name": {
-        "en": "Postage stamps (book)",
-        "es": "Sellos postales (libreta)"
-       },
-       "price_cents": 800,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "SNACK",
-       "name": {
-        "en": "Snack pack",
-        "es": "Paquete de bocadillos"
-       },
-       "price_cents": 350,
-       "category": "food",
-       "min_tier": 2,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "COFFEE",
-       "name": {
-        "en": "Instant coffee",
-        "es": "Caf\u00e9 instant\u00e1neo"
-       },
-       "price_cents": 450,
-       "category": "food",
-       "min_tier": 3,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "HEADPHONES",
-       "name": {
-        "en": "Headphones",
-        "es": "Aud\u00edfonos"
-       },
-       "price_cents": 1200,
-       "category": "electronics",
-       "min_tier": 4,
-       "available": false,
-       "block_reason": "ITEM_TIER"
+      "after": {
+        "/device/view": {
+          "resident_code": "E2E-GINA",
+          "settings": {
+            "language": "en",
+            "text_size": "normal",
+            "reading_level": "standard",
+            "captions": false
+          },
+          "tier": {
+            "earned": 2,
+            "ceiling": 10,
+            "effective": 2,
+            "points": 110,
+            "next_tier": 3,
+            "points_to_next": 140,
+            "capped_by_ceiling": false
+          },
+          "features": {
+            "advanced_education": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 3",
+                  "params": {
+                    "tier": 3
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "attorney_calls": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "basic_education": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "calls": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "minutes_per_day": 20
+              },
+              "reasons": []
+            },
+            "chess_engine": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "chess_human": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 5",
+                  "params": {
+                    "tier": 5
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "commissary": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "dollars_per_week": 30
+              },
+              "reasons": []
+            },
+            "emergency_contact": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "grievances_appeals": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "legal_materials": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "medical_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "mental_health_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "out_of_cell_minimum": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {
+                "minutes_per_day": 60
+              },
+              "reasons": []
+            },
+            "outdoor_rec": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 9",
+                  "params": {
+                    "tier": 9
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_expanded": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_general": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "religious_texts": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "request_staff": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "texting": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 4",
+                  "params": {
+                    "tier": 4
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "video": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 6",
+                  "params": {
+                    "tier": 6
+                  },
+                  "sanction_id": null
+                }
+              ]
+            }
+          },
+          "allowances": [
+            {
+              "feature": "calls",
+              "period": "day",
+              "unit": "minutes",
+              "limit": 20,
+              "used": 0.0
+            },
+            {
+              "feature": "commissary",
+              "period": "week",
+              "unit": "dollars",
+              "limit": 30,
+              "used": 0.0
+            }
+          ],
+          "locks": [],
+          "generated_at": "2026-10-21T12:36:32.565052Z",
+          "valid_until": "2026-10-21T13:36:32.565052Z",
+          "simulation": false,
+          "ui": {
+            "inactivity_return_home_seconds": 90
+          }
+        },
+        "/device/contacts": [
+          {
+            "id": 1,
+            "name": "Synthetic family gina",
+            "type": "family",
+            "available": true
+          },
+          {
+            "id": 2,
+            "name": "Synthetic attorney gina",
+            "type": "attorney",
+            "available": true
+          }
+        ],
+        "/device/commissary": {
+          "allowed": true,
+          "reasons": [],
+          "balance_cents": 0,
+          "weekly_limit_cents": 3000,
+          "spent_this_week_cents": 0,
+          "items": [
+            {
+              "code": "SOAP",
+              "name": {
+                "en": "Bar soap",
+                "es": "Jab\u00f3n en barra"
+              },
+              "price_cents": 125,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "TOOTHPASTE",
+              "name": {
+                "en": "Toothpaste",
+                "es": "Pasta dental"
+              },
+              "price_cents": 210,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "PAD",
+              "name": {
+                "en": "Writing pad",
+                "es": "Bloc de notas"
+              },
+              "price_cents": 175,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "STAMPS",
+              "name": {
+                "en": "Postage stamps (book)",
+                "es": "Sellos postales (libreta)"
+              },
+              "price_cents": 800,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "SNACK",
+              "name": {
+                "en": "Snack pack",
+                "es": "Paquete de bocadillos"
+              },
+              "price_cents": 350,
+              "category": "food",
+              "min_tier": 2,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "COFFEE",
+              "name": {
+                "en": "Instant coffee",
+                "es": "Caf\u00e9 instant\u00e1neo"
+              },
+              "price_cents": 450,
+              "category": "food",
+              "min_tier": 3,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            },
+            {
+              "code": "HEADPHONES",
+              "name": {
+                "en": "Headphones",
+                "es": "Aud\u00edfonos"
+              },
+              "price_cents": 1200,
+              "category": "electronics",
+              "min_tier": 4,
+              "available": false,
+              "block_reason": "ITEM_TIER"
+            }
+          ]
+        },
+        "/device/courses": [
+          {
+            "code": "MONEY101",
+            "level": "basic",
+            "title": {
+              "en": "Everyday Money Basics",
+              "es": "Fundamentos del dinero diario"
+            },
+            "lessons": 3,
+            "lessons_done": 3,
+            "completed": true,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "code": "WORKMATH",
+            "level": "advanced",
+            "title": {
+              "en": "Workplace Math",
+              "es": "Matem\u00e1ticas para el trabajo"
+            },
+            "lessons": 1,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 3
+                },
+                "ends_at": null,
+                "source": "tier"
+              }
+            ]
+          }
+        ],
+        "/device/courses/MONEY101": {
+          "code": "MONEY101",
+          "level": "basic",
+          "title": {
+            "en": "Everyday Money Basics",
+            "es": "Fundamentos del dinero diario"
+          },
+          "lessons": [
+            {
+              "id": "budget",
+              "title": {
+                "en": "Making a simple budget",
+                "es": "C\u00f3mo hacer un presupuesto sencillo"
+              },
+              "body": {
+                "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
+                "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
+              }
+            },
+            {
+              "id": "saving",
+              "title": {
+                "en": "Saving a little each week",
+                "es": "Ahorrar un poco cada semana"
+              },
+              "body": {
+                "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
+                "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
+              }
+            },
+            {
+              "id": "debt",
+              "title": {
+                "en": "Understanding debt and interest",
+                "es": "Entender la deuda y los intereses"
+              },
+              "body": {
+                "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
+                "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
+              }
+            }
+          ],
+          "quiz": [
+            {
+              "id": "q1",
+              "prompt": {
+                "en": "What should you write down first in a budget?",
+                "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
+              },
+              "choices": [
+                {
+                  "en": "Your income",
+                  "es": "Sus ingresos"
+                },
+                {
+                  "en": "Your wants",
+                  "es": "Sus gustos"
+                },
+                {
+                  "en": "Your debts only",
+                  "es": "Solo sus deudas"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": {
+                "en": "If spending is higher than income, what should you change first?",
+                "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
+              },
+              "choices": [
+                {
+                  "en": "Needs such as food",
+                  "es": "Necesidades como la comida"
+                },
+                {
+                  "en": "Wants",
+                  "es": "Los gustos"
+                },
+                {
+                  "en": "Nothing",
+                  "es": "Nada"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": {
+                "en": "Why keep savings in a separate place?",
+                "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
+              },
+              "choices": [
+                {
+                  "en": "So they are not spent by accident",
+                  "es": "Para no gastarlos por accidente"
+                },
+                {
+                  "en": "So they earn more interest on debt",
+                  "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
+                },
+                {
+                  "en": "It makes no difference",
+                  "es": "No hay diferencia"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": {
+                "en": "What is interest?",
+                "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
+              },
+              "choices": [
+                {
+                  "en": "A gift from the bank",
+                  "es": "Un regalo del banco"
+                },
+                {
+                  "en": "The cost of borrowing money",
+                  "es": "El costo de pedir dinero prestado"
+                },
+                {
+                  "en": "A kind of savings account",
+                  "es": "Un tipo de cuenta de ahorros"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": {
+                "en": "Paying more than the minimum on a loan usually...?",
+                "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
+              },
+              "choices": [
+                {
+                  "en": "Reduces the total you pay",
+                  "es": "Reduce el total que paga"
+                },
+                {
+                  "en": "Increases the interest rate",
+                  "es": "Aumenta la tasa de inter\u00e9s"
+                },
+                {
+                  "en": "Cancels the loan",
+                  "es": "Cancela el pr\u00e9stamo"
+                }
+              ]
+            }
+          ],
+          "lessons_done": ["budget", "saving", "debt"],
+          "completed": true
+        },
+        "/device/jobs": {
+          "pay_split": {
+            "facility_pct": 30,
+            "resident_pct": 60,
+            "deductions_pct": 10
+          },
+          "jobs": [
+            {
+              "id": 1,
+              "code": "TRANSCRIBE",
+              "title": "Transcribe public-domain books",
+              "task_type": "transcription_public_domain",
+              "description": "Type up public-domain book pages. No personal data is involved.",
+              "enrolled": false
+            },
+            {
+              "id": 2,
+              "code": "CAPTION",
+              "title": "Caption educational videos",
+              "task_type": "captioning",
+              "description": "Write captions for course videos.",
+              "enrolled": false
+            }
+          ]
+        },
+        "/device/rec": {
+          "day": "2026-10-21",
+          "baseline_minutes": 60,
+          "slots": [
+            {
+              "slot": "09:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "13:30",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "18:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "10:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "15:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            }
+          ]
+        },
+        "/device/reading": [
+          {
+            "id": "tortoise-hare",
+            "title": "The Tortoise and the Hare (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "lion-mouse",
+            "title": "The Lion and the Mouse (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "preamble",
+            "title": "Preamble to the Constitution of the United States",
+            "author": "United States, 1787 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          },
+          {
+            "id": "gettysburg",
+            "title": "The Gettysburg Address (opening)",
+            "author": "Abraham Lincoln, 1863 (public domain)",
+            "catalog": "expanded",
+            "allowed": false,
+            "reasons": [
+              {
+                "code": "TIER_LOCKED",
+                "params": {
+                  "tier": 4
+                }
+              }
+            ]
+          }
+        ],
+        "/device/reading/tortoise-hare": {
+          "id": "tortoise-hare",
+          "title": "The Tortoise and the Hare (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+        },
+        "/device/reading/lion-mouse": {
+          "id": "lion-mouse",
+          "title": "The Lion and the Mouse (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+        },
+        "/device/reading/preamble": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
+        },
+        "/device/reading/gettysburg": {
+          "__error": 409,
+          "body": {
+            "detail": {
+              "code": "FEATURE_LOCKED",
+              "message": "this text is locked"
+            }
+          }
+        },
+        "/device/messages?contact_id=1": [],
+        "/device/messages?contact_id=2": []
       }
-     ]
     },
-    "/device/courses": [
-     {
-      "code": "MONEY101",
-      "level": "basic",
-      "title": {
-       "en": "Everyday Money Basics",
-       "es": "Fundamentos del dinero diario"
-      },
-      "lessons": 3,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "code": "WORKMATH",
-      "level": "advanced",
-      "title": {
-       "en": "Workplace Math",
-       "es": "Matem\u00e1ticas para el trabajo"
-      },
-      "lessons": 1,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": true,
-      "reasons": []
-     }
-    ],
-    "/device/courses/MONEY101": {
-     "code": "MONEY101",
-     "level": "basic",
-     "title": {
-      "en": "Everyday Money Basics",
-      "es": "Fundamentos del dinero diario"
-     },
-     "lessons": [
-      {
-       "id": "budget",
-       "title": {
-        "en": "Making a simple budget",
-        "es": "C\u00f3mo hacer un presupuesto sencillo"
-       },
-       "body": {
-        "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
-        "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
-       }
-      },
-      {
-       "id": "saving",
-       "title": {
-        "en": "Saving a little each week",
-        "es": "Ahorrar un poco cada semana"
-       },
-       "body": {
-        "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
-        "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
-       }
-      },
-      {
-       "id": "debt",
-       "title": {
-        "en": "Understanding debt and interest",
-        "es": "Entender la deuda y los intereses"
-       },
-       "body": {
-        "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
-        "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
-       }
+    "tess": {
+      "label": "tier4",
+      "before": {
+        "/device/view": {
+          "resident_code": "E2E-TESS",
+          "settings": {
+            "language": "en",
+            "text_size": "normal",
+            "reading_level": "standard",
+            "captions": false
+          },
+          "tier": {
+            "earned": 4,
+            "ceiling": 10,
+            "effective": 4,
+            "points": 450,
+            "next_tier": 5,
+            "points_to_next": 250,
+            "capped_by_ceiling": false
+          },
+          "features": {
+            "advanced_education": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "attorney_calls": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "basic_education": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "calls": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "minutes_per_day": 30
+              },
+              "reasons": []
+            },
+            "chess_engine": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "chess_human": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 5",
+                  "params": {
+                    "tier": 5
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "commissary": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "dollars_per_week": 50
+              },
+              "reasons": []
+            },
+            "emergency_contact": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "grievances_appeals": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "legal_materials": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "medical_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "mental_health_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "out_of_cell_minimum": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {
+                "minutes_per_day": 60
+              },
+              "reasons": []
+            },
+            "outdoor_rec": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 9",
+                  "params": {
+                    "tier": 9
+                  },
+                  "sanction_id": null
+                }
+              ]
+            },
+            "reading_expanded": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "reading_general": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {},
+              "reasons": []
+            },
+            "religious_texts": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "request_staff": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
+            "texting": {
+              "allowed": true,
+              "baseline": false,
+              "limits": {
+                "messages_per_day": 10
+              },
+              "reasons": []
+            },
+            "video": {
+              "allowed": false,
+              "baseline": false,
+              "limits": {},
+              "reasons": [
+                {
+                  "code": "TIER_LOCKED",
+                  "source": "tier",
+                  "how_to_appeal": "request_staff",
+                  "ends_at": null,
+                  "detail": "Unlocks at tier 6",
+                  "params": {
+                    "tier": 6
+                  },
+                  "sanction_id": null
+                }
+              ]
+            }
+          },
+          "allowances": [
+            {
+              "feature": "calls",
+              "period": "day",
+              "unit": "minutes",
+              "limit": 30,
+              "used": 0.0
+            },
+            {
+              "feature": "texting",
+              "period": "day",
+              "unit": "messages",
+              "limit": 10,
+              "used": 0.0
+            },
+            {
+              "feature": "commissary",
+              "period": "week",
+              "unit": "dollars",
+              "limit": 50,
+              "used": 0.0
+            }
+          ],
+          "locks": [],
+          "generated_at": "2026-10-21T12:36:32.274205Z",
+          "valid_until": "2026-10-21T13:36:32.274205Z",
+          "simulation": false,
+          "ui": {
+            "inactivity_return_home_seconds": 90
+          }
+        },
+        "/device/contacts": [
+          {
+            "id": 6,
+            "name": "Synthetic family tess",
+            "type": "family",
+            "available": true
+          },
+          {
+            "id": 7,
+            "name": "Synthetic attorney tess",
+            "type": "attorney",
+            "available": true
+          }
+        ],
+        "/device/commissary": {
+          "allowed": true,
+          "reasons": [],
+          "balance_cents": 0,
+          "weekly_limit_cents": 5000,
+          "spent_this_week_cents": 0,
+          "items": [
+            {
+              "code": "SOAP",
+              "name": {
+                "en": "Bar soap",
+                "es": "Jab\u00f3n en barra"
+              },
+              "price_cents": 125,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "TOOTHPASTE",
+              "name": {
+                "en": "Toothpaste",
+                "es": "Pasta dental"
+              },
+              "price_cents": 210,
+              "category": "hygiene",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "PAD",
+              "name": {
+                "en": "Writing pad",
+                "es": "Bloc de notas"
+              },
+              "price_cents": 175,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "STAMPS",
+              "name": {
+                "en": "Postage stamps (book)",
+                "es": "Sellos postales (libreta)"
+              },
+              "price_cents": 800,
+              "category": "writing",
+              "min_tier": 1,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "SNACK",
+              "name": {
+                "en": "Snack pack",
+                "es": "Paquete de bocadillos"
+              },
+              "price_cents": 350,
+              "category": "food",
+              "min_tier": 2,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "COFFEE",
+              "name": {
+                "en": "Instant coffee",
+                "es": "Caf\u00e9 instant\u00e1neo"
+              },
+              "price_cents": 450,
+              "category": "food",
+              "min_tier": 3,
+              "available": true,
+              "block_reason": null
+            },
+            {
+              "code": "HEADPHONES",
+              "name": {
+                "en": "Headphones",
+                "es": "Aud\u00edfonos"
+              },
+              "price_cents": 1200,
+              "category": "electronics",
+              "min_tier": 4,
+              "available": true,
+              "block_reason": null
+            }
+          ]
+        },
+        "/device/courses": [
+          {
+            "code": "MONEY101",
+            "level": "basic",
+            "title": {
+              "en": "Everyday Money Basics",
+              "es": "Fundamentos del dinero diario"
+            },
+            "lessons": 3,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "code": "WORKMATH",
+            "level": "advanced",
+            "title": {
+              "en": "Workplace Math",
+              "es": "Matem\u00e1ticas para el trabajo"
+            },
+            "lessons": 1,
+            "lessons_done": 0,
+            "completed": false,
+            "allowed": true,
+            "reasons": []
+          }
+        ],
+        "/device/courses/MONEY101": {
+          "code": "MONEY101",
+          "level": "basic",
+          "title": {
+            "en": "Everyday Money Basics",
+            "es": "Fundamentos del dinero diario"
+          },
+          "lessons": [
+            {
+              "id": "budget",
+              "title": {
+                "en": "Making a simple budget",
+                "es": "C\u00f3mo hacer un presupuesto sencillo"
+              },
+              "body": {
+                "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
+                "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
+              }
+            },
+            {
+              "id": "saving",
+              "title": {
+                "en": "Saving a little each week",
+                "es": "Ahorrar un poco cada semana"
+              },
+              "body": {
+                "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
+                "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
+              }
+            },
+            {
+              "id": "debt",
+              "title": {
+                "en": "Understanding debt and interest",
+                "es": "Entender la deuda y los intereses"
+              },
+              "body": {
+                "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
+                "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
+              }
+            }
+          ],
+          "quiz": [
+            {
+              "id": "q1",
+              "prompt": {
+                "en": "What should you write down first in a budget?",
+                "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
+              },
+              "choices": [
+                {
+                  "en": "Your income",
+                  "es": "Sus ingresos"
+                },
+                {
+                  "en": "Your wants",
+                  "es": "Sus gustos"
+                },
+                {
+                  "en": "Your debts only",
+                  "es": "Solo sus deudas"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": {
+                "en": "If spending is higher than income, what should you change first?",
+                "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
+              },
+              "choices": [
+                {
+                  "en": "Needs such as food",
+                  "es": "Necesidades como la comida"
+                },
+                {
+                  "en": "Wants",
+                  "es": "Los gustos"
+                },
+                {
+                  "en": "Nothing",
+                  "es": "Nada"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": {
+                "en": "Why keep savings in a separate place?",
+                "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
+              },
+              "choices": [
+                {
+                  "en": "So they are not spent by accident",
+                  "es": "Para no gastarlos por accidente"
+                },
+                {
+                  "en": "So they earn more interest on debt",
+                  "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
+                },
+                {
+                  "en": "It makes no difference",
+                  "es": "No hay diferencia"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": {
+                "en": "What is interest?",
+                "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
+              },
+              "choices": [
+                {
+                  "en": "A gift from the bank",
+                  "es": "Un regalo del banco"
+                },
+                {
+                  "en": "The cost of borrowing money",
+                  "es": "El costo de pedir dinero prestado"
+                },
+                {
+                  "en": "A kind of savings account",
+                  "es": "Un tipo de cuenta de ahorros"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": {
+                "en": "Paying more than the minimum on a loan usually...?",
+                "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
+              },
+              "choices": [
+                {
+                  "en": "Reduces the total you pay",
+                  "es": "Reduce el total que paga"
+                },
+                {
+                  "en": "Increases the interest rate",
+                  "es": "Aumenta la tasa de inter\u00e9s"
+                },
+                {
+                  "en": "Cancels the loan",
+                  "es": "Cancela el pr\u00e9stamo"
+                }
+              ]
+            }
+          ],
+          "lessons_done": [],
+          "completed": false
+        },
+        "/device/jobs": {
+          "pay_split": {
+            "facility_pct": 30,
+            "resident_pct": 60,
+            "deductions_pct": 10
+          },
+          "jobs": [
+            {
+              "id": 1,
+              "code": "TRANSCRIBE",
+              "title": "Transcribe public-domain books",
+              "task_type": "transcription_public_domain",
+              "description": "Type up public-domain book pages. No personal data is involved.",
+              "enrolled": false
+            },
+            {
+              "id": 2,
+              "code": "CAPTION",
+              "title": "Caption educational videos",
+              "task_type": "captioning",
+              "description": "Write captions for course videos.",
+              "enrolled": false
+            }
+          ]
+        },
+        "/device/rec": {
+          "day": "2026-10-21",
+          "baseline_minutes": 60,
+          "slots": [
+            {
+              "slot": "09:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "13:30",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "18:00",
+              "kind": "indoor",
+              "allowed": true,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "10:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            },
+            {
+              "slot": "15:00",
+              "kind": "outdoor",
+              "allowed": false,
+              "booked": false,
+              "spaces": 6
+            }
+          ]
+        },
+        "/device/reading": [
+          {
+            "id": "tortoise-hare",
+            "title": "The Tortoise and the Hare (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "lion-mouse",
+            "title": "The Lion and the Mouse (retelling)",
+            "author": "Traditional fable, retold",
+            "catalog": "general",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "preamble",
+            "title": "Preamble to the Constitution of the United States",
+            "author": "United States, 1787 (public domain)",
+            "catalog": "expanded",
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "gettysburg",
+            "title": "The Gettysburg Address (opening)",
+            "author": "Abraham Lincoln, 1863 (public domain)",
+            "catalog": "expanded",
+            "allowed": true,
+            "reasons": []
+          }
+        ],
+        "/device/reading/tortoise-hare": {
+          "id": "tortoise-hare",
+          "title": "The Tortoise and the Hare (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+        },
+        "/device/reading/lion-mouse": {
+          "id": "lion-mouse",
+          "title": "The Lion and the Mouse (retelling)",
+          "author": "Traditional fable, retold",
+          "language": "en",
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+        },
+        "/device/reading/preamble": {
+          "id": "preamble",
+          "title": "Preamble to the Constitution of the United States",
+          "author": "United States, 1787 (public domain)",
+          "language": "en",
+          "text": "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
+        },
+        "/device/reading/gettysburg": {
+          "id": "gettysburg",
+          "title": "The Gettysburg Address (opening)",
+          "author": "Abraham Lincoln, 1863 (public domain)",
+          "language": "en",
+          "text": "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+        },
+        "/device/messages?contact_id=6": [],
+        "/device/messages?contact_id=7": []
       }
-     ],
-     "quiz": [
-      {
-       "id": "q1",
-       "prompt": {
-        "en": "What should you write down first in a budget?",
-        "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
-       },
-       "choices": [
-        {
-         "en": "Your income",
-         "es": "Sus ingresos"
-        },
-        {
-         "en": "Your wants",
-         "es": "Sus gustos"
-        },
-        {
-         "en": "Your debts only",
-         "es": "Solo sus deudas"
-        }
-       ]
-      },
-      {
-       "id": "q2",
-       "prompt": {
-        "en": "If spending is higher than income, what should you change first?",
-        "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
-       },
-       "choices": [
-        {
-         "en": "Needs such as food",
-         "es": "Necesidades como la comida"
-        },
-        {
-         "en": "Wants",
-         "es": "Los gustos"
-        },
-        {
-         "en": "Nothing",
-         "es": "Nada"
-        }
-       ]
-      },
-      {
-       "id": "q3",
-       "prompt": {
-        "en": "Why keep savings in a separate place?",
-        "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
-       },
-       "choices": [
-        {
-         "en": "So they are not spent by accident",
-         "es": "Para no gastarlos por accidente"
-        },
-        {
-         "en": "So they earn more interest on debt",
-         "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
-        },
-        {
-         "en": "It makes no difference",
-         "es": "No hay diferencia"
-        }
-       ]
-      },
-      {
-       "id": "q4",
-       "prompt": {
-        "en": "What is interest?",
-        "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
-       },
-       "choices": [
-        {
-         "en": "A gift from the bank",
-         "es": "Un regalo del banco"
-        },
-        {
-         "en": "The cost of borrowing money",
-         "es": "El costo de pedir dinero prestado"
-        },
-        {
-         "en": "A kind of savings account",
-         "es": "Un tipo de cuenta de ahorros"
-        }
-       ]
-      },
-      {
-       "id": "q5",
-       "prompt": {
-        "en": "Paying more than the minimum on a loan usually...?",
-        "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
-       },
-       "choices": [
-        {
-         "en": "Reduces the total you pay",
-         "es": "Reduce el total que paga"
-        },
-        {
-         "en": "Increases the interest rate",
-         "es": "Aumenta la tasa de inter\u00e9s"
-        },
-        {
-         "en": "Cancels the loan",
-         "es": "Cancela el pr\u00e9stamo"
-        }
-       ]
-      }
-     ],
-     "lessons_done": [],
-     "completed": false
-    },
-    "/device/jobs": {
-     "pay_split": {
-      "facility_pct": 30,
-      "resident_pct": 60,
-      "deductions_pct": 10
-     },
-     "jobs": [
-      {
-       "id": 1,
-       "code": "TRANSCRIBE",
-       "title": "Transcribe public-domain books",
-       "task_type": "transcription_public_domain",
-       "description": "Type up public-domain book pages. No personal data is involved.",
-       "enrolled": false
-      },
-      {
-       "id": 2,
-       "code": "CAPTION",
-       "title": "Caption educational videos",
-       "task_type": "captioning",
-       "description": "Write captions for course videos.",
-       "enrolled": false
-      }
-     ]
-    },
-    "/device/rec": {
-     "day": "2026-10-21",
-     "baseline_minutes": 60,
-     "slots": [
-      {
-       "slot": "09:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "13:30",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "18:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "10:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "15:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      }
-     ]
-    },
-    "/device/reading": [
-     {
-      "id": "tortoise-hare",
-      "title": "The Tortoise and the Hare (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "lion-mouse",
-      "title": "The Lion and the Mouse (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "preamble",
-      "title": "Preamble to the Constitution of the United States",
-      "author": "United States, 1787 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     },
-     {
-      "id": "gettysburg",
-      "title": "The Gettysburg Address (opening)",
-      "author": "Abraham Lincoln, 1863 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     }
-    ],
-    "/device/reading/tortoise-hare": {
-     "id": "tortoise-hare",
-     "title": "The Tortoise and the Hare (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
-    },
-    "/device/reading/lion-mouse": {
-     "id": "lion-mouse",
-     "title": "The Lion and the Mouse (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
-    },
-    "/device/reading/preamble": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
-    },
-    "/device/reading/gettysburg": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
     }
-   }
   },
-  "gina": {
-   "label": "loop",
-   "before": {
-    "/device/view": {
-     "resident_code": "E2E-GINA",
-     "settings": {
-      "language": "en",
-      "text_size": "normal",
-      "reading_level": "standard",
-      "captions": false
-     },
-     "tier": {
-      "earned": 1,
-      "ceiling": 10,
-      "effective": 1,
-      "points": 60,
-      "next_tier": 2,
-      "points_to_next": 40,
-      "capped_by_ceiling": false
-     },
-     "features": {
-      "advanced_education": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 3",
-         "params": {
-          "tier": 3
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "attorney_calls": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "basic_education": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "calls": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "minutes_per_day": 15
-       },
-       "reasons": []
-      },
-      "chess_engine": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 2",
-         "params": {
-          "tier": 2
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "chess_human": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 5",
-         "params": {
-          "tier": 5
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "commissary": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "dollars_per_week": 20
-       },
-       "reasons": []
-      },
-      "emergency_contact": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "grievances_appeals": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "legal_materials": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "medical_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "mental_health_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "out_of_cell_minimum": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {
-        "minutes_per_day": 60
-       },
-       "reasons": []
-      },
-      "outdoor_rec": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 9",
-         "params": {
-          "tier": 9
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_expanded": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_general": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "religious_texts": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "request_staff": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "texting": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "video": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 6",
-         "params": {
-          "tier": 6
-         },
-         "sanction_id": null
-        }
-       ]
-      }
-     },
-     "allowances": [
-      {
-       "feature": "calls",
-       "period": "day",
-       "unit": "minutes",
-       "limit": 15,
-       "used": 0.0
-      },
-      {
-       "feature": "commissary",
-       "period": "week",
-       "unit": "dollars",
-       "limit": 20,
-       "used": 0.0
-      }
-     ],
-     "locks": [],
-     "generated_at": "2026-10-21T12:36:32.033656Z",
-     "valid_until": "2026-10-21T13:36:32.033656Z",
-     "simulation": false,
-     "ui": {
-      "inactivity_return_home_seconds": 90
-     }
+  "lesson_responses": {
+    "budget": {
+      "lessons_done": ["budget"],
+      "total": 3
     },
-    "/device/contacts": [
-     {
-      "id": 1,
-      "name": "Synthetic family gina",
-      "type": "family",
-      "available": true
-     },
-     {
-      "id": 2,
-      "name": "Synthetic attorney gina",
-      "type": "attorney",
-      "available": true
-     }
-    ],
-    "/device/commissary": {
-     "allowed": true,
-     "reasons": [],
-     "balance_cents": 0,
-     "weekly_limit_cents": 2000,
-     "spent_this_week_cents": 0,
-     "items": [
-      {
-       "code": "SOAP",
-       "name": {
-        "en": "Bar soap",
-        "es": "Jab\u00f3n en barra"
-       },
-       "price_cents": 125,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "TOOTHPASTE",
-       "name": {
-        "en": "Toothpaste",
-        "es": "Pasta dental"
-       },
-       "price_cents": 210,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "PAD",
-       "name": {
-        "en": "Writing pad",
-        "es": "Bloc de notas"
-       },
-       "price_cents": 175,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "STAMPS",
-       "name": {
-        "en": "Postage stamps (book)",
-        "es": "Sellos postales (libreta)"
-       },
-       "price_cents": 800,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "SNACK",
-       "name": {
-        "en": "Snack pack",
-        "es": "Paquete de bocadillos"
-       },
-       "price_cents": 350,
-       "category": "food",
-       "min_tier": 2,
-       "available": false,
-       "block_reason": "ITEM_TIER"
-      },
-      {
-       "code": "COFFEE",
-       "name": {
-        "en": "Instant coffee",
-        "es": "Caf\u00e9 instant\u00e1neo"
-       },
-       "price_cents": 450,
-       "category": "food",
-       "min_tier": 3,
-       "available": false,
-       "block_reason": "ITEM_TIER"
-      },
-      {
-       "code": "HEADPHONES",
-       "name": {
-        "en": "Headphones",
-        "es": "Aud\u00edfonos"
-       },
-       "price_cents": 1200,
-       "category": "electronics",
-       "min_tier": 4,
-       "available": false,
-       "block_reason": "ITEM_TIER"
-      }
-     ]
+    "saving": {
+      "lessons_done": ["budget", "saving"],
+      "total": 3
     },
-    "/device/courses": [
-     {
-      "code": "MONEY101",
-      "level": "basic",
-      "title": {
-       "en": "Everyday Money Basics",
-       "es": "Fundamentos del dinero diario"
-      },
-      "lessons": 3,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "code": "WORKMATH",
-      "level": "advanced",
-      "title": {
-       "en": "Workplace Math",
-       "es": "Matem\u00e1ticas para el trabajo"
-      },
-      "lessons": 1,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 3
-        },
-        "ends_at": null,
-        "source": "tier"
-       }
-      ]
-     }
-    ],
-    "/device/courses/MONEY101": {
-     "code": "MONEY101",
-     "level": "basic",
-     "title": {
-      "en": "Everyday Money Basics",
-      "es": "Fundamentos del dinero diario"
-     },
-     "lessons": [
-      {
-       "id": "budget",
-       "title": {
-        "en": "Making a simple budget",
-        "es": "C\u00f3mo hacer un presupuesto sencillo"
-       },
-       "body": {
-        "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
-        "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
-       }
-      },
-      {
-       "id": "saving",
-       "title": {
-        "en": "Saving a little each week",
-        "es": "Ahorrar un poco cada semana"
-       },
-       "body": {
-        "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
-        "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
-       }
-      },
-      {
-       "id": "debt",
-       "title": {
-        "en": "Understanding debt and interest",
-        "es": "Entender la deuda y los intereses"
-       },
-       "body": {
-        "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
-        "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
-       }
-      }
-     ],
-     "quiz": [
-      {
-       "id": "q1",
-       "prompt": {
-        "en": "What should you write down first in a budget?",
-        "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
-       },
-       "choices": [
-        {
-         "en": "Your income",
-         "es": "Sus ingresos"
-        },
-        {
-         "en": "Your wants",
-         "es": "Sus gustos"
-        },
-        {
-         "en": "Your debts only",
-         "es": "Solo sus deudas"
-        }
-       ]
-      },
-      {
-       "id": "q2",
-       "prompt": {
-        "en": "If spending is higher than income, what should you change first?",
-        "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
-       },
-       "choices": [
-        {
-         "en": "Needs such as food",
-         "es": "Necesidades como la comida"
-        },
-        {
-         "en": "Wants",
-         "es": "Los gustos"
-        },
-        {
-         "en": "Nothing",
-         "es": "Nada"
-        }
-       ]
-      },
-      {
-       "id": "q3",
-       "prompt": {
-        "en": "Why keep savings in a separate place?",
-        "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
-       },
-       "choices": [
-        {
-         "en": "So they are not spent by accident",
-         "es": "Para no gastarlos por accidente"
-        },
-        {
-         "en": "So they earn more interest on debt",
-         "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
-        },
-        {
-         "en": "It makes no difference",
-         "es": "No hay diferencia"
-        }
-       ]
-      },
-      {
-       "id": "q4",
-       "prompt": {
-        "en": "What is interest?",
-        "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
-       },
-       "choices": [
-        {
-         "en": "A gift from the bank",
-         "es": "Un regalo del banco"
-        },
-        {
-         "en": "The cost of borrowing money",
-         "es": "El costo de pedir dinero prestado"
-        },
-        {
-         "en": "A kind of savings account",
-         "es": "Un tipo de cuenta de ahorros"
-        }
-       ]
-      },
-      {
-       "id": "q5",
-       "prompt": {
-        "en": "Paying more than the minimum on a loan usually...?",
-        "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
-       },
-       "choices": [
-        {
-         "en": "Reduces the total you pay",
-         "es": "Reduce el total que paga"
-        },
-        {
-         "en": "Increases the interest rate",
-         "es": "Aumenta la tasa de inter\u00e9s"
-        },
-        {
-         "en": "Cancels the loan",
-         "es": "Cancela el pr\u00e9stamo"
-        }
-       ]
-      }
-     ],
-     "lessons_done": [],
-     "completed": false
-    },
-    "/device/jobs": {
-     "pay_split": {
-      "facility_pct": 30,
-      "resident_pct": 60,
-      "deductions_pct": 10
-     },
-     "jobs": [
-      {
-       "id": 1,
-       "code": "TRANSCRIBE",
-       "title": "Transcribe public-domain books",
-       "task_type": "transcription_public_domain",
-       "description": "Type up public-domain book pages. No personal data is involved.",
-       "enrolled": false
-      },
-      {
-       "id": 2,
-       "code": "CAPTION",
-       "title": "Caption educational videos",
-       "task_type": "captioning",
-       "description": "Write captions for course videos.",
-       "enrolled": false
-      }
-     ]
-    },
-    "/device/rec": {
-     "day": "2026-10-21",
-     "baseline_minutes": 60,
-     "slots": [
-      {
-       "slot": "09:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "13:30",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "18:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "10:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "15:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      }
-     ]
-    },
-    "/device/reading": [
-     {
-      "id": "tortoise-hare",
-      "title": "The Tortoise and the Hare (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "lion-mouse",
-      "title": "The Lion and the Mouse (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "preamble",
-      "title": "Preamble to the Constitution of the United States",
-      "author": "United States, 1787 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     },
-     {
-      "id": "gettysburg",
-      "title": "The Gettysburg Address (opening)",
-      "author": "Abraham Lincoln, 1863 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     }
-    ],
-    "/device/reading/tortoise-hare": {
-     "id": "tortoise-hare",
-     "title": "The Tortoise and the Hare (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
-    },
-    "/device/reading/lion-mouse": {
-     "id": "lion-mouse",
-     "title": "The Lion and the Mouse (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
-    },
-    "/device/reading/preamble": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
-    },
-    "/device/reading/gettysburg": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
-    },
-    "/device/messages?contact_id=1": [],
-    "/device/messages?contact_id=2": []
-   },
-   "after": {
-    "/device/view": {
-     "resident_code": "E2E-GINA",
-     "settings": {
-      "language": "en",
-      "text_size": "normal",
-      "reading_level": "standard",
-      "captions": false
-     },
-     "tier": {
-      "earned": 2,
-      "ceiling": 10,
-      "effective": 2,
-      "points": 110,
-      "next_tier": 3,
-      "points_to_next": 140,
-      "capped_by_ceiling": false
-     },
-     "features": {
-      "advanced_education": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 3",
-         "params": {
-          "tier": 3
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "attorney_calls": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "basic_education": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "calls": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "minutes_per_day": 20
-       },
-       "reasons": []
-      },
-      "chess_engine": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "chess_human": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 5",
-         "params": {
-          "tier": 5
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "commissary": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "dollars_per_week": 30
-       },
-       "reasons": []
-      },
-      "emergency_contact": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "grievances_appeals": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "legal_materials": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "medical_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "mental_health_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "out_of_cell_minimum": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {
-        "minutes_per_day": 60
-       },
-       "reasons": []
-      },
-      "outdoor_rec": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 9",
-         "params": {
-          "tier": 9
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_expanded": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_general": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "religious_texts": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "request_staff": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "texting": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 4",
-         "params": {
-          "tier": 4
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "video": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 6",
-         "params": {
-          "tier": 6
-         },
-         "sanction_id": null
-        }
-       ]
-      }
-     },
-     "allowances": [
-      {
-       "feature": "calls",
-       "period": "day",
-       "unit": "minutes",
-       "limit": 20,
-       "used": 0.0
-      },
-      {
-       "feature": "commissary",
-       "period": "week",
-       "unit": "dollars",
-       "limit": 30,
-       "used": 0.0
-      }
-     ],
-     "locks": [],
-     "generated_at": "2026-10-21T12:36:32.565052Z",
-     "valid_until": "2026-10-21T13:36:32.565052Z",
-     "simulation": false,
-     "ui": {
-      "inactivity_return_home_seconds": 90
-     }
-    },
-    "/device/contacts": [
-     {
-      "id": 1,
-      "name": "Synthetic family gina",
-      "type": "family",
-      "available": true
-     },
-     {
-      "id": 2,
-      "name": "Synthetic attorney gina",
-      "type": "attorney",
-      "available": true
-     }
-    ],
-    "/device/commissary": {
-     "allowed": true,
-     "reasons": [],
-     "balance_cents": 0,
-     "weekly_limit_cents": 3000,
-     "spent_this_week_cents": 0,
-     "items": [
-      {
-       "code": "SOAP",
-       "name": {
-        "en": "Bar soap",
-        "es": "Jab\u00f3n en barra"
-       },
-       "price_cents": 125,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "TOOTHPASTE",
-       "name": {
-        "en": "Toothpaste",
-        "es": "Pasta dental"
-       },
-       "price_cents": 210,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "PAD",
-       "name": {
-        "en": "Writing pad",
-        "es": "Bloc de notas"
-       },
-       "price_cents": 175,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "STAMPS",
-       "name": {
-        "en": "Postage stamps (book)",
-        "es": "Sellos postales (libreta)"
-       },
-       "price_cents": 800,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "SNACK",
-       "name": {
-        "en": "Snack pack",
-        "es": "Paquete de bocadillos"
-       },
-       "price_cents": 350,
-       "category": "food",
-       "min_tier": 2,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "COFFEE",
-       "name": {
-        "en": "Instant coffee",
-        "es": "Caf\u00e9 instant\u00e1neo"
-       },
-       "price_cents": 450,
-       "category": "food",
-       "min_tier": 3,
-       "available": false,
-       "block_reason": "ITEM_TIER"
-      },
-      {
-       "code": "HEADPHONES",
-       "name": {
-        "en": "Headphones",
-        "es": "Aud\u00edfonos"
-       },
-       "price_cents": 1200,
-       "category": "electronics",
-       "min_tier": 4,
-       "available": false,
-       "block_reason": "ITEM_TIER"
-      }
-     ]
-    },
-    "/device/courses": [
-     {
-      "code": "MONEY101",
-      "level": "basic",
-      "title": {
-       "en": "Everyday Money Basics",
-       "es": "Fundamentos del dinero diario"
-      },
-      "lessons": 3,
-      "lessons_done": 3,
-      "completed": true,
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "code": "WORKMATH",
-      "level": "advanced",
-      "title": {
-       "en": "Workplace Math",
-       "es": "Matem\u00e1ticas para el trabajo"
-      },
-      "lessons": 1,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 3
-        },
-        "ends_at": null,
-        "source": "tier"
-       }
-      ]
-     }
-    ],
-    "/device/courses/MONEY101": {
-     "code": "MONEY101",
-     "level": "basic",
-     "title": {
-      "en": "Everyday Money Basics",
-      "es": "Fundamentos del dinero diario"
-     },
-     "lessons": [
-      {
-       "id": "budget",
-       "title": {
-        "en": "Making a simple budget",
-        "es": "C\u00f3mo hacer un presupuesto sencillo"
-       },
-       "body": {
-        "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
-        "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
-       }
-      },
-      {
-       "id": "saving",
-       "title": {
-        "en": "Saving a little each week",
-        "es": "Ahorrar un poco cada semana"
-       },
-       "body": {
-        "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
-        "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
-       }
-      },
-      {
-       "id": "debt",
-       "title": {
-        "en": "Understanding debt and interest",
-        "es": "Entender la deuda y los intereses"
-       },
-       "body": {
-        "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
-        "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
-       }
-      }
-     ],
-     "quiz": [
-      {
-       "id": "q1",
-       "prompt": {
-        "en": "What should you write down first in a budget?",
-        "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
-       },
-       "choices": [
-        {
-         "en": "Your income",
-         "es": "Sus ingresos"
-        },
-        {
-         "en": "Your wants",
-         "es": "Sus gustos"
-        },
-        {
-         "en": "Your debts only",
-         "es": "Solo sus deudas"
-        }
-       ]
-      },
-      {
-       "id": "q2",
-       "prompt": {
-        "en": "If spending is higher than income, what should you change first?",
-        "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
-       },
-       "choices": [
-        {
-         "en": "Needs such as food",
-         "es": "Necesidades como la comida"
-        },
-        {
-         "en": "Wants",
-         "es": "Los gustos"
-        },
-        {
-         "en": "Nothing",
-         "es": "Nada"
-        }
-       ]
-      },
-      {
-       "id": "q3",
-       "prompt": {
-        "en": "Why keep savings in a separate place?",
-        "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
-       },
-       "choices": [
-        {
-         "en": "So they are not spent by accident",
-         "es": "Para no gastarlos por accidente"
-        },
-        {
-         "en": "So they earn more interest on debt",
-         "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
-        },
-        {
-         "en": "It makes no difference",
-         "es": "No hay diferencia"
-        }
-       ]
-      },
-      {
-       "id": "q4",
-       "prompt": {
-        "en": "What is interest?",
-        "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
-       },
-       "choices": [
-        {
-         "en": "A gift from the bank",
-         "es": "Un regalo del banco"
-        },
-        {
-         "en": "The cost of borrowing money",
-         "es": "El costo de pedir dinero prestado"
-        },
-        {
-         "en": "A kind of savings account",
-         "es": "Un tipo de cuenta de ahorros"
-        }
-       ]
-      },
-      {
-       "id": "q5",
-       "prompt": {
-        "en": "Paying more than the minimum on a loan usually...?",
-        "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
-       },
-       "choices": [
-        {
-         "en": "Reduces the total you pay",
-         "es": "Reduce el total que paga"
-        },
-        {
-         "en": "Increases the interest rate",
-         "es": "Aumenta la tasa de inter\u00e9s"
-        },
-        {
-         "en": "Cancels the loan",
-         "es": "Cancela el pr\u00e9stamo"
-        }
-       ]
-      }
-     ],
-     "lessons_done": [
-      "budget",
-      "saving",
-      "debt"
-     ],
-     "completed": true
-    },
-    "/device/jobs": {
-     "pay_split": {
-      "facility_pct": 30,
-      "resident_pct": 60,
-      "deductions_pct": 10
-     },
-     "jobs": [
-      {
-       "id": 1,
-       "code": "TRANSCRIBE",
-       "title": "Transcribe public-domain books",
-       "task_type": "transcription_public_domain",
-       "description": "Type up public-domain book pages. No personal data is involved.",
-       "enrolled": false
-      },
-      {
-       "id": 2,
-       "code": "CAPTION",
-       "title": "Caption educational videos",
-       "task_type": "captioning",
-       "description": "Write captions for course videos.",
-       "enrolled": false
-      }
-     ]
-    },
-    "/device/rec": {
-     "day": "2026-10-21",
-     "baseline_minutes": 60,
-     "slots": [
-      {
-       "slot": "09:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "13:30",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "18:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "10:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "15:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      }
-     ]
-    },
-    "/device/reading": [
-     {
-      "id": "tortoise-hare",
-      "title": "The Tortoise and the Hare (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "lion-mouse",
-      "title": "The Lion and the Mouse (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "preamble",
-      "title": "Preamble to the Constitution of the United States",
-      "author": "United States, 1787 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     },
-     {
-      "id": "gettysburg",
-      "title": "The Gettysburg Address (opening)",
-      "author": "Abraham Lincoln, 1863 (public domain)",
-      "catalog": "expanded",
-      "allowed": false,
-      "reasons": [
-       {
-        "code": "TIER_LOCKED",
-        "params": {
-         "tier": 4
-        }
-       }
-      ]
-     }
-    ],
-    "/device/reading/tortoise-hare": {
-     "id": "tortoise-hare",
-     "title": "The Tortoise and the Hare (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
-    },
-    "/device/reading/lion-mouse": {
-     "id": "lion-mouse",
-     "title": "The Lion and the Mouse (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
-    },
-    "/device/reading/preamble": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
-    },
-    "/device/reading/gettysburg": {
-     "__error": 409,
-     "body": {
-      "detail": {
-       "code": "FEATURE_LOCKED",
-       "message": "this text is locked"
-      }
-     }
-    },
-    "/device/messages?contact_id=1": [],
-    "/device/messages?contact_id=2": []
-   }
+    "debt": {
+      "lessons_done": ["budget", "saving", "debt"],
+      "total": 3
+    }
   },
-  "tess": {
-   "label": "tier4",
-   "before": {
-    "/device/view": {
-     "resident_code": "E2E-TESS",
-     "settings": {
-      "language": "en",
-      "text_size": "normal",
-      "reading_level": "standard",
-      "captions": false
-     },
-     "tier": {
-      "earned": 4,
-      "ceiling": 10,
-      "effective": 4,
-      "points": 450,
-      "next_tier": 5,
-      "points_to_next": 250,
-      "capped_by_ceiling": false
-     },
-     "features": {
-      "advanced_education": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "attorney_calls": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "basic_education": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "calls": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "minutes_per_day": 30
-       },
-       "reasons": []
-      },
-      "chess_engine": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "chess_human": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 5",
-         "params": {
-          "tier": 5
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "commissary": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "dollars_per_week": 50
-       },
-       "reasons": []
-      },
-      "emergency_contact": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "grievances_appeals": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "legal_materials": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "medical_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "mental_health_requests": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "out_of_cell_minimum": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {
-        "minutes_per_day": 60
-       },
-       "reasons": []
-      },
-      "outdoor_rec": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 9",
-         "params": {
-          "tier": 9
-         },
-         "sanction_id": null
-        }
-       ]
-      },
-      "reading_expanded": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "reading_general": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {},
-       "reasons": []
-      },
-      "religious_texts": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "request_staff": {
-       "allowed": true,
-       "baseline": true,
-       "limits": {},
-       "reasons": []
-      },
-      "texting": {
-       "allowed": true,
-       "baseline": false,
-       "limits": {
-        "messages_per_day": 10
-       },
-       "reasons": []
-      },
-      "video": {
-       "allowed": false,
-       "baseline": false,
-       "limits": {},
-       "reasons": [
-        {
-         "code": "TIER_LOCKED",
-         "source": "tier",
-         "how_to_appeal": "request_staff",
-         "ends_at": null,
-         "detail": "Unlocks at tier 6",
-         "params": {
-          "tier": 6
-         },
-         "sanction_id": null
-        }
-       ]
-      }
-     },
-     "allowances": [
-      {
-       "feature": "calls",
-       "period": "day",
-       "unit": "minutes",
-       "limit": 30,
-       "used": 0.0
-      },
-      {
-       "feature": "texting",
-       "period": "day",
-       "unit": "messages",
-       "limit": 10,
-       "used": 0.0
-      },
-      {
-       "feature": "commissary",
-       "period": "week",
-       "unit": "dollars",
-       "limit": 50,
-       "used": 0.0
-      }
-     ],
-     "locks": [],
-     "generated_at": "2026-10-21T12:36:32.274205Z",
-     "valid_until": "2026-10-21T13:36:32.274205Z",
-     "simulation": false,
-     "ui": {
-      "inactivity_return_home_seconds": 90
-     }
-    },
-    "/device/contacts": [
-     {
-      "id": 6,
-      "name": "Synthetic family tess",
-      "type": "family",
-      "available": true
-     },
-     {
-      "id": 7,
-      "name": "Synthetic attorney tess",
-      "type": "attorney",
-      "available": true
-     }
-    ],
-    "/device/commissary": {
-     "allowed": true,
-     "reasons": [],
-     "balance_cents": 0,
-     "weekly_limit_cents": 5000,
-     "spent_this_week_cents": 0,
-     "items": [
-      {
-       "code": "SOAP",
-       "name": {
-        "en": "Bar soap",
-        "es": "Jab\u00f3n en barra"
-       },
-       "price_cents": 125,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "TOOTHPASTE",
-       "name": {
-        "en": "Toothpaste",
-        "es": "Pasta dental"
-       },
-       "price_cents": 210,
-       "category": "hygiene",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "PAD",
-       "name": {
-        "en": "Writing pad",
-        "es": "Bloc de notas"
-       },
-       "price_cents": 175,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "STAMPS",
-       "name": {
-        "en": "Postage stamps (book)",
-        "es": "Sellos postales (libreta)"
-       },
-       "price_cents": 800,
-       "category": "writing",
-       "min_tier": 1,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "SNACK",
-       "name": {
-        "en": "Snack pack",
-        "es": "Paquete de bocadillos"
-       },
-       "price_cents": 350,
-       "category": "food",
-       "min_tier": 2,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "COFFEE",
-       "name": {
-        "en": "Instant coffee",
-        "es": "Caf\u00e9 instant\u00e1neo"
-       },
-       "price_cents": 450,
-       "category": "food",
-       "min_tier": 3,
-       "available": true,
-       "block_reason": null
-      },
-      {
-       "code": "HEADPHONES",
-       "name": {
-        "en": "Headphones",
-        "es": "Aud\u00edfonos"
-       },
-       "price_cents": 1200,
-       "category": "electronics",
-       "min_tier": 4,
-       "available": true,
-       "block_reason": null
-      }
-     ]
-    },
-    "/device/courses": [
-     {
-      "code": "MONEY101",
-      "level": "basic",
-      "title": {
-       "en": "Everyday Money Basics",
-       "es": "Fundamentos del dinero diario"
-      },
-      "lessons": 3,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "code": "WORKMATH",
-      "level": "advanced",
-      "title": {
-       "en": "Workplace Math",
-       "es": "Matem\u00e1ticas para el trabajo"
-      },
-      "lessons": 1,
-      "lessons_done": 0,
-      "completed": false,
-      "allowed": true,
-      "reasons": []
-     }
-    ],
-    "/device/courses/MONEY101": {
-     "code": "MONEY101",
-     "level": "basic",
-     "title": {
-      "en": "Everyday Money Basics",
-      "es": "Fundamentos del dinero diario"
-     },
-     "lessons": [
-      {
-       "id": "budget",
-       "title": {
-        "en": "Making a simple budget",
-        "es": "C\u00f3mo hacer un presupuesto sencillo"
-       },
-       "body": {
-        "en": "A budget lists the money you expect to receive and the money you need to spend. Write income first, then needs such as housing and food, then wants. If spending is higher than income, change the wants first.",
-        "es": "Un presupuesto enumera el dinero que espera recibir y el que necesita gastar. Escriba primero los ingresos, luego las necesidades como vivienda y comida, y despu\u00e9s los gustos. Si los gastos superan los ingresos, cambie primero los gustos."
-       }
-      },
-      {
-       "id": "saving",
-       "title": {
-        "en": "Saving a little each week",
-        "es": "Ahorrar un poco cada semana"
-       },
-       "body": {
-        "en": "Small, regular savings add up. Setting aside even a few dollars every payday builds a cushion for surprise costs. Put savings in a separate place so it is not spent by accident.",
-        "es": "Los ahorros peque\u00f1os y regulares se acumulan. Apartar unos pocos d\u00f3lares cada d\u00eda de pago crea un colch\u00f3n para gastos imprevistos. Guarde los ahorros en un lugar aparte para no gastarlos por accidente."
-       }
-      },
-      {
-       "id": "debt",
-       "title": {
-        "en": "Understanding debt and interest",
-        "es": "Entender la deuda y los intereses"
-       },
-       "body": {
-        "en": "Interest is the cost of borrowing. A loan with a high interest rate costs much more over time. Paying more than the minimum reduces the total you pay. Always read the full cost before you agree to borrow.",
-        "es": "El inter\u00e9s es el costo de pedir prestado. Un pr\u00e9stamo con tasa alta cuesta mucho m\u00e1s con el tiempo. Pagar m\u00e1s del m\u00ednimo reduce el total que paga. Lea siempre el costo total antes de aceptar un pr\u00e9stamo."
-       }
-      }
-     ],
-     "quiz": [
-      {
-       "id": "q1",
-       "prompt": {
-        "en": "What should you write down first in a budget?",
-        "es": "\u00bfQu\u00e9 debe anotar primero en un presupuesto?"
-       },
-       "choices": [
-        {
-         "en": "Your income",
-         "es": "Sus ingresos"
-        },
-        {
-         "en": "Your wants",
-         "es": "Sus gustos"
-        },
-        {
-         "en": "Your debts only",
-         "es": "Solo sus deudas"
-        }
-       ]
-      },
-      {
-       "id": "q2",
-       "prompt": {
-        "en": "If spending is higher than income, what should you change first?",
-        "es": "Si los gastos superan los ingresos, \u00bfqu\u00e9 debe cambiar primero?"
-       },
-       "choices": [
-        {
-         "en": "Needs such as food",
-         "es": "Necesidades como la comida"
-        },
-        {
-         "en": "Wants",
-         "es": "Los gustos"
-        },
-        {
-         "en": "Nothing",
-         "es": "Nada"
-        }
-       ]
-      },
-      {
-       "id": "q3",
-       "prompt": {
-        "en": "Why keep savings in a separate place?",
-        "es": "\u00bfPor qu\u00e9 guardar los ahorros aparte?"
-       },
-       "choices": [
-        {
-         "en": "So they are not spent by accident",
-         "es": "Para no gastarlos por accidente"
-        },
-        {
-         "en": "So they earn more interest on debt",
-         "es": "Para que generen m\u00e1s inter\u00e9s en la deuda"
-        },
-        {
-         "en": "It makes no difference",
-         "es": "No hay diferencia"
-        }
-       ]
-      },
-      {
-       "id": "q4",
-       "prompt": {
-        "en": "What is interest?",
-        "es": "\u00bfQu\u00e9 es el inter\u00e9s?"
-       },
-       "choices": [
-        {
-         "en": "A gift from the bank",
-         "es": "Un regalo del banco"
-        },
-        {
-         "en": "The cost of borrowing money",
-         "es": "El costo de pedir dinero prestado"
-        },
-        {
-         "en": "A kind of savings account",
-         "es": "Un tipo de cuenta de ahorros"
-        }
-       ]
-      },
-      {
-       "id": "q5",
-       "prompt": {
-        "en": "Paying more than the minimum on a loan usually...?",
-        "es": "Pagar m\u00e1s del m\u00ednimo de un pr\u00e9stamo normalmente...?"
-       },
-       "choices": [
-        {
-         "en": "Reduces the total you pay",
-         "es": "Reduce el total que paga"
-        },
-        {
-         "en": "Increases the interest rate",
-         "es": "Aumenta la tasa de inter\u00e9s"
-        },
-        {
-         "en": "Cancels the loan",
-         "es": "Cancela el pr\u00e9stamo"
-        }
-       ]
-      }
-     ],
-     "lessons_done": [],
-     "completed": false
-    },
-    "/device/jobs": {
-     "pay_split": {
-      "facility_pct": 30,
-      "resident_pct": 60,
-      "deductions_pct": 10
-     },
-     "jobs": [
-      {
-       "id": 1,
-       "code": "TRANSCRIBE",
-       "title": "Transcribe public-domain books",
-       "task_type": "transcription_public_domain",
-       "description": "Type up public-domain book pages. No personal data is involved.",
-       "enrolled": false
-      },
-      {
-       "id": 2,
-       "code": "CAPTION",
-       "title": "Caption educational videos",
-       "task_type": "captioning",
-       "description": "Write captions for course videos.",
-       "enrolled": false
-      }
-     ]
-    },
-    "/device/rec": {
-     "day": "2026-10-21",
-     "baseline_minutes": 60,
-     "slots": [
-      {
-       "slot": "09:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "13:30",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "18:00",
-       "kind": "indoor",
-       "allowed": true,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "10:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      },
-      {
-       "slot": "15:00",
-       "kind": "outdoor",
-       "allowed": false,
-       "booked": false,
-       "spaces": 6
-      }
-     ]
-    },
-    "/device/reading": [
-     {
-      "id": "tortoise-hare",
-      "title": "The Tortoise and the Hare (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "lion-mouse",
-      "title": "The Lion and the Mouse (retelling)",
-      "author": "Traditional fable, retold",
-      "catalog": "general",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "preamble",
-      "title": "Preamble to the Constitution of the United States",
-      "author": "United States, 1787 (public domain)",
-      "catalog": "expanded",
-      "allowed": true,
-      "reasons": []
-     },
-     {
-      "id": "gettysburg",
-      "title": "The Gettysburg Address (opening)",
-      "author": "Abraham Lincoln, 1863 (public domain)",
-      "catalog": "expanded",
-      "allowed": true,
-      "reasons": []
-     }
-    ],
-    "/device/reading/tortoise-hare": {
-     "id": "tortoise-hare",
-     "title": "The Tortoise and the Hare (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
-    },
-    "/device/reading/lion-mouse": {
-     "id": "lion-mouse",
-     "title": "The Lion and the Mouse (retelling)",
-     "author": "Traditional fable, retold",
-     "language": "en",
-     "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
-    },
-    "/device/reading/preamble": {
-     "id": "preamble",
-     "title": "Preamble to the Constitution of the United States",
-     "author": "United States, 1787 (public domain)",
-     "language": "en",
-     "text": "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
-    },
-    "/device/reading/gettysburg": {
-     "id": "gettysburg",
-     "title": "The Gettysburg Address (opening)",
-     "author": "Abraham Lincoln, 1863 (public domain)",
-     "language": "en",
-     "text": "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
-    },
-    "/device/messages?contact_id=6": [],
-    "/device/messages?contact_id=7": []
-   }
+  "quiz_response": {
+    "correct": 5,
+    "total": 5,
+    "passed": true,
+    "points_awarded": 50,
+    "already_completed": false,
+    "tier_before": 1,
+    "tier_after": 2,
+    "calls_minutes_before": 15,
+    "calls_minutes_after": 20
+  },
+  "call_started": {
+    "call_id": 41,
+    "privileged": false,
+    "monitored": true,
+    "max_seconds": 1800,
+    "started_at": "2026-10-21T12:36:32.752163+00:00",
+    "status": "active",
+    "duration_seconds": null
+  },
+  "call_ended": {
+    "call_id": 41,
+    "privileged": false,
+    "monitored": true,
+    "max_seconds": 1800,
+    "started_at": "2026-10-21T12:36:32.752163+00:00",
+    "status": "completed",
+    "duration_seconds": 0
   }
- },
- "lesson_responses": {
-  "budget": {
-   "lessons_done": [
-    "budget"
-   ],
-   "total": 3
-  },
-  "saving": {
-   "lessons_done": [
-    "budget",
-    "saving"
-   ],
-   "total": 3
-  },
-  "debt": {
-   "lessons_done": [
-    "budget",
-    "saving",
-    "debt"
-   ],
-   "total": 3
-  }
- },
- "quiz_response": {
-  "correct": 5,
-  "total": 5,
-  "passed": true,
-  "points_awarded": 50,
-  "already_completed": false,
-  "tier_before": 1,
-  "tier_after": 2,
-  "calls_minutes_before": 15,
-  "calls_minutes_after": 20
- },
- "call_started": {
-  "call_id": 41,
-  "privileged": false,
-  "monitored": true,
-  "max_seconds": 1800,
-  "started_at": "2026-10-21T12:36:32.752163+00:00",
-  "status": "active",
-  "duration_seconds": null
- },
- "call_ended": {
-  "call_id": 41,
-  "privileged": false,
-  "monitored": true,
-  "max_seconds": 1800,
-  "started_at": "2026-10-21T12:36:32.752163+00:00",
-  "status": "completed",
-  "duration_seconds": 0
- }
 }

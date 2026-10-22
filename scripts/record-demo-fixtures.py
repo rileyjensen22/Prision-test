@@ -17,7 +17,10 @@ def call(token, path, method="GET", body=None):
         BASE + path,
         method=method,
         data=json.dumps(body).encode() if body is not None else None,
-        headers={"X-Device-Token": f"e2e-token-{token}", "Content-Type": "application/json"},
+        headers={
+            "X-Device-Token": f"e2e-token-{token}",
+            "Content-Type": "application/json",
+        },
     )
     try:
         with urllib.request.urlopen(req) as r:
@@ -28,14 +31,29 @@ def call(token, path, method="GET", body=None):
 
 def snapshot(token):
     snap = {}
-    for p in ("/device/view", "/device/contacts", "/device/commissary", "/device/courses",
-              "/device/courses/MONEY101", "/device/jobs", "/device/rec", "/device/reading"):
+    for p in (
+        "/device/view",
+        "/device/contacts",
+        "/device/commissary",
+        "/device/courses",
+        "/device/courses/MONEY101",
+        "/device/jobs",
+        "/device/rec",
+        "/device/reading",
+    ):
         snap[p] = call(token, p)
-    for item in snap["/device/reading"] if isinstance(snap["/device/reading"], list) else []:
-        snap[f"/device/reading/{item['id']}"] = call(token, f"/device/reading/{item['id']}")
-    for c in snap["/device/contacts"] if isinstance(snap["/device/contacts"], list) else []:
+    for item in (
+        snap["/device/reading"] if isinstance(snap["/device/reading"], list) else []
+    ):
+        snap[f"/device/reading/{item['id']}"] = call(
+            token, f"/device/reading/{item['id']}"
+        )
+    for c in (
+        snap["/device/contacts"] if isinstance(snap["/device/contacts"], list) else []
+    ):
         snap[f"/device/messages?contact_id={c['id']}"] = call(
-            token, f"/device/messages?contact_id={c['id']}")
+            token, f"/device/messages?contact_id={c['id']}"
+        )
     return snap
 
 
@@ -52,12 +70,21 @@ out["quiz_response"] = quiz
 out["scenarios"]["gina"]["after"] = snapshot("gina")
 
 # one real call as tess (family contact), for the call screen shape
-fam = next((c for c in out["scenarios"]["tess"]["before"]["/device/contacts"] if c["type"] == "family"), None)
+fam = next(
+    (
+        c
+        for c in out["scenarios"]["tess"]["before"]["/device/contacts"]
+        if c["type"] == "family"
+    ),
+    None,
+)
 if fam:
     started = call("tess", "/device/calls", "POST", {"contact_id": fam["id"]})
     out["call_started"] = started
     if "call_id" in started:
-        out["call_ended"] = call("tess", f"/device/calls/{started['call_id']}/end", "POST")
+        out["call_ended"] = call(
+            "tess", f"/device/calls/{started['call_id']}/end", "POST"
+        )
 
 OUT.write_text(json.dumps(out, indent=1))
 print("wrote", OUT, OUT.stat().st_size, "bytes", file=sys.stderr)

@@ -202,8 +202,9 @@ def report_video_tamper(
     existing = session.execute(_select(Sanction).where(Sanction.evidence_ref == ref)).scalar()
     if existing:
         return existing
-    if c.status == "active":
-        end_call(session, resident_id, call_id, now, telephony)
+    if c.status != "active":
+        raise CallDenied("NOT_ACTIVE", "tamper is only detected during an active call")
+    end_call(session, resident_id, call_id, now, telephony)
     return issue_sanction(
         session, SYSTEM, resident_id, "DEVICE_TAMPER", now, Evidence("system_event", ref=ref)
     )

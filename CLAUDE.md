@@ -23,6 +23,12 @@ Customers: other correctional facilities, and facilities we run ourselves. Initi
 9. **Everything tunable lives in versioned config tables**, not code: tiers, limits, point values, thresholds, sanctions, offense restrictions, repeat-return curve. Config changes are audit-logged.
 10. **Externals are mocked behind interfaces:** telephony, video, payments, chess provider, facility camera events, content sources.
 11. **Synthetic data only.** No real names, IDs, or records anywhere in the repo.
+12. **Automated flags only create review items.** Keywords and unusual patterns never create a sanction on their own; a human confirms.
+13. **Resident-to-resident play has no free text, no real names, no wagering, no friend lists.** Pairing respects keep-separate records.
+14. **Device camera frames are never stored or transmitted** except as the live call itself. Tamper detection runs on-device on a derived signal (e.g. brightness/variance) and only during an active call.
+15. **Money paths are append-only** (trust ledger, job earnings). A nightly reconciliation job checks that balances match the ledger and alerts on any mismatch.
+16. **Reading monitored messages, reviewing monitored calls, and mirroring a device each require a stated reason**, and each is audit-logged.
+17. **Analytics are for evaluation only.** They never feed into tier, sanction, or restriction decisions, and there are no individual risk scores.
 
 ## 3. Stack and layout
 

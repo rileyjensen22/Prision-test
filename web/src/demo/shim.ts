@@ -9,9 +9,22 @@ const F = fixtures as unknown as Fixtures
 
 export type Scenario = 'alice' | 'gina' | 'tess'
 export const SCENARIOS: { id: Scenario; title: string; blurb: string }[] = [
-  { id: 'alice', title: 'Locked feature', blurb: 'Tier 3 with a 24h communication lock: tap Locks to see the reason, end time and Appeal.' },
-  { id: 'gina', title: 'Demo loop', blurb: 'Tier 1. Open Education, finish the sample course, and watch call minutes rise.' },
-  { id: 'tess', title: 'Tier 4', blurb: 'Calls to family and attorney, texting, commissary and reading.' },
+  {
+    id: 'alice',
+    title: 'Locked feature',
+    blurb:
+      'Tier 3 with a 24h communication lock: tap Locks to see the reason, end time and Appeal.',
+  },
+  {
+    id: 'gina',
+    title: 'Demo loop',
+    blurb: 'Tier 1. Open Education, finish the sample course, and watch call minutes rise.',
+  },
+  {
+    id: 'tess',
+    title: 'Tier 4',
+    blurb: 'Calls to family and attorney, texting, commissary and reading.',
+  },
 ]
 
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
@@ -28,11 +41,16 @@ function shift(value: unknown, delta: number): unknown {
   return value
 }
 
-const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T
 const reply = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
-export type DemoState = { scenario: Scenario; language: 'en' | 'es'; passed: boolean; balance: number }
+export type DemoState = {
+  scenario: Scenario
+  language: 'en' | 'es'
+  passed: boolean
+  balance: number
+}
 
 const realFetch = window.fetch.bind(window)
 
@@ -52,15 +70,22 @@ export function installShim(state: DemoState): void {
       const raw = snap[path]
       if (raw === undefined) return reply({ detail: 'not in demo' }, 404)
       const out = clone(raw) as Record<string, unknown>
-      const base = Date.parse(String((sc.before['/device/view'] as { generated_at: string }).generated_at))
+      const base = Date.parse(
+        String((sc.before['/device/view'] as { generated_at: string }).generated_at),
+      )
       const moved = shift(out, Date.now() - base) as Record<string, unknown>
       if (path === '/device/view') {
-        const v = moved as { settings: { language: string }; generated_at: string; valid_until: string }
+        const v = moved as {
+          settings: { language: string }
+          generated_at: string
+          valid_until: string
+        }
         v.settings.language = state.language
         v.generated_at = new Date().toISOString()
         v.valid_until = new Date(Date.now() + 3600_000).toISOString()
       }
-      if (path === '/device/commissary') (moved as { balance_cents: number }).balance_cents = state.balance
+      if (path === '/device/commissary')
+        (moved as { balance_cents: number }).balance_cents = state.balance
       return reply(moved)
     }
 
@@ -86,7 +111,9 @@ export function installShim(state: DemoState): void {
       })
     }
     if (path === '/device/commissary/orders') {
-      const items = (sc.before['/device/commissary'] as { items: { code: string; price_cents: number }[] }).items
+      const items = (
+        sc.before['/device/commissary'] as { items: { code: string; price_cents: number }[] }
+      ).items
       const lines = (body.lines ?? {}) as Record<string, number>
       const total = Object.entries(lines).reduce(
         (s, [code, q]) => s + (items.find((i) => i.code === code)?.price_cents ?? 0) * q,

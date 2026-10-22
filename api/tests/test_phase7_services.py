@@ -426,6 +426,22 @@ def test_covering_the_camera_ends_the_call_and_raises_device_tamper_once(
         calls.report_video_tamper(owner, rid, 999999, NOW)
 
 
+def test_tamper_is_refused_when_the_call_is_not_active(
+    owner, seeded, make_resident, add_contact
+):
+    """Invariant 14: tamper detection only runs during an active call."""
+    rid = make_resident()
+    give(owner, rid, 1000)
+    v = calls.start_call(owner, rid, add_contact(rid), NOW, medium="video")
+    calls.end_call(owner, rid, v.id, NOW + timedelta(minutes=1))
+    with pytest.raises(CallDenied) as e:
+        calls.report_video_tamper(owner, rid, v.id, NOW + timedelta(minutes=2))
+    assert e.value.code == "NOT_ACTIVE"
+    assert owner.execute(
+        select(Sanction).where(Sanction.evidence_ref == f"video-call-{v.id}")
+    ).first() is None
+
+
 # ======================= texting =======================
 def test_texting_is_monitored_tier_gated_and_limited(owner, seeded, make_resident, add_contact):
     rid = make_resident()

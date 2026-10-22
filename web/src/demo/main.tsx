@@ -44,7 +44,8 @@ function Demo() {
     <div style={{ background: '#0f172a', minHeight: '100vh' }}>
       <div
         style={{
-          padding: '10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left))',
+          padding:
+            '10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left))',
           color: '#e2e8f0',
           font: '14px system-ui, sans-serif',
         }}
@@ -55,8 +56,11 @@ function Demo() {
               key={s.id}
               onClick={() => setScenario(s.id)}
               style={{
-                padding: '8px 12px', borderRadius: 8, border: '1px solid #475569',
-                background: s.id === scenario ? '#2563eb' : 'transparent', color: '#fff',
+                padding: '8px 12px',
+                borderRadius: 8,
+                border: '1px solid #475569',
+                background: s.id === scenario ? '#2563eb' : 'transparent',
+                color: '#fff',
               }}
             >
               {s.title}
@@ -64,13 +68,25 @@ function Demo() {
           ))}
           <button
             onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #475569', background: 'transparent', color: '#fff' }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #475569',
+              background: 'transparent',
+              color: '#fff',
+            }}
           >
             {language === 'en' ? 'Español' : 'English'}
           </button>
           <button
             onClick={() => setRun(run + 1)}
-            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #475569', background: 'transparent', color: '#fff' }}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #475569',
+              background: 'transparent',
+              color: '#fff',
+            }}
           >
             Reset
           </button>
@@ -79,13 +95,13 @@ function Demo() {
           {info.blurb} Sample data only; nothing is saved.
         </p>
       </div>
-      {(
+      {
         <MemoryRouter key={`${scenario}-${language}-${run}`} initialEntries={['/resident']}>
           <Routes>
             <Route path="/resident/*" element={<ResidentApp />} />
           </Routes>
         </MemoryRouter>
-      )}
+      }
     </div>
   )
 }

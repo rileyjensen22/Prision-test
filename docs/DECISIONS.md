@@ -123,3 +123,11 @@
 - **Secrets scanner** (`scripts/check-secrets.py`): checks tracked files for key shapes, hard-coded assignments, passwords in URLs, and forbidden files (`.env`, keys, `var/`, e2e fixtures). Known synthetic development values are on an allow-list; its own tests build fake secrets from fragments so the test file does not trip it. Runs in CI and as a test.
 - **Dependencies.** `pip-audit` clean; npm production dependencies clean; seven advisories in the Tailwind 3 build chain (build-time only) accepted until a Tailwind 4 upgrade. CI runs both audits.
 - **Not done (listed in `docs/security.md`):** MFA and password reset, shared rate-limit store, retention/deletion jobs, encryption at rest, penetration test, real-device kiosk lockdown testing, a production container image.
+
+## Phase 9 (audit before building v1.1)
+
+- **Audit method:** ran pytest, vitest, Playwright, lint, the secrets scan and the simulated week, then read the code against each new invariant (12 to 17). Result is in `docs/STATUS.md`.
+- **Failures found:** lint (an unused import and unformatted files, all in the phone-demo code I added). Nothing in the engine, audit log or features failed. The Playwright run in this session failed at first only because the browser path variable (`CHROMIUM_PATH`) was not set; with it set, all 37 pass.
+- **Invariant 14 was violated and is fixed.** `report_video_tamper` ended a call only if it was active but then raised DEVICE_TAMPER regardless, so a report for a finished call still produced a pending sanction. It now refuses with `NOT_ACTIVE` unless the call is active (a repeat report for the same call still returns the existing sanction). Rejected: silently ignoring the report (the device should be told).
+- **New invariants 12 to 17 appended to `CLAUDE.md` section 2.** The v1.1 spec is saved as `docs/PHASE2.md` so later sessions can read it.
+- **Not changed, because they belong to later phases:** nightly reconciliation (15), the `keep_separate` table (13), monitored-message review UI and keyword flags (12, 16), on-device tamper detection (14).
