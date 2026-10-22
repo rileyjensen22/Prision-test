@@ -1,4 +1,12 @@
 # Jobs are voluntary and never affect tier or entitlements (invariant 7).
 # Compliance review of wages, deductions and voluntariness is REQUIRED before any real use.
-version: 1
+version: 2
 pay_split: {resident_pct: 60, facility_pct: 30, deductions_pct: 10}
+# Whether a sanction can pause work. OFF by default. Flagged for counsel in docs/ASSUMPTIONS.md.
+# When on, only sanctions with these scopes pause it; earned pay is always still paid out.
+suspend_on_sanction: false
+suspend_scopes: [all_non_baseline]
+max_tasks_per_day: 40
+claim_minutes: 30
+accept_similarity: 0.9
+min_payout_cents: 1

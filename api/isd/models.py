@@ -319,7 +319,8 @@ class TrustLedger(Base):
     __tablename__ = "trust_ledger"
     __table_args__ = (
         CheckConstraint(
-            "entry_type IN ('deposit', 'purchase', 'refund', 'adjustment')", name="ck_ledger_type"
+            "entry_type IN ('deposit', 'purchase', 'refund', 'adjustment', 'job_payout')",
+            name="ck_ledger_type",
         ),
         CheckConstraint("amount_cents <> 0", name="ck_ledger_nonzero"),
         CheckConstraint("balance_after_cents >= 0", name="ck_ledger_no_overdraft"),
@@ -532,6 +533,16 @@ class ReadingBookmark(Base):
 JOB_TASK_TYPES = ("transcription_public_domain", "captioning", "labeling_non_personal")
 
 
+class JobPartner(Base):
+    """An outside organisation that supplies work (a mock in v1)."""
+
+    __tablename__ = "job_partners"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(32), unique=True)
+    name: Mapped[str] = mapped_column(String(128))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
 class JobListing(Base):
     """Voluntary work. Task types are limited to ones that never handle anyone's personal data."""
 
@@ -544,6 +555,113 @@ class JobListing(Base):
     description: Mapped[str] = mapped_column(Text)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    partner_id: Mapped[int | None] = mapped_column(ForeignKey("job_partners.id"), nullable=True)
+    pay_per_task_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
+
+class JobTask(Base):
+    """One unit of work from a partner. Content is public or synthetic only (screened on entry)."""
+
+    __tablename__ = "job_tasks"
+    __table_args__ = (
+        UniqueConstraint("listing_id", "external_id", name="uq_task_external"),
+        CheckConstraint(f"kind IN {JOB_TASK_TYPES}", name="ck_task_kind"),
+        CheckConstraint(
+            "status IN ('open', 'claimed', 'accepted', 'rejected')", name="ck_task_status"
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("job_listings.id"), index=True)
+    external_id: Mapped[str] = mapped_column(String(64))
+    kind: Mapped[str] = mapped_column(String(40))
+    spec: Mapped[dict] = mapped_column(JSONB)
+    status: Mapped[str] = mapped_column(String(10), default="open")
+    claimed_by: Mapped[int | None] = mapped_column(ForeignKey("residents.id"), nullable=True)
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class TaskSubmission(Base):
+    """What a resident handed in and whether the partner accepted it. Never edited."""
+
+    __tablename__ = "task_submissions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("job_tasks.id"), unique=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("job_listings.id"))
+    answer: Mapped[str | None] = mapped_column(Text, nullable=True)  # kept only if accepted
+    accepted: Mapped[bool] = mapped_column(Boolean)
+    review_reason: Mapped[str] = mapped_column(String(32))
+    pay_cents: Mapped[int] = mapped_column(Integer)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class EarningsLedger(Base):
+    """Append-only work earnings. 'earned' rows split the pay; 'payout' rows move the resident's
+    share into the trust account. A nightly reconciliation checks these against the trust ledger
+    (invariant 15)."""
+
+    __tablename__ = "earnings_ledger"
+    __table_args__ = (
+        CheckConstraint("entry_type IN ('earned', 'payout')", name="ck_earn_type"),
+        CheckConstraint(
+            "entry_type <> 'earned' OR (gross_cents > 0 AND resident_cents >= 0"
+            " AND facility_cents >= 0 AND deductions_cents >= 0"
+            " AND gross_cents = resident_cents + facility_cents + deductions_cents"
+            " AND submission_id IS NOT NULL AND trust_ledger_id IS NULL)",
+            name="ck_earn_earned_adds_up",
+        ),
+        CheckConstraint(
+            "entry_type <> 'payout' OR (resident_cents < 0 AND gross_cents = 0"
+            " AND facility_cents = 0 AND deductions_cents = 0"
+            " AND trust_ledger_id IS NOT NULL AND submission_id IS NULL)",
+            name="ck_earn_payout_shape",
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    entry_type: Mapped[str] = mapped_column(String(8))
+    submission_id: Mapped[int | None] = mapped_column(
+        ForeignKey("task_submissions.id"), unique=True, nullable=True
+    )
+    gross_cents: Mapped[int] = mapped_column(Integer)
+    resident_cents: Mapped[int] = mapped_column(Integer)  # signed: payouts are negative
+    facility_cents: Mapped[int] = mapped_column(Integer)
+    deductions_cents: Mapped[int] = mapped_column(Integer)
+    split: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    trust_ledger_id: Mapped[int | None] = mapped_column(
+        ForeignKey("trust_ledger.id"), unique=True, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WorkLog(Base):
+    """A resident's own record of joining, leaving and finishing tasks. Append-only. Staff see
+    only totals, so work never becomes part of a behaviour record."""
+
+    __tablename__ = "work_log"
+    __table_args__ = (
+        CheckConstraint(
+            "event IN ('joined', 'left', 'task_accepted', 'task_rejected')", name="ck_worklog_event"
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("job_listings.id"))
+    event: Mapped[str] = mapped_column(String(16))
+    task_id: Mapped[int | None] = mapped_column(ForeignKey("job_tasks.id"), nullable=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReconciliationRun(Base):
+    """The result of each nightly check that balances match their ledgers. Append-only."""
+
+    __tablename__ = "reconciliation_runs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ok: Mapped[bool] = mapped_column(Boolean)
+    checked: Mapped[dict] = mapped_column(JSONB)
+    problems: Mapped[list] = mapped_column(JSONB)
 
 
 class JobEnrollment(Base):

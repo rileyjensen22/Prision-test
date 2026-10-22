@@ -45,6 +45,7 @@ from isd.models import (
     Device,
     DeviceAssignment,
     JobEnrollment,
+    JobTask,
     Message,
     MessageFlag,
     OffenseFlag,
@@ -72,11 +73,13 @@ from isd.services import (
     public_log,
     reading,
     rec,
+    reconcile,
     sanctions,
     staff_requests,
     texting,
     video_bookings,
     welfare,
+    work_tasks,
 )
 from isd.services import contacts as contact_service
 from isd.services.audit import SYSTEM, Actor, verify_chain
@@ -115,9 +118,9 @@ ACTIONS = [
     ("reading", 8),
     ("chess", 6),
     ("rec", 8),
-    ("job", 4),
+    ("job", 10),
     ("video", 14),
-    ("video_book", 6),
+    ("video_book", 16),
     ("contact_request", 3),
     ("request", 4),
 ]
@@ -297,6 +300,19 @@ class Simulation:
             self.residents.append(r.id)
         s.commit()
 
+    def do_work(self, rid: int, listing_id: int, now: datetime) -> None:
+        """Takes a task and hands it in, usually correctly."""
+        s, rng = self.s, self.rng
+        view = self.attempt("work_task", work_tasks.next_task, s, rid, listing_id, now)
+        if not view:
+            return
+        spec = s.get(JobTask, view["task_id"]).spec
+        if rng.random() < 0.8:
+            answer = spec.get("expected") or f"someone with a {spec['keywords'][0]} nearby"
+        else:
+            answer = "no idea at all"
+        self.attempt("work_submit", work_tasks.submit, s, rid, view["task_id"], answer, now)
+
     # ---------- resident actions ----------
     def resident_action(self, rid: int, now: datetime) -> None:
         s, rng = self.s, self.rng
@@ -447,7 +463,10 @@ class Simulation:
             )
         elif what == "job":
             listing = rng.choice(jobs.list_listings(s, rid))
-            if listing["enrolled"]:
+            if listing["enrolled"] and rng.random() < 0.7:
+                for _ in range(rng.randint(1, 3)):
+                    self.do_work(rid, listing["id"], now)
+            elif listing["enrolled"]:
                 self.attempt("job_leave", jobs.leave, s, rid, listing["id"], now)
             else:
                 self.attempt("job_join", jobs.opt_in, s, rid, listing["id"], now)
@@ -923,6 +942,20 @@ class Simulation:
             )
         )
 
+        # money: work earnings and the trust ledger reconcile, every night and now
+        from isd.models import ReconciliationRun
+
+        nightly = s.execute(select(ReconciliationRun)).scalars().all()
+        checked, problems = reconcile.run_checks(s)
+        add(
+            Check(
+                "earnings and trust ledgers reconcile (nightly job and a final check)",
+                not problems and bool(nightly) and all(r.ok for r in nightly),
+                f"{len(nightly)} nightly runs; {checked['earnings_entries']} earnings entries, "
+                f"{checked['trust_entries']} trust entries",
+            )
+        )
+
         # jobs and points
         add(
             Check(
@@ -994,6 +1027,7 @@ class Simulation:
             "rec",
             "job_join",
             "job_leave",
+            "work_submit",
             "staff_request",
             "sanction_issue",
             "sanction_confirm",
@@ -1004,7 +1038,12 @@ class Simulation:
             "camera_event",
             "daily_clean_days",
         ]
-        not_exercised = [r for r in required if not self.report.counts[r]]
+        denied = self.report.denied
+
+        def attempted(label: str) -> bool:  # done, or tried and refused by a rule
+            return bool(self.report.counts[label]) or any(k.startswith(f"{label}:") for k in denied)
+
+        not_exercised = [r for r in required if not attempted(r)]
         tiers = Counter(get_entitlements(s, r, end, cfg).effective_tier for r in self.residents)
         self.report.summary = {
             "not_exercised": not_exercised,

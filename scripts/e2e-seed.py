@@ -200,6 +200,7 @@ def main() -> None:
         )  # tier 4: texting, reading
         resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
         resident("cam")  # receives a cell-camera event
+        resident("wren")  # tier 1: voluntary work, earnings
         resident(
             "ola", start_points=450, contacts=("family", "attorney")
         )  # tier 4: monitored texting and the keyword-flag review

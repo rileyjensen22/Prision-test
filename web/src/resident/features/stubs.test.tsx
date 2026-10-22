@@ -41,12 +41,15 @@ test('jobs: voluntary notice, pay split, join and leave', async () => {
     }
     return {
       pay_split: { resident_pct: 60, facility_pct: 30, deductions_pct: 10 },
+      earnings: { earned_cents: 0, paid_cents: 0, pending_cents: 0 },
+      suspended: null,
       jobs: [
         {
           id: 1,
           title: 'Transcribe books',
           task_type: 'transcription_public_domain',
           description: 'Type pages',
+          pay_per_task_cents: 25,
           enrolled,
         },
       ],

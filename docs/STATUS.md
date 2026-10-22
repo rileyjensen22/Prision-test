@@ -1,6 +1,6 @@
 # Status
 
-Last updated: Phase 11 (contacts, texting, video). Everything below was checked by running the code, not from memory.
+Last updated: Phase 12 (jobs). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
@@ -21,7 +21,8 @@ Last updated: Phase 11 (contacts, texting, video). Everything below was checked 
 | 9 Audit | **Done** | Report delivered; invariant 14 violation fixed. |
 | 10 Reading and chess | **Reading built; chess deferred** | Reader (page, text size, bookmarks, progress sync, offline cache), approved-source catalog, baseline legal and religious texts, optional book points (default 0). Chess is untouched on the owner's instruction. |
 | 11 Texting and video | **Built** | Contact requests and approvals, delivery states, keyword flags (review items only), monitored-message review with reasons, attorney messages unreadable by any role, `VideoProvider` with a WebRTC loopback demo, scheduled video, recording retention, on-device tamper detection. See `docs/DECISIONS.md`. |
-| 12 to 16 | **Not started** | |
+| 12 Jobs | **Built** | Partner interface (mock), screened public-domain/synthetic tasks, work log, earnings ledger with config split, nightly payouts to the trust account, nightly reconciliation with alerts, Finance page and partner dashboard, sanction-pause flag (off). |
+| 13 to 16 | **Not started** | |
 
 ## Phases 0 to 8
 
@@ -50,7 +51,7 @@ All hold. Each has a test, and the simulated week re-checks 1, 2, 3, 4, 5, 6, 7,
 | 12 | Flags only create review items | **Holds, tested** | Keyword rules create `message_flags` rows only; the monitoring and texting code cannot reach the sanction service (tested) and sanction counts do not change. Welfare flags are review items too. |
 | 13 | Resident play: no free text, names, wagering, friends | **Partial** | The chess stub has no chat column, method or route (tested). Human play is a mock; there is no `keep_separate` table, no anonymous handles, no match log. Phase 10. |
 | 14 | Camera frames never stored; tamper on-device, only during a call | **Holds (fake camera only)** | Detection runs in the kiosk page on brightness numbers, only during an active call; the server accepts only `{signal, covered_ms}` for an active call; no binary column exists in the database. Tested in a browser with a fake camera; real kiosk cameras are untested. Earlier:  The tamper endpoint accepted a report for a call that had already ended and still raised a sanction. It now refuses (`NOT_ACTIVE`, tested). There is no real camera in v1, so on-device detection on a derived signal does not exist yet. Phase 11. |
-| 15 | Money paths append-only, nightly reconciliation | **Partial** | The trust ledger is append-only (trigger plus revoked grants, `balance_after >= 0`). There is **no nightly reconciliation job** and no job-earnings ledger. Phases 12 and 16. |
+| 15 | Money paths append-only, nightly reconciliation | **Holds** | The trust ledger and the new earnings ledger are append-only (trigger plus revoked grants plus database checks); the daily job reconciles both every night and a mismatch raises an audit alert, a dashboard banner and a non-zero exit. |
 | 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Holds, one gap** | Messages, call-recording fetch (reason added in Phase 11), the activity timeline and mirroring all need a reason and are logged without content. There is still no screen for reviewing monitored calls. Earlier: | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |
 | 17 | Analytics never feed decisions, no risk scores | **Holds, one question** | No analytics tables exist. The welfare check compares a resident's activity with their own recent baseline and shows staff a flag; it feeds no tier, sanction or restriction. See open question 1. |
 

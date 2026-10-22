@@ -11,6 +11,7 @@ interface Summary {
   offline_devices: number
   outlier_flags: number | null
   welfare_flags: number
+  ledger_ok: boolean | null
 }
 interface Ev {
   seq: number
@@ -54,6 +55,18 @@ export default function Dashboard() {
   return (
     <Page title="Dashboard">
       <ErrorLine error={summary.error} />
+      {s?.ledger_ok === false && (
+        <p
+          role="alert"
+          data-testid="ledger-alert"
+          className="rounded border border-red-400 bg-red-50 px-3 py-2 text-red-900"
+        >
+          The last nightly reconciliation found a mismatch between a balance and its ledger.{' '}
+          <Link className="underline" to="/staff/finance">
+            Open Finance
+          </Link>
+        </p>
+      )}
       {s && (
         <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
           <Stat id="stat-residents" label="Residents" value={s.residents} to="/staff/roster" />

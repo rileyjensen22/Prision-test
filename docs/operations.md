@@ -33,6 +33,8 @@ Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<
 | Daily job (clean-day points, tier checks so delayed drops happen, abandoned-call and stale-mirror cleanup) | once a day shortly after midnight UTC | `python scripts/daily-job.py` (`make daily`) |
 | Public log export (only if enabled by an operator) | as policy requires | `python scripts/export-public-log.py --out <dir>` |
 
+The daily job also pays work earnings into residents' trust accounts, tops up work tasks, and runs the **nightly reconciliation** (`make reconcile` runs only that). A mismatch makes the job exit with status 2 (so cron or monitoring can alert), writes a `reconciliation_mismatch` audit entry, and shows as a red banner on the staff dashboard and on the Finance page. Nothing is changed automatically: investigate and fix with a correcting entry, then run `make reconcile` again.
+
 Both are safe to repeat. If the daily job is missed, run it for each missed day (`run_daily(..., for_day=...)`); clean days are never awarded twice.
 
 ## Backups and restore

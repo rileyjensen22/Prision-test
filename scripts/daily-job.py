@@ -20,6 +20,11 @@ def main() -> int:
     ):
         result = run_daily(session, datetime.now(UTC))
     print(json.dumps(result))
+    if not result["reconciliation"][
+        "ok"
+    ]:  # a ledger mismatch must page someone, not pass quietly
+        print("RECONCILIATION MISMATCH: see Finance in the staff app", file=sys.stderr)
+        return 2
     return 0
 
 

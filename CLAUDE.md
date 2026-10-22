@@ -242,6 +242,7 @@ Work one phase at a time. Don't start the next until the current phase's tests p
 make db-local # (no Docker) create dev DB roles on a local Postgres
 make migrate  # alembic upgrade head
 make daily    # daily job: clean-day points, tier checks (delayed drops), cleanup
+make reconcile  # nightly check: balances match their ledgers (exit 2 on mismatch)
 make secrets-check  # fail if anything that looks like a secret is committed
 make dev      # run api + web + postgres
 make test     # pytest + vitest + playwright

@@ -10,7 +10,18 @@ from isd.auth import DeviceContext, current_device
 from isd.db import get_db
 from isd.engine.calls import CallDenied
 from isd.routers.device_features import _call_out
-from isd.services import calls, chess, jobs, reading, rec, texting, video_bookings
+from isd.services import (
+    calls,
+    chess,
+    earnings,
+    job_policy,
+    jobs,
+    reading,
+    rec,
+    texting,
+    video_bookings,
+    work_tasks,
+)
 
 router = APIRouter(prefix="/device", tags=["device-extras"])
 
@@ -270,7 +281,54 @@ def reading_bookmark(
 # ---------------- jobs (voluntary) ----------------
 @router.get("/jobs")
 def job_list(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
-    return {"pay_split": jobs.pay_split(db), "jobs": jobs.list_listings(db, ctx.resident_id)}
+    return {
+        "pay_split": jobs.pay_split(db),
+        "jobs": jobs.list_listings(db, ctx.resident_id),
+        "earnings": earnings.summary(db, ctx.resident_id),
+        "suspended": job_policy.suspension(db, ctx.resident_id, _now()),
+    }
+
+
+@router.get("/jobs/work-log")
+def job_work_log(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    return work_tasks.work_log(db, ctx.resident_id)
+
+
+@router.get("/jobs/{listing_id}/task")
+def job_next_task(
+    listing_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        return work_tasks.next_task(db, ctx.resident_id, listing_id, _now())
+    except jobs.JobError as e:
+        if e.code == "JOB_SUSPENDED":  # a lock: reason, end time and how to appeal (invariant 5)
+            raise HTTPException(
+                409,
+                {
+                    "code": e.code,
+                    "message": str(e),
+                    "lock": job_policy.suspension(db, ctx.resident_id, _now()),
+                },
+            ) from e
+        raise _err(e) from e
+
+
+class TaskAnswerIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    answer: str = Field(min_length=1, max_length=2000)
+
+
+@router.post("/jobs/tasks/{task_id}/submit")
+def job_submit_task(
+    task_id: int,
+    body: TaskAnswerIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    try:
+        return work_tasks.submit(db, ctx.resident_id, task_id, body.answer, _now())
+    except jobs.JobError as e:
+        raise _err(e) from e
 
 
 @router.post("/jobs/{listing_id}/join", status_code=201)

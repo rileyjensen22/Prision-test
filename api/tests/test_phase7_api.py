@@ -199,7 +199,9 @@ def test_jobs_over_http_are_voluntary_and_private_to_the_resident(client, kiosk,
     _, sup = account("supervisor")
     listing = client.get("/staff/jobs", headers=sup).json()
     assert all(
-        set(j) == {"id", "code", "title", "task_type", "active", "participants"} for j in listing
+        set(j)
+        == {"id", "code", "title", "task_type", "active", "participants", "pay_per_task_cents"}
+        for j in listing
     )  # no resident info
 
 

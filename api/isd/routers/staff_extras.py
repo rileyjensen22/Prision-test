@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from isd.auth import require_roles
 from isd.db import get_db
-from isd.models import ROLES, JobEnrollment, JobListing, Resident, Staff
-from isd.services import jobs, out_of_cell, reading, timeline, welfare
+from isd.models import ROLES, JobEnrollment, JobListing, JobPartner, Resident, Staff
+from isd.services import earnings, jobs, out_of_cell, reading, reconcile, timeline, welfare
 from isd.services.audit import Actor
 
 router = APIRouter(prefix="/staff", tags=["staff-extras"])
@@ -161,6 +161,8 @@ class JobIn(BaseModel):
     title: str = Field(min_length=3, max_length=128)
     task_type: str
     description: str
+    pay_per_task_cents: int = Field(default=0, ge=0, le=5000)
+    partner_code: str = Field(default="MOCK_PARTNER", max_length=32)
 
 
 @router.get("/jobs")
@@ -180,9 +182,36 @@ def job_listings(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> list
             "task_type": j.task_type,
             "active": j.active,
             "participants": counts.get(j.id, 0),
+            "pay_per_task_cents": j.pay_per_task_cents,
         }
         for j in db.execute(select(JobListing).order_by(JobListing.id)).scalars()
     ]
+
+
+def _partner_id(db: Session, code: str) -> int:
+    partner = db.execute(select(JobPartner).where(JobPartner.code == code)).scalar()
+    if partner is None:
+        raise HTTPException(422, {"code": "BAD_PARTNER", "message": "unknown work partner"})
+    return partner.id
+
+
+@router.get("/jobs/partners")
+def partner_dashboard(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> list[dict]:
+    """The mock partner's view: tasks done and money owed per listing. No resident is named."""
+    return earnings.partner_dashboard(db)
+
+
+@router.get("/finance/reconciliation")
+def reconciliation(
+    _: Staff = Depends(require_roles("supervisor", "admin", "auditor")),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    return reconcile.latest_runs(db)
+
+
+@router.post("/finance/reconcile")
+def run_reconciliation(staff: Staff = Depends(ADMIN), db: Session = Depends(get_db)) -> dict:
+    return reconcile.reconcile(db, _now(), Actor(staff.id, staff.role))
 
 
 @router.post("/jobs", status_code=201)
@@ -196,6 +225,8 @@ def create_job(body: JobIn, staff: Staff = Depends(ADMIN), db: Session = Depends
             body.task_type,
             body.description,
             _now(),
+            body.pay_per_task_cents,
+            _partner_id(db, body.partner_code),
         )
     except jobs.JobError as e:
         raise HTTPException(422, {"code": e.code, "message": str(e)}) from e

@@ -15,6 +15,7 @@ from isd.models import (
     Device,
     DeviceAssignment,
     JobListing,
+    JobPartner,
     Resident,
     Staff,
 )
@@ -61,27 +62,51 @@ def ensure_reference_data(session: Session) -> None:
                     name=name, kind="bundled", active=True, protected=protected, approved_at=now
                 )
             )
-    if session.execute(select(JobListing.id)).first() is None:
-        session.add_all(
-            [
+    partner = session.execute(select(JobPartner).where(JobPartner.code == "MOCK_PARTNER")).scalar()
+    if partner is None:
+        partner = JobPartner(code="MOCK_PARTNER", name="Sample Work Partner (demo)", active=True)
+        session.add(partner)
+        session.flush()
+    existing = {j.code: j for j in session.execute(select(JobListing)).scalars()}
+    have_jobs = set(existing)
+    for code, title, kind, pay, text in (
+        (
+            "TRANSCRIBE",
+            "Transcribe public-domain books",
+            "transcription_public_domain",
+            25,
+            "Correct lines from public-domain books that were scanned badly. No personal data.",
+        ),
+        (
+            "CAPTION",
+            "Caption educational clips",
+            "captioning",
+            20,
+            "Write a short caption for a described scene from a course clip. No personal data.",
+        ),
+        (
+            "SENTENCES",
+            "Label sentences",
+            "labeling_non_personal",
+            10,
+            "Say if a public-domain or made-up sentence is a statement, question or exclamation.",
+        ),
+    ):
+        if code in existing and existing[code].partner_id is None:  # older databases
+            existing[code].partner_id, existing[code].pay_per_task_cents = partner.id, pay
+        if code not in have_jobs:
+            session.add(
                 JobListing(
-                    code="TRANSCRIBE",
-                    title="Transcribe public-domain books",
-                    task_type="transcription_public_domain",
+                    code=code,
+                    title=title,
+                    task_type=kind,
+                    description=text,
                     active=True,
                     created_at=now,
-                    description="Type up public-domain book pages. No personal data is involved.",
-                ),
-                JobListing(
-                    code="CAPTION",
-                    title="Caption educational videos",
-                    task_type="captioning",
-                    active=True,
-                    created_at=now,
-                    description="Write captions for course videos.",
-                ),
-            ]
-        )
+                    partner_id=partner.id,
+                    pay_per_task_cents=pay,
+                )
+            )
     session.flush()
 
 

@@ -9,6 +9,7 @@ import Confirmations from './pages/Confirmations'
 import ContactRequests from './pages/ContactRequests'
 import ContentJobs from './pages/ContentJobs'
 import Dashboard from './pages/Dashboard'
+import Finance from './pages/Finance'
 import Mirror from './pages/Mirror'
 import Monitoring from './pages/Monitoring'
 import Outliers from './pages/Outliers'
@@ -30,6 +31,7 @@ const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff/view-as', label: 'View as' },
   { to: '/staff/mirror', label: 'Live mirror', roles: SUPERVISION },
   { to: '/staff/content', label: 'Content & jobs' },
+  { to: '/staff/finance', label: 'Finance', roles: SUPERVISION },
   { to: '/staff/config', label: 'Config' },
   { to: '/staff/audit', label: 'Audit log', roles: ['admin', 'auditor'] },
 ]
@@ -128,6 +130,14 @@ function Shell() {
             }
           />
           <Route path="content" element={<ContentJobs />} />
+          <Route
+            path="finance"
+            element={
+              <Guard roles={SUPERVISION}>
+                <Finance />
+              </Guard>
+            }
+          />
           <Route path="config" element={<ConfigEditor />} />
           <Route
             path="audit"

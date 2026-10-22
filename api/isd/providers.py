@@ -1,6 +1,7 @@
 """Where the app gets its external providers. v1 only ever returns mocks (no real network calls)."""
 
 from isd.interfaces.chess import ChessProvider
+from isd.interfaces.job_partner import JobPartner
 from isd.interfaces.messaging import MessagingService
 from isd.interfaces.payments import PaymentProvider
 from isd.interfaces.sso import SSOProvider
@@ -8,6 +9,7 @@ from isd.interfaces.telephony import TelephonyService
 from isd.interfaces.verification import ContactVerifier
 from isd.interfaces.video import VideoService
 from isd.mocks.chess import MockChessProvider
+from isd.mocks.job_partner import MockJobPartner
 from isd.mocks.messaging import MockMessagingProvider
 from isd.mocks.payments import MockPaymentProvider
 from isd.mocks.sso import MockSSOProvider
@@ -20,6 +22,7 @@ _payments: PaymentProvider = MockPaymentProvider()
 _messaging = MessagingService(MockMessagingProvider())
 _chess: ChessProvider = MockChessProvider()
 _sso: SSOProvider = MockSSOProvider()
+_partners: dict[str, JobPartner] = {MockJobPartner.code: MockJobPartner()}
 _video = VideoService(MockVideoProvider())
 _verifier: ContactVerifier = MockContactVerifier()
 
@@ -65,3 +68,11 @@ def set_video(service: VideoService) -> None:  # tests
 
 def get_verifier() -> ContactVerifier:
     return _verifier
+
+
+def get_job_partner(code: str) -> JobPartner:
+    return _partners[code]
+
+
+def set_job_partner(partner: JobPartner) -> None:  # tests
+    _partners[partner.code] = partner

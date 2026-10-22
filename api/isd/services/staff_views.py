@@ -374,4 +374,15 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
         "offline_devices": sum(r["offline"] for r in ro),
         "outlier_flags": outliers(session, now)["flagged"] if show_outliers else None,
         "welfare_flags": len(welfare.all_flags(session, now)),
+        # None until a reconciliation has run (or for roles that do not see finance)
+        "ledger_ok": _ledger_ok(session) if show_outliers else None,
     }
+
+
+def _ledger_ok(session: Session) -> bool | None:
+    from isd.models import ReconciliationRun
+
+    last = session.execute(
+        select(ReconciliationRun.ok).order_by(ReconciliationRun.id.desc()).limit(1)
+    ).scalar()
+    return last

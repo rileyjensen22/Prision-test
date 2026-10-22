@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: db-local migrate daily secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: db-local migrate daily reconcile secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -42,6 +42,9 @@ format: $(VENV)/.installed
 
 daily: $(VENV)/.installed migrate  ## run the daily job (clean-day points, tier checks)
 	$(PY) scripts/daily-job.py
+
+reconcile: $(VENV)/.installed migrate  ## check balances against their ledgers (exit 2 on a mismatch)
+	$(PY) scripts/reconcile.py
 
 secrets-check:  ## fail if the repository contains anything that looks like a secret
 	$(PY) scripts/check-secrets.py

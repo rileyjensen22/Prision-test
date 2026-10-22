@@ -1,12 +1,12 @@
-"""Jobs (stub). Voluntary opt-in. Nothing here touches points, sanctions, tiers or entitlements
-(invariant 7), and this module deliberately imports none of them."""
+"""Jobs: listings and voluntary opt-in. Nothing here touches points, sanctions, tiers or
+entitlements (invariant 7), and this module deliberately imports none of them."""
 
 from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from isd.models import JOB_TASK_TYPES, JobEnrollment, JobListing
+from isd.models import JOB_TASK_TYPES, JobEnrollment, JobListing, WorkLog
 from isd.services.audit import Actor, append_audit
 from isd.services.config_store import get_current
 
@@ -39,6 +39,7 @@ def list_listings(session: Session, resident_id: int) -> list[dict]:
             "title": j.title,
             "task_type": j.task_type,
             "description": j.description,
+            "pay_per_task_cents": j.pay_per_task_cents,
             "enrolled": j.id in active_ids,
         }
         for j in rows
@@ -61,6 +62,7 @@ def opt_in(session: Session, resident_id: int, listing_id: int, now: datetime) -
         resident_id=resident_id, listing_id=listing_id, status="active", opted_in_at=now
     )
     session.add(row)
+    session.add(WorkLog(resident_id=resident_id, listing_id=listing_id, event="joined", at=now))
     session.flush()
     return row
 
@@ -76,6 +78,7 @@ def leave(session: Session, resident_id: int, listing_id: int, now: datetime) ->
     if row is None:
         raise JobError("NOT_JOINED", "you are not in this job")
     row.status, row.left_at = "left", now
+    session.add(WorkLog(resident_id=resident_id, listing_id=listing_id, event="left", at=now))
     return row
 
 
@@ -88,6 +91,8 @@ def create_listing(
     task_type: str,
     description: str,
     now: datetime,
+    pay_per_task_cents: int = 0,
+    partner_id: int | None = None,
 ):
     if task_type not in JOB_TASK_TYPES:
         raise JobError("BAD_TASK_TYPE", f"task type must be one of {', '.join(JOB_TASK_TYPES)}")
@@ -98,6 +103,8 @@ def create_listing(
         description=description,
         active=True,
         created_at=now,
+        pay_per_task_cents=pay_per_task_cents,
+        partner_id=partner_id,
     )
     session.add(row)
     session.flush()
