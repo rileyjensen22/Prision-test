@@ -82,11 +82,13 @@ def run_daily(session: Session, now: datetime, for_day: date | None = None) -> d
             )  # closes it if over time or idle
         except mirror.MirrorError:
             closed += 1
+    purged = calls.purge_expired_recordings(session, now)  # video recordings past retention
     return {
         "day": day.isoformat(),
         "clean_days_awarded": awarded,
         "skipped_for_infraction": skipped_infraction,
         "mirror_sessions_closed": closed,
+        "recordings_purged": purged,
     }
 
 

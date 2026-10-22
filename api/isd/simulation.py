@@ -26,12 +26,15 @@ from isd.config_loader import load_config
 from isd.engine.authority import AuthorityError, Evidence
 from isd.engine.calls import CallDenied
 from isd.engine.commissary import OrderError
+from isd.engine.contacts import ContactInvalid
 from isd.engine.features import BASELINE_FEATURES, NON_BASELINE_FEATURES
 from isd.engine.sandbox import SandboxOverrides, SandboxSanction
 from isd.interfaces.messaging import MessagingService
 from isd.interfaces.telephony import TelephonyService
+from isd.interfaces.video import VideoService
 from isd.mocks.messaging import MockMessagingProvider
 from isd.mocks.telephony import MockTelephonyProvider
+from isd.mocks.video import MockVideoProvider
 from isd.models import (
     Appeal,
     AuditLog,
@@ -43,6 +46,7 @@ from isd.models import (
     DeviceAssignment,
     JobEnrollment,
     Message,
+    MessageFlag,
     OffenseFlag,
     OutOfCellLog,
     PointEvent,
@@ -62,6 +66,7 @@ from isd.services import (
     facility,
     jobs,
     mirror,
+    monitoring,
     out_of_cell,
     points,
     public_log,
@@ -70,8 +75,10 @@ from isd.services import (
     sanctions,
     staff_requests,
     texting,
+    video_bookings,
     welfare,
 )
+from isd.services import contacts as contact_service
 from isd.services.audit import SYSTEM, Actor, verify_chain
 from isd.services.config_store import get_current, set_config
 from isd.services.entitlement_service import get_entitlements, load_engine_config
@@ -83,6 +90,7 @@ EXPECTED = (
     CallDenied,
     OrderError,
     texting.TextDenied,
+    ContactInvalid,
     education.EducationError,
     chess.ChessDenied,
     reading.ReadingDenied,
@@ -108,7 +116,9 @@ ACTIONS = [
     ("chess", 6),
     ("rec", 8),
     ("job", 4),
-    ("video", 4),
+    ("video", 14),
+    ("video_book", 6),
+    ("contact_request", 3),
     ("request", 4),
 ]
 
@@ -206,8 +216,13 @@ class Simulation:
         from isd.providers import set_messaging
 
         set_messaging(MessagingService(MockMessagingProvider()))
+        providers.set_video(VideoService(MockVideoProvider()))
         before = cfg.start - timedelta(days=30)
         for name, payload in load_config().items():
+            if (
+                name == "compliance"
+            ):  # recording on, so "attorney video is never recorded" is tested
+                payload = {**payload, "video_recording_enabled": True}
             set_config(s, SYSTEM, name, payload, "simulation seed")
         ensure_reference_data(s)
         pw = hash_password("simulation-only-password")
@@ -327,9 +342,53 @@ class Simulation:
                 s,
                 rid,
                 rng.choice(contacts).id,
-                f"Hello from the unit {rng.randint(1, 999)}",
+                rng.choice(
+                    [
+                        f"Hello from the unit {rng.randint(1, 999)}",
+                        "we talked about demo contraband",
+                    ]
+                ),
                 now,
             )
+        elif what == "video_book":
+            when = (now + timedelta(days=rng.randint(1, 3))).replace(
+                hour=rng.choice([9, 10, 14]),
+                minute=rng.choice([0, 15, 30]),
+                second=0,
+                microsecond=0,
+            )
+            self.attempt(
+                "video_book",
+                video_bookings.book,
+                s,
+                rid,
+                rng.choice(contacts).id,
+                when,
+                rng.choice([15, 30]),
+                now,
+            )
+        elif what == "contact_request":
+            req = self.attempt(
+                "contact_request",
+                contact_service.request_contact,
+                s,
+                rid,
+                f"Synthetic Visitor {rng.randint(1, 9999)}",
+                rng.choice(["family", "friend", "attorney"]),
+                f"555-{rng.randint(1000000, 9999999)}",
+                now,
+            )
+            if req:
+                self.attempt(
+                    "contact_review",
+                    contact_service.review_contact,
+                    s,
+                    rng.choice(self.supervisors),
+                    req.id,
+                    rng.random() < 0.8,
+                    "does not check out",
+                    now,
+                )
         elif what == "order":
             items = rng.sample(
                 [i["code"] for i in get_current(s, "commissary").payload["items"]],
@@ -435,6 +494,30 @@ class Simulation:
             )
             if sanc:
                 self.attempt("self_confirm", sanctions.confirm_sanction, s, sup, sanc.id, now)
+        if rng.random() < 0.3:  # a supervisor works the monitoring queue (flags are review items)
+            sup = rng.choice(self.supervisors)
+            for row in monitoring.queue(s, flagged_only=True, limit=3):
+                self.attempt(
+                    "monitor_read",
+                    monitoring.read_message,
+                    s,
+                    sup,
+                    row["message_id"],
+                    "reviewing a keyword flag",
+                    now,
+                )
+                for flag in row["flags"]:
+                    if flag["status"] == "open":
+                        self.attempt(
+                            "flag_review",
+                            monitoring.review_flag,
+                            s,
+                            sup,
+                            flag["id"],
+                            rng.choice(["no_action", "referred"]),
+                            "looked at the message",
+                            now,
+                        )
         if rng.random() < 0.1:  # a facility camera event
             n = rng.randint(1, self.cfg.residents)
             self.attempt(
@@ -752,7 +835,7 @@ class Simulation:
             )
         )
         provider = providers.get_telephony()._p
-        monitored = [c for c in calls_all if c.monitored]
+        monitored = [c for c in calls_all if c.monitored and c.medium == "voice"]
         add(
             Check(
                 "only monitored calls were ever recorded by the provider",
@@ -760,7 +843,69 @@ class Simulation:
                 f"{provider.recordings_created} recordings for {len(monitored)} monitored calls",
             )
         )
+        video_provider = providers.get_video()._p
+        video_all = [c for c in calls_all if c.medium == "video"]
+        recorded = [c for c in video_all if c.monitor_ref]
+        add(
+            Check(
+                "attorney video is never recorded, even with recording switched on",
+                all(c.monitor_ref is None for c in video_all if c.privileged)
+                and all(
+                    rec["recording"] is None
+                    for ref, rec in video_provider.sessions.items()
+                    if any(c.provider_ref == ref and c.privileged for c in video_all)
+                ),
+                f"{len(video_all)} video calls, {len(recorded)} recorded",
+            )
+        )
         texts = s.execute(select(Message)).scalars().all()
+        priv_msgs = [m for m in texts if m.privileged]
+        readable = []
+        for m in priv_msgs:
+            for role, actor in (
+                ("supervisor", self.supervisors[0]),
+                ("officer", self.officers[0]),
+                ("admin", self.admin),
+                ("auditor", Actor(self.admin.id, "auditor")),
+            ):
+                try:
+                    monitoring.read_message(s, actor, m.id, "simulation attempt to read", end)
+                    readable.append((m.id, role))
+                except monitoring.MonitoringDenied:
+                    pass
+        add(
+            Check(
+                "no role can read an attorney message, and none appear in the monitoring queue",
+                not readable
+                and all(
+                    r["message_id"] not in {m.id for m in priv_msgs}
+                    for r in monitoring.queue(s, limit=10_000)
+                ),
+                f"{len(priv_msgs)} attorney messages tried by four roles",
+            )
+        )
+        flags = s.execute(select(MessageFlag)).scalars().all()
+        add(
+            Check(
+                "keyword flags are review items only: none was acted on without a person",
+                all(f.status == "open" or (f.reviewed_by and f.review_reason) for f in flags),
+                f"{len(flags)} flags, {sum(f.status != 'open' for f in flags)} reviewed by people",
+            )
+        )
+        pending_left = [
+            c for c in s.execute(select(Contact)).scalars() if c.requested_by == "resident"
+        ]
+        add(
+            Check(
+                "every reviewed contact request has a reviewer and a matching approval flag",
+                all(
+                    c.approved == (c.status == "approved")
+                    and (c.status == "pending" or c.reviewed_by is not None)
+                    for c in pending_left
+                ),
+                f"{len(pending_left)} resident-requested contacts",
+            )
+        )
         add(
             Check(
                 "attorney messages: no text stored",
@@ -838,6 +983,11 @@ class Simulation:
             "quiz",
             "call",
             "text",
+            "video_book",
+            "contact_request",
+            "contact_review",
+            "monitor_read",
+            "flag_review",
             "order",
             "deposit",
             "reading",

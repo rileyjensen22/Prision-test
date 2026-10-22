@@ -3,14 +3,14 @@
 from datetime import UTC, date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from isd.auth import DeviceContext, current_device
 from isd.db import get_db
 from isd.engine.calls import CallDenied
 from isd.routers.device_features import _call_out
-from isd.services import calls, chess, jobs, reading, rec, texting
+from isd.services import calls, chess, jobs, reading, rec, texting, video_bookings
 
 router = APIRouter(prefix="/device", tags=["device-extras"])
 
@@ -40,6 +40,7 @@ def messages(
             "direction": m.direction,
             "body": m.body,
             "private": m.privileged,
+            "delivery": m.delivery,
             "at": m.created_at.isoformat(),
         }
         for m in texting.thread(db, ctx.resident_id, contact_id)
@@ -54,7 +55,7 @@ def send_message(
         m = texting.send_text(db, ctx.resident_id, body.contact_id, body.body, _now())
     except texting.TextDenied as e:
         raise _err(e) from e
-    return {"id": m.id, "private": m.privileged, "monitored": m.monitored}
+    return {"id": m.id, "private": m.privileged, "monitored": m.monitored, "delivery": m.delivery}
 
 
 # ---------------- video ----------------
@@ -62,28 +63,101 @@ class VideoIn(BaseModel):
     contact_id: int
 
 
+def _video_out(c) -> dict:
+    out = _call_out(c)
+    out["medium"] = c.medium
+    out["connection"] = getattr(c, "connection", {})
+    return out
+
+
 @router.post("/video-calls", status_code=201)
 def start_video(
     body: VideoIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ):
     try:
-        return _call_out(
+        return _video_out(
             calls.start_call(db, ctx.resident_id, body.contact_id, _now(), medium="video")
         )
     except CallDenied as e:
         raise _err(e) from e
 
 
+class TamperIn(BaseModel):
+    """What the device may say about its camera: a derived signal and how long, never an image."""
+
+    model_config = ConfigDict(extra="forbid")
+    signal: str = Field(max_length=8)
+    covered_ms: int = Field(ge=0, le=600_000)
+
+
 @router.post("/video-calls/{call_id}/tamper")
 def video_tamper(
-    call_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+    call_id: int,
+    body: TamperIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
 ):
     """Camera covered during a video call: ends the call; DEVICE_TAMPER goes to a supervisor."""
     try:
-        s = calls.report_video_tamper(db, ctx.resident_id, call_id, _now())
+        s = calls.report_video_tamper(db, ctx.resident_id, call_id, _now(), body.signal)
     except CallDenied as e:
         raise _err(e) from e
     return {"sanction_id": s.id, "status": s.status}
+
+
+class BookingIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    contact_id: int
+    starts_at: datetime
+    minutes: int = Field(ge=1, le=240)
+
+
+def _booking_out(b) -> dict:
+    return {
+        "id": b.id,
+        "contact_id": b.contact_id,
+        "starts_at": b.starts_at.isoformat(),
+        "minutes": b.minutes,
+        "status": b.status,
+    }
+
+
+@router.get("/video-bookings")
+def list_bookings(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    return [_booking_out(b) for b in video_bookings.upcoming(db, ctx.resident_id, _now())]
+
+
+@router.post("/video-bookings", status_code=201)
+def book_video(
+    body: BookingIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        b = video_bookings.book(
+            db, ctx.resident_id, body.contact_id, body.starts_at, body.minutes, _now()
+        )
+    except CallDenied as e:
+        raise _err(e) from e
+    return _booking_out(b)
+
+
+@router.post("/video-bookings/{booking_id}/cancel")
+def cancel_booking(
+    booking_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        return _booking_out(video_bookings.cancel(db, ctx.resident_id, booking_id, _now()))
+    except CallDenied as e:
+        raise _err(e) from e
+
+
+@router.post("/video-bookings/{booking_id}/start", status_code=201)
+def start_booking(
+    booking_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        return _video_out(video_bookings.start_booked(db, ctx.resident_id, booking_id, _now()))
+    except CallDenied as e:
+        raise _err(e) from e
 
 
 # ---------------- chess ----------------

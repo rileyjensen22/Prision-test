@@ -1,0 +1,12 @@
+# Keyword rules for monitored (non-attorney) messages. A match only creates a review item for staff;
+# it never creates a sanction (invariant 12). PLACEHOLDER keywords: the customer supplies real ones.
+# ALL ITEMS UNVERIFIED. Confirm with counsel before any deployment.
+version: 1
+text_max_chars: 500
+rules:
+  - id: PLACEHOLDER_CONTRABAND
+    label: "Possible contraband mention (placeholder)"
+    keywords: ["demo contraband", "demo smuggle"]
+  - id: PLACEHOLDER_SELF_HARM
+    label: "Possible self-harm language (placeholder)"
+    keywords: ["demo hopeless"]

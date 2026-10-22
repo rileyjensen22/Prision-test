@@ -105,14 +105,25 @@ class DeviceAssignment(Base):
 
 class Contact(Base):
     __tablename__ = "contacts"
-    __table_args__ = (CheckConstraint(f"type IN {CONTACT_TYPES}", name="ck_contact_type"),)
+    __table_args__ = (
+        CheckConstraint(f"type IN {CONTACT_TYPES}", name="ck_contact_type"),
+        CheckConstraint("status IN ('pending', 'approved', 'rejected')", name="ck_contact_status"),
+        CheckConstraint("approved = (status = 'approved')", name="ck_contact_approved_matches"),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"))
     name: Mapped[str] = mapped_column(String(128))
     type: Mapped[str] = mapped_column(String(16))
-    approved: Mapped[bool] = mapped_column(Boolean, default=True)
+    approved: Mapped[bool] = mapped_column(Boolean, default=True)  # always status == 'approved'
+    status: Mapped[str] = mapped_column(String(10), default="approved", server_default="approved")
+    requested_by: Mapped[str] = mapped_column(String(8), default="staff", server_default="staff")
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)  # no-contact order
     phone_ref: Mapped[str | None] = mapped_column(String(32), nullable=True)  # synthetic number
+    verification: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class PointEvent(Base):
@@ -258,6 +269,9 @@ class CallRecord(Base):
     duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="active")
     medium: Mapped[str] = mapped_column(String(8), default="voice", server_default="voice")
+    recording_purged_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class CourseProgress(Base):
@@ -373,6 +387,9 @@ class Message(Base):
         CheckConstraint("direction IN ('out', 'in')", name="ck_msg_direction"),
         CheckConstraint("NOT (privileged AND monitored)", name="ck_msg_privileged_not_monitored"),
         CheckConstraint("NOT (privileged AND body IS NOT NULL)", name="ck_msg_privileged_no_body"),
+        CheckConstraint(
+            "delivery IN ('queued', 'sent', 'delivered', 'failed')", name="ck_msg_delivery"
+        ),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
@@ -381,6 +398,48 @@ class Message(Base):
     body: Mapped[str | None] = mapped_column(Text, nullable=True)
     privileged: Mapped[bool] = mapped_column(Boolean)
     monitored: Mapped[bool] = mapped_column(Boolean)
+    delivery: Mapped[str] = mapped_column(
+        String(10), default="delivered", server_default="delivered"
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class MessageFlag(Base):
+    """A keyword match on a monitored message: a review item, never a sanction (invariant 12)."""
+
+    __tablename__ = "message_flags"
+    __table_args__ = (
+        UniqueConstraint("message_id", "rule_id", name="uq_flag_message_rule"),
+        CheckConstraint("status IN ('open', 'reviewed', 'referred')", name="ck_flag_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    message_id: Mapped[int] = mapped_column(ForeignKey("messages.id"), index=True)
+    rule_id: Mapped[str] = mapped_column(String(64))
+    label: Mapped[str] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(10), default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class VideoBooking(Base):
+    """A scheduled video call. Minutes are reserved against the weekly allowance."""
+
+    __tablename__ = "video_bookings"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('scheduled', 'started', 'cancelled', 'missed')", name="ck_booking_status"
+        ),
+        CheckConstraint("minutes > 0", name="ck_booking_minutes"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    minutes: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(10), default="scheduled")
+    call_id: Mapped[int | None] = mapped_column(ForeignKey("call_records.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 

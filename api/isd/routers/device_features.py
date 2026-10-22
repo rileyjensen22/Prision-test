@@ -3,15 +3,16 @@
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from isd.auth import DeviceContext, current_device
 from isd.db import get_db
 from isd.engine.calls import CallDenied
 from isd.engine.commissary import OrderError
+from isd.engine.contacts import ContactInvalid
 from isd.models import CallRecord, Contact
-from isd.services import calls, commissary, education
+from isd.services import calls, commissary, contacts, education
 from isd.services.education import EducationError
 
 router = APIRouter(prefix="/device", tags=["device-features"])
@@ -97,6 +98,42 @@ def _call_out(c: CallRecord) -> dict:
 @router.get("/contacts")
 def list_contacts(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
     return [_contact_out(c) for c in calls.list_contacts(db, ctx.resident_id)]
+
+
+class ContactRequestIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str = Field(min_length=1, max_length=64)
+    type: str = Field(max_length=16)
+    phone: str = Field(min_length=1, max_length=20)
+
+
+@router.get("/contacts/all")
+def all_contacts(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    """Every contact with its review status, for the contacts screen."""
+    return [
+        {
+            "id": c.id,
+            "name": c.name,
+            "type": c.type,
+            "status": c.status,
+            "available": c.status == "approved" and (not c.blocked or c.type == "attorney"),
+            "note": c.review_note if c.status == "rejected" else None,
+        }
+        for c in contacts.all_for_resident(db, ctx.resident_id)
+    ]
+
+
+@router.post("/contacts", status_code=201)
+def request_contact(
+    body: ContactRequestIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    try:
+        c = contacts.request_contact(db, ctx.resident_id, body.name, body.type, body.phone, _now())
+    except ContactInvalid as e:
+        raise HTTPException(409, {"code": e.code, "message": str(e)}) from e
+    return {"id": c.id, "status": c.status}
 
 
 class CallIn(BaseModel):

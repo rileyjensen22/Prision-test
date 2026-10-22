@@ -174,7 +174,7 @@ def test_attorney_calls_are_never_recorded_or_content_logged(
     # No path back to content, even for a supervisor
     sup = make_staff("supervisor")
     with pytest.raises(PrivilegedCommunicationError):
-        calls.fetch_recording(owner, sup, c.id, service)
+        calls.fetch_recording(owner, sup, c.id, "reviewing a complaint", service)
     with pytest.raises(PrivilegedCommunicationError):
         service.recording(
             __import__("isd.interfaces.telephony", fromlist=["CallHandle"]).CallHandle(
@@ -270,15 +270,24 @@ def test_monitored_call_content_access_is_audited_and_role_limited(
     c = calls.start_call(owner, rid, add_contact(rid), NOW, service)
     calls.end_call(owner, rid, c.id, NOW + timedelta(minutes=1), service)
     with pytest.raises(PermissionError):
-        calls.fetch_recording(owner, make_staff("officer"), c.id, service)
+        calls.fetch_recording(owner, make_staff("officer"), c.id, "reviewing a complaint", service)
+    with pytest.raises(PermissionError):  # invariant 16: a stated reason is required
+        calls.fetch_recording(owner, make_staff("supervisor"), c.id, "  ", service)
     assert (
-        calls.fetch_recording(owner, make_staff("supervisor"), c.id, service)
+        calls.fetch_recording(
+            owner, make_staff("supervisor"), c.id, "reviewing a complaint", service
+        )
         == b"[synthetic audio]"
     )
     row = owner.execute(
-        text("SELECT reason_code FROM audit_log WHERE action = 'monitoring_access'")
+        text(
+            "SELECT reason_code, payload FROM audit_log"
+            " WHERE action = 'monitoring_access' AND target_type = 'call' AND target_id = :c"
+        ),
+        {"c": str(c.id)},
     ).one()
     assert row.reason_code == "MONITORING_ACCESS"
+    assert row.payload["reason"] == "reviewing a complaint"
 
 
 # ======================= commissary =======================

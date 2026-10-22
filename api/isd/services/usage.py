@@ -48,6 +48,7 @@ def video_seconds_this_week(session: Session, resident_id: int, at_time: datetim
         select(CallRecord).where(
             CallRecord.resident_id == resident_id,
             CallRecord.medium == "video",
+            CallRecord.privileged.is_(False),  # attorney video is not metered
             CallRecord.started_at >= period_start(at_time, "week"),
             CallRecord.started_at <= at_time,
         )
@@ -66,6 +67,7 @@ def messages_sent_today(session: Session, resident_id: int, at_time: datetime) -
             select(func.count()).where(
                 Message.resident_id == resident_id,
                 Message.direction == "out",
+                Message.delivery != "failed",  # an undeliverable message does not use the allowance
                 Message.created_at >= period_start(at_time, "day"),
                 Message.created_at <= at_time,
             )

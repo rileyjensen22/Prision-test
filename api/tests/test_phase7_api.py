@@ -12,6 +12,9 @@ from isd.services.audit import SYSTEM
 pytestmark = pytest.mark.usefixtures("committed_config", "committed_reference")
 
 
+DARK = {"signal": "dark", "covered_ms": 3000}
+
+
 def dh(token):
     return {"X-Device-Token": token}
 
@@ -76,6 +79,7 @@ def test_texting_over_http(client, kiosk, boost, contact):
         "id": ok.json()["id"],
         "private": False,
         "monitored": True,
+        "delivery": "delivered",
     }
     thread = client.get(f"/device/messages?contact_id={family}", headers=dh(token)).json()
     assert [m["direction"] for m in thread] == ["out", "in"] and thread[0]["body"] == "hello"
@@ -106,16 +110,23 @@ def test_video_and_tamper_over_http(client, kiosk, boost, contact, account):
     cid = contact(rid)
     v = client.post("/device/video-calls", json={"contact_id": cid}, headers=dh(token))
     assert v.status_code == 201 and v.json()["max_seconds"] == 30 * 60
-    t = client.post(f"/device/video-calls/{v.json()['call_id']}/tamper", headers=dh(token))
+    t = client.post(
+        f"/device/video-calls/{v.json()['call_id']}/tamper", json=DARK, headers=dh(token)
+    )
     assert t.status_code == 200 and t.json()["status"] == "pending"
-    again = client.post(f"/device/video-calls/{v.json()['call_id']}/tamper", headers=dh(token))
+    again = client.post(
+        f"/device/video-calls/{v.json()['call_id']}/tamper", json=DARK, headers=dh(token)
+    )
     assert again.json()["sanction_id"] == t.json()["sanction_id"]
     _, sup = account("supervisor")
     queue = client.get("/staff/confirmations", headers=sup).json()
     item = next(q for q in queue if q["id"] == t.json()["sanction_id"])
     assert item["infraction_code"] == "DEVICE_TAMPER" and item["issued_by"] is None
     assert item["evidence"]["type"] == "system_event" and item["can_confirm"] is True
-    assert client.post("/device/video-calls/999999/tamper", headers=dh(token)).status_code == 404
+    assert (
+        client.post("/device/video-calls/999999/tamper", json=DARK, headers=dh(token)).status_code
+        == 404
+    )
 
 
 def test_chess_reading_rec_over_http(client, kiosk, boost):

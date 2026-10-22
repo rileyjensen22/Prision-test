@@ -13,6 +13,7 @@ from isd.engine.config import (
     validate_sanctions,
     validate_welfare,
 )
+from isd.engine.monitoring import validate_monitoring
 from isd.jobs_config import validate_jobs  # noqa: E402
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
@@ -28,6 +29,7 @@ CONFIG_FILES = (
     "jobs",
     "rec",
     "reading",
+    "monitoring",
 )
 
 
@@ -64,6 +66,8 @@ def validate_section(name: str, payload: dict) -> None:
         validate_rec(payload)
     elif name == "reading":
         validate_reading(payload)
+    elif name == "monitoring":
+        validate_monitoring(payload)
     elif name not in CONFIG_FILES:
         raise ValueError(f"unknown config section: {name}")
 

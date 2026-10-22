@@ -12,3 +12,10 @@ entitlement_snapshot_ttl_minutes: 60
 mirror_max_minutes: 15
 mirror_idle_seconds: 60
 public_log_min_cell: 3
+contact_max_pending: 3
+contact_max_approved: 25
+video_recording_enabled: false
+video_booking_days_ahead: 7
+video_booking_slot_minutes: 15
+video_booking_max_minutes: 30
+video_start_early_minutes: 5

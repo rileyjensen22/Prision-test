@@ -395,9 +395,8 @@ def test_video_is_locked_below_tier_6_and_not_offered_for_attorneys(
         calls.start_call(owner, rid, cid, NOW, medium="video")
     assert e.value.code == "FEATURE_LOCKED"
     give(owner, rid, 1000)
-    with pytest.raises(CallDenied) as e:
-        calls.start_call(owner, rid, att, NOW, medium="video")
-    assert e.value.code == "VIDEO_NOT_AVAILABLE"
+    v = calls.start_call(owner, rid, att, NOW, medium="video")
+    assert v.privileged and not v.monitored  # attorney video: unmetered, never recorded
 
 
 def test_covering_the_camera_ends_the_call_and_raises_device_tamper_once(

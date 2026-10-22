@@ -14,11 +14,15 @@ from isd.interfaces.telephony import PrivilegedCommunicationError
 class Sent:
     provider_ref: str
     reply: str | None  # an inbound reply to store (monitored messages only)
+    delivery: str = "delivered"  # queued | sent | delivered | failed
 
 
 class MessagingProvider(Protocol):
     def send(self, phone_ref: str, body: str, *, retain: bool) -> tuple[str, str | None]:
         """Returns (provider_ref, canned inbound reply or None)."""
+
+    def delivery_state(self, provider_ref: str) -> str:
+        """queued, sent, delivered or failed."""
 
     def retained_copy(self, provider_ref: str) -> str | None:
         """The provider's monitoring copy of the message, if it kept one."""
@@ -33,5 +37,6 @@ class MessagingService:
         if privileged:
             if self._p.retained_copy(ref) is not None:
                 raise PrivilegedCommunicationError("provider kept a privileged message")
-            return Sent(ref, None)  # nothing comes back for the app to store
-        return Sent(ref, reply)
+            return Sent(ref, None, self._p.delivery_state(ref))  # nothing to store
+        state = self._p.delivery_state(ref)
+        return Sent(ref, reply if state != "failed" else None, state)

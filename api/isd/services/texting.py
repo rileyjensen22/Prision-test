@@ -8,11 +8,13 @@ from sqlalchemy.orm import Session
 from isd.interfaces.messaging import MessagingService
 from isd.models import Contact, Message
 from isd.providers import get_messaging
+from isd.services import monitoring
 from isd.services.calls import privileged_types
+from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements
 from isd.services.usage import messages_sent_today
 
-MAX_BODY = 500
+DEFAULT_MAX_BODY = 500
 
 
 class TextDenied(ValueError):
@@ -42,8 +44,9 @@ def send_text(
     if contact.blocked and not privileged:
         raise TextDenied("CONTACT_UNAVAILABLE", "contact not available")
     text = body.strip()
-    if not 1 <= len(text) <= MAX_BODY:
-        raise TextDenied("BAD_MESSAGE", f"messages must be 1 to {MAX_BODY} characters")
+    max_body = get_current(session, "monitoring").payload["text_max_chars"]
+    if not 1 <= len(text) <= max_body:
+        raise TextDenied("BAD_MESSAGE", f"messages must be 1 to {max_body} characters")
     fe = get_entitlements(session, resident_id, now).features["texting"]
     if not fe.allowed:
         raise TextDenied("FEATURE_LOCKED", "texting is locked")
@@ -58,21 +61,25 @@ def send_text(
         body=None if privileged else text,  # privileged: no content is ever stored
         privileged=privileged,
         monitored=not privileged,
+        delivery=sent.delivery,
         created_at=now,
     )
     session.add(row)
+    session.flush()
+    monitoring.flag_message(session, row, now)  # review items only (invariant 12)
     if sent.reply:  # monitored threads show the (mock) reply
-        session.add(
-            Message(
-                resident_id=resident_id,
-                contact_id=contact.id,
-                direction="in",
-                body=sent.reply,
-                privileged=False,
-                monitored=True,
-                created_at=now,
-            )
+        reply = Message(
+            resident_id=resident_id,
+            contact_id=contact.id,
+            direction="in",
+            body=sent.reply,
+            privileged=False,
+            monitored=True,
+            created_at=now,
         )
+        session.add(reply)
+        session.flush()
+        monitoring.flag_message(session, reply, now)
     session.flush()
     return row
 
