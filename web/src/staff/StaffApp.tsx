@@ -6,9 +6,11 @@ import Appeals from './pages/Appeals'
 import AuditLog from './pages/AuditLog'
 import ConfigEditor from './pages/ConfigEditor'
 import Confirmations from './pages/Confirmations'
+import ContactRequests from './pages/ContactRequests'
 import ContentJobs from './pages/ContentJobs'
 import Dashboard from './pages/Dashboard'
 import Mirror from './pages/Mirror'
+import Monitoring from './pages/Monitoring'
 import Outliers from './pages/Outliers'
 import ResidentDetail from './pages/ResidentDetail'
 import Roster from './pages/Roster'
@@ -20,6 +22,8 @@ const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff', label: 'Dashboard' },
   { to: '/staff/roster', label: 'Roster' },
   { to: '/staff/welfare', label: 'Welfare' },
+  { to: '/staff/contacts', label: 'Contacts', roles: ['officer', 'supervisor', 'admin'] },
+  { to: '/staff/monitoring', label: 'Monitoring', roles: SUPERVISION },
   { to: '/staff/confirmations', label: 'Confirmations', roles: SUPERVISION },
   { to: '/staff/appeals', label: 'Appeals', roles: SUPERVISION },
   { to: '/staff/outliers', label: 'Outliers', roles: SUPERVISION },
@@ -107,6 +111,22 @@ function Shell() {
             }
           />
           <Route path="welfare" element={<Welfare />} />
+          <Route
+            path="contacts"
+            element={
+              <Guard roles={['officer', 'supervisor', 'admin']}>
+                <ContactRequests />
+              </Guard>
+            }
+          />
+          <Route
+            path="monitoring"
+            element={
+              <Guard roles={SUPERVISION}>
+                <Monitoring />
+              </Guard>
+            }
+          />
           <Route path="content" element={<ContentJobs />} />
           <Route path="config" element={<ConfigEditor />} />
           <Route

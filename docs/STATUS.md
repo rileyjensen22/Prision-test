@@ -1,6 +1,6 @@
 # Status
 
-Last updated: Phase 10 (reading). Everything below was checked by running the code, not from memory.
+Last updated: Phase 11 (contacts, texting, video). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
@@ -20,7 +20,8 @@ Last updated: Phase 10 (reading). Everything below was checked by running the co
 |---|---|---|
 | 9 Audit | **Done** | Report delivered; invariant 14 violation fixed. |
 | 10 Reading and chess | **Reading built; chess deferred** | Reader (page, text size, bookmarks, progress sync, offline cache), approved-source catalog, baseline legal and religious texts, optional book points (default 0). Chess is untouched on the owner's instruction. |
-| 11 to 16 | **Not started** | |
+| 11 Texting and video | **Built** | Contact requests and approvals, delivery states, keyword flags (review items only), monitored-message review with reasons, attorney messages unreadable by any role, `VideoProvider` with a WebRTC loopback demo, scheduled video, recording retention, on-device tamper detection. See `docs/DECISIONS.md`. |
+| 12 to 16 | **Not started** | |
 
 ## Phases 0 to 8
 
@@ -46,11 +47,11 @@ All hold. Each has a test, and the simulated week re-checks 1, 2, 3, 4, 5, 6, 7,
 
 | # | Rule | State | Detail |
 |---|---|---|---|
-| 12 | Flags only create review items | **Holds, nothing to break yet** | There are no keyword rules. Welfare flags are review items that nothing acts on automatically. Phase 11 adds keyword flags and must keep this. |
+| 12 | Flags only create review items | **Holds, tested** | Keyword rules create `message_flags` rows only; the monitoring and texting code cannot reach the sanction service (tested) and sanction counts do not change. Welfare flags are review items too. |
 | 13 | Resident play: no free text, names, wagering, friends | **Partial** | The chess stub has no chat column, method or route (tested). Human play is a mock; there is no `keep_separate` table, no anonymous handles, no match log. Phase 10. |
-| 14 | Camera frames never stored; tamper on-device, only during a call | **Was violated, now fixed** | The tamper endpoint accepted a report for a call that had already ended and still raised a sanction. It now refuses (`NOT_ACTIVE`, tested). There is no real camera in v1, so on-device detection on a derived signal does not exist yet. Phase 11. |
+| 14 | Camera frames never stored; tamper on-device, only during a call | **Holds (fake camera only)** | Detection runs in the kiosk page on brightness numbers, only during an active call; the server accepts only `{signal, covered_ms}` for an active call; no binary column exists in the database. Tested in a browser with a fake camera; real kiosk cameras are untested. Earlier:  The tamper endpoint accepted a report for a call that had already ended and still raised a sanction. It now refuses (`NOT_ACTIVE`, tested). There is no real camera in v1, so on-device detection on a derived signal does not exist yet. Phase 11. |
 | 15 | Money paths append-only, nightly reconciliation | **Partial** | The trust ledger is append-only (trigger plus revoked grants, `balance_after >= 0`). There is **no nightly reconciliation job** and no job-earnings ledger. Phases 12 and 16. |
-| 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Partial** | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |
+| 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Holds, one gap** | Messages, call-recording fetch (reason added in Phase 11), the activity timeline and mirroring all need a reason and are logged without content. There is still no screen for reviewing monitored calls. Earlier: | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |
 | 17 | Analytics never feed decisions, no risk scores | **Holds, one question** | No analytics tables exist. The welfare check compares a resident's activity with their own recent baseline and shows staff a flag; it feeds no tier, sanction or restriction. See open question 1. |
 
 ## Known gaps and TODOs
@@ -59,10 +60,10 @@ No `TODO` or `FIXME` markers are in the code. The gaps are the "not done" items 
 
 - Rate limits are per process (in memory); a shared store is needed for more than one API process.
 - No MFA or password reset for staff.
-- No retention or deletion jobs; `recording_retention_days` is a config value only.
+- Retention: video recordings are purged after `recording_retention_days` (unset keeps them). Messages, call metadata and other records have no retention or deletion job.
 - No encryption at rest; backups and restore were never drilled.
 - Kiosk lockdown (systemd, TTY, firewall) is documented but untested on a real device.
-- Reading level is stored but does not yet change wording (also true of the reader); captions are stored but there is no video to caption.
+- Reading level is stored but does not yet change wording (also true of the reader); captions are stored but the demo video call has no captions.
 - Chess moves are format-checked only; the engine is a scripted mock. Deferred by the owner: engine licence decision, human matches, `keep_separate`, `games` sanction scope.
 - The legal and religious texts are placeholders; there are no Spanish versions yet.
 - Docker Compose and `deploy/nginx.conf.example` are untested.

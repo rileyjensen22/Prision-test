@@ -13,6 +13,7 @@ PRIVATE_SCREEN_PREFIXES = (
     "/resident/feature/medical_requests",
     "/resident/feature/mental_health_requests",
     "/resident/feature/attorney_calls",
+    "/resident/feature/contact_requests",  # names and numbers of people, including attorneys
 )
 REDACTED_PATH = "/resident/redacted"
 _SAFE_PATH = re.compile(r"^/resident(/[A-Za-z0-9_\-]+)*$")

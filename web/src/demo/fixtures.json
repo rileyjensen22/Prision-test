@@ -48,7 +48,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-23T00:29:56.869261Z",
+                  "ends_at": "2026-10-23T01:15:36.255342Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -85,6 +85,12 @@
               "limits": {
                 "dollars_per_week": 40
               },
+              "reasons": []
+            },
+            "contact_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
               "reasons": []
             },
             "emergency_contact": {
@@ -199,7 +205,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-23T00:29:56.869261Z",
+                  "ends_at": "2026-10-23T01:15:36.255342Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -226,7 +232,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-23T00:29:56.869261Z",
+                  "ends_at": "2026-10-23T01:15:36.255342Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -249,7 +255,7 @@
               "code": "DISRUPT",
               "source": "sanction",
               "features": ["calls", "texting", "video"],
-              "ends_at": "2026-10-23T00:29:56.869261Z",
+              "ends_at": "2026-10-23T01:15:36.255342Z",
               "detail": "",
               "params": {},
               "how_to_appeal": "appeal",
@@ -257,8 +263,8 @@
               "appeal_open": false
             }
           ],
-          "generated_at": "2026-10-22T01:30:02.786218Z",
-          "valid_until": "2026-10-22T02:30:02.786218Z",
+          "generated_at": "2026-10-22T02:15:42.188740Z",
+          "valid_until": "2026-10-22T03:15:42.188740Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -911,6 +917,12 @@
               },
               "reasons": []
             },
+            "contact_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
             "emergency_contact": {
               "allowed": true,
               "baseline": true,
@@ -1057,8 +1069,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-22T01:30:03.081151Z",
-          "valid_until": "2026-10-22T02:30:03.081151Z",
+          "generated_at": "2026-10-22T02:15:42.461486Z",
+          "valid_until": "2026-10-22T03:15:42.461486Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -1720,6 +1732,12 @@
               },
               "reasons": []
             },
+            "contact_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
             "emergency_contact": {
               "allowed": true,
               "baseline": true,
@@ -1866,8 +1884,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-22T01:30:03.599203Z",
-          "valid_until": "2026-10-22T02:30:03.599203Z",
+          "generated_at": "2026-10-22T02:15:42.987498Z",
+          "valid_until": "2026-10-22T03:15:42.987498Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -2520,6 +2538,12 @@
               },
               "reasons": []
             },
+            "contact_requests": {
+              "allowed": true,
+              "baseline": true,
+              "limits": {},
+              "reasons": []
+            },
             "emergency_contact": {
               "allowed": true,
               "baseline": true,
@@ -2651,8 +2675,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-22T01:30:03.278275Z",
-          "valid_until": "2026-10-22T02:30:03.278275Z",
+          "generated_at": "2026-10-22T02:15:42.693283Z",
+          "valid_until": "2026-10-22T03:15:42.693283Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -3242,7 +3266,7 @@
     "privileged": false,
     "monitored": true,
     "max_seconds": 1800,
-    "started_at": "2026-10-22T01:30:03.807269+00:00",
+    "started_at": "2026-10-22T02:15:43.175619+00:00",
     "status": "active",
     "duration_seconds": null
   },
@@ -3251,7 +3275,7 @@
     "privileged": false,
     "monitored": true,
     "max_seconds": 1800,
-    "started_at": "2026-10-22T01:30:03.807269+00:00",
+    "started_at": "2026-10-22T02:15:43.175619+00:00",
     "status": "completed",
     "duration_seconds": 0
   }

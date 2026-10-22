@@ -201,6 +201,15 @@ def main() -> None:
         resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
         resident("cam")  # receives a cell-camera event
         resident(
+            "ola", start_points=450, contacts=("family", "attorney")
+        )  # tier 4: monitored texting and the keyword-flag review
+        resident(
+            "nia", start_points=450
+        )  # tier 4, no contacts yet: contact-request flow
+        resident(
+            "rae", start_points=1000, contacts=("family", "attorney")
+        )  # tier 6: video calls, scheduling, tamper in the browser
+        resident(
             "lee", start_points=450
         )  # tier 4, then a confirmed CAM_BLOCK: reading locks
         heavy = Actor(

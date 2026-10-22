@@ -6,10 +6,12 @@ import { RequestStaffDialog } from './RequestStaff'
 import { ResidentProvider, useResident } from './ResidentContext'
 import { Calls } from './features/Calls'
 import { Commissary } from './features/Commissary'
+import { Contacts } from './features/Contacts'
 import { Jobs } from './features/Jobs'
 import { Reading } from './features/Reading'
 import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
+import { Video } from './features/Video'
 import { Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
 import { TEXT_SIZE } from './theme'
@@ -82,6 +84,8 @@ function Shell() {
             <Route path="feature/basic_education" element={<Education />} />
             <Route path="feature/advanced_education" element={<Education />} />
             <Route path="feature/texting" element={<Texting />} />
+            <Route path="feature/video" element={<Video />} />
+            <Route path="feature/contact_requests" element={<Contacts />} />
             <Route path="feature/reading_general" element={<Reading />} />
             <Route path="feature/reading_expanded" element={<Reading />} />
             <Route path="feature/outdoor_rec" element={<Rec />} />

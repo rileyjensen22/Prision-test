@@ -8,6 +8,7 @@ import { useResident } from './ResidentContext'
 
 const ALWAYS_ORDER = [
   'attorney_calls',
+  'contact_requests',
   'legal_materials',
   'grievances_appeals',
   'medical_requests',

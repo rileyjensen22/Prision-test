@@ -11,6 +11,7 @@ BASELINE_FEATURES = frozenset(
         "religious_texts",
         "basic_education",
         "attorney_calls",
+        "contact_requests",  # asking staff to approve a contact; attorney access depends on it
         "out_of_cell_minimum",
     }
 )

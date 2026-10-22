@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
@@ -17,6 +18,7 @@ interface Msg {
   direction: 'out' | 'in'
   body: string | null
   private: boolean
+  delivery: 'queued' | 'sent' | 'delivered' | 'failed'
 }
 
 export function Texting() {
@@ -85,6 +87,9 @@ export function Texting() {
         <>
           <h2 className="text-2xl font-bold">{t('texting.contacts')}</h2>
           {contacts.length === 0 && <p>{t('texting.none')}</p>}
+          <Link to="/resident/feature/contact_requests" className="inline-block underline">
+            {t('contacts.link')}
+          </Link>
           <ul className="space-y-3">
             {contacts.map((c) => (
               <li key={c.id}>
@@ -120,6 +125,11 @@ export function Texting() {
               <p key={m.id} data-testid={`msg-${m.direction}`}>
                 <strong>{m.direction === 'out' ? t('texting.you') : t('texting.them')}: </strong>
                 {m.body ?? t('texting.sentPrivately')}
+                {m.direction === 'out' && (
+                  <span data-testid="delivery" data-state={m.delivery} className="ml-2 opacity-80">
+                    ({t(`texting.delivery.${m.delivery}`)})
+                  </span>
+                )}
               </p>
             ))}
           </Card>

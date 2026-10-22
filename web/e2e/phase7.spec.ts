@@ -178,7 +178,10 @@ test('video: covering the camera ends the call and a supervisor decides', async 
   ).json()
   expect(call.max_seconds).toBe(30 * 60)
   const tamper = await (
-    await request.post(`/api/device/video-calls/${call.call_id}/tamper`, { headers: dev })
+    await request.post(`/api/device/video-calls/${call.call_id}/tamper`, {
+      headers: dev,
+      data: { signal: 'dark', covered_ms: 3000 },
+    })
   ).json()
   expect(tamper.status).toBe('pending')
 

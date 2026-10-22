@@ -48,7 +48,7 @@ Start the browser from the system's kiosk session or a systemd service, restart 
 - **CSP** (production build): same-origin scripts, styles, images, and API calls only; no inline script, plugins, framing of other origins, or form posts. A Playwright test checks that injected inline script is blocked. Allow-listed content hosts get added to `KIOSK_CSP` in `web/vite.config.ts` when `approved_content_sources` gains external sources.
 - No links leave the app; the context menu and drag-and-drop are disabled; the UI returns home after `inactivity_return_home_seconds` (config, default 90).
 - Settings (language, text size, reading level, captions) come from the server and can only be changed by staff.
-- Serve the web app with the headers in `deploy/nginx.conf.example` (frame denial, HSTS, no sniffing, a permissions policy). The camera permission is off until the video feature is real.
+- Serve the web app with the headers in `deploy/nginx.conf.example` (frame denial, HSTS, no sniffing, a permissions policy). The camera and microphone are allowed for our own origin only (`camera=(self), microphone=(self)`) because video calls use them, and only during a call. On the kiosk browser, pre-grant them with the Chromium enterprise policies `VideoCaptureAllowedUrls` and `AudioCaptureAllowedUrls` set to the kiosk origin, so a resident never sees a permission prompt. The demo video provider loops the camera back inside the page; a real provider replaces it behind `VideoProvider`.
 
 ## Offline behavior
 

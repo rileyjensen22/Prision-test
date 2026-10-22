@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
@@ -116,6 +117,9 @@ export function Calls() {
       )}
       <h2 className="text-2xl font-bold">{t('calls.contacts')}</h2>
       {contacts?.length === 0 && <p>{t('calls.none')}</p>}
+      <Link to="/resident/feature/contact_requests" className="inline-block underline">
+        {t('contacts.link')}
+      </Link>
       <ul className="space-y-3">
         {(contacts ?? []).map((c) => (
           <li key={c.id}>
