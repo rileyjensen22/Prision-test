@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from isd.engine.features import NON_BASELINE_FEATURES, SCOPES
+from isd.engine.reading import CATALOG_FEATURE
 
 
 @dataclass(frozen=True)
@@ -165,6 +166,8 @@ def validate_rec(payload: dict) -> None:
 def validate_reading(payload: dict) -> None:
     ids = set()
     for it in payload["items"]:
-        if it["id"] in ids or it["catalog"] not in ("general", "expanded"):
+        if it["id"] in ids or it["catalog"] not in CATALOG_FEATURE:
             raise ValueError(f"{it['id']}: duplicate id or bad catalog")
         ids.add(it["id"])
+        if not it.get("source", "").strip() or not it["text"].strip():
+            raise ValueError(f"{it['id']}: needs a source and some text")

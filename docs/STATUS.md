@@ -1,18 +1,26 @@
 # Status
 
-Last audit: Phase 9 (v1.1). Everything below was checked by running the code, not from memory.
+Last updated: Phase 10 (reading). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
 | Check | Result |
 |---|---|
-| `pytest` (API, engine, security, simulation) | 248 passed |
-| `vitest` | 33 passed |
-| Playwright e2e | 37 passed |
+| `pytest` (API, engine, security, simulation) | 266 passed |
+| `vitest` | 41 passed |
+| Playwright e2e | 41 passed |
 | `make lint` (ruff, tsc, eslint, prettier) | clean (after fixing an unused import and formatting in the phone-demo files) |
 | `make secrets-check` | no secrets found |
-| `make simulate-week` | 19 of 19 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
+| `make simulate-week` | 20 of 20 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
 | Audit-chain verifier | passes (run by the simulated week; also by the audit tests) |
+
+## Phases 9 onward (v1.1)
+
+| Phase | State | Notes |
+|---|---|---|
+| 9 Audit | **Done** | Report delivered; invariant 14 violation fixed. |
+| 10 Reading and chess | **Reading built; chess deferred** | Reader (page, text size, bookmarks, progress sync, offline cache), approved-source catalog, baseline legal and religious texts, optional book points (default 0). Chess is untouched on the owner's instruction. |
+| 11 to 16 | **Not started** | |
 
 ## Phases 0 to 8
 
@@ -54,8 +62,9 @@ No `TODO` or `FIXME` markers are in the code. The gaps are the "not done" items 
 - No retention or deletion jobs; `recording_retention_days` is a config value only.
 - No encryption at rest; backups and restore were never drilled.
 - Kiosk lockdown (systemd, TTY, firewall) is documented but untested on a real device.
-- Reading level is stored but does not yet change wording; captions are stored but there is no video to caption.
-- Chess moves are format-checked only; the engine is a scripted mock.
+- Reading level is stored but does not yet change wording (also true of the reader); captions are stored but there is no video to caption.
+- Chess moves are format-checked only; the engine is a scripted mock. Deferred by the owner: engine licence decision, human matches, `keep_separate`, `games` sanction scope.
+- The legal and religious texts are placeholders; there are no Spanish versions yet.
 - Docker Compose and `deploy/nginx.conf.example` are untested.
 - Seven build-time advisories in the Tailwind 3 chain are accepted until a Tailwind 4 upgrade.
 - Compliance items in `docs/ASSUMPTIONS.md` are all unverified and need counsel.

@@ -10,6 +10,7 @@ interface Source {
   kind: string
   base_url: string | null
   active: boolean
+  protected: boolean
 }
 interface Job {
   id: number
@@ -70,7 +71,8 @@ export default function ContentJobs() {
                   <Badge tone={s.active ? 'green' : 'gray'}>{s.active ? 'approved' : 'off'}</Badge>
                 </Td>
                 <Td>
-                  {admin && (
+                  {s.protected && <Badge tone="amber">protected baseline</Badge>}
+                  {admin && !s.protected && (
                     <Btn
                       kind="plain"
                       onClick={() =>

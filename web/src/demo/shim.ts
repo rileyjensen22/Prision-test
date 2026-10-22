@@ -23,7 +23,8 @@ export const SCENARIOS: { id: Scenario; title: string; blurb: string }[] = [
   {
     id: 'tess',
     title: 'Tier 4',
-    blurb: 'Calls to family and attorney, texting, commissary and reading.',
+    blurb:
+      'Calls to family and attorney, texting, commissary, and the reader (text size, bookmarks, pages).',
   },
 ]
 
@@ -69,6 +70,8 @@ export function installShim(state: DemoState): void {
     if (method === 'GET') {
       const raw = snap[path]
       if (raw === undefined) return reply({ detail: 'not in demo' }, 404)
+      const failed = raw as { __error?: number; body?: unknown }
+      if (failed.__error) return reply(failed.body, failed.__error)
       const out = clone(raw) as Record<string, unknown>
       const base = Date.parse(
         String((sc.before['/device/view'] as { generated_at: string }).generated_at),

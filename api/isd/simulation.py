@@ -357,14 +357,18 @@ class Simulation:
                 now,
             )
         elif what == "reading":
-            self.attempt(
-                "reading",
-                reading.read_item,
-                s,
-                rid,
-                rng.choice(["tortoise-hare", "lion-mouse", "preamble", "gettysburg"]),
-                now,
+            text = rng.choice(
+                [
+                    "tortoise-hare",
+                    "lion-mouse",
+                    "preamble",
+                    "gettysburg",
+                    "psalm-23",
+                    "bill-of-rights-selected",
+                ]
             )
+            if self.attempt("reading", reading.read_item, s, rid, text, now):
+                self.attempt("reading", reading.save_progress, s, rid, text, rng.randrange(4), now)
         elif what == "chess":
             game = self.attempt(
                 "chess_game", chess.new_game, s, rid, rng.choice(["engine", "human"]), now
@@ -637,6 +641,24 @@ class Simulation:
                 f"{len(self.residents) * self.cfg.days} resident-days sampled"
                 if not bad
                 else str(bad[:3]),
+            )
+        )
+
+        # legal and religious texts stay readable for everyone, whatever sanctions are active
+        shut = []
+        for d in range(self.cfg.days):
+            when = self.cfg.start + timedelta(days=d, hours=12)
+            for rid in self.residents:
+                shut += [
+                    (rid, d, i["id"])
+                    for i in reading.list_items(s, rid, when)
+                    if i["catalog"] in ("legal", "religious") and not i["allowed"]
+                ]
+        add(
+            Check(
+                "legal and religious texts readable by everyone on every sampled day",
+                not shut,
+                "ok" if not shut else str(shut[:3]),
             )
         )
 

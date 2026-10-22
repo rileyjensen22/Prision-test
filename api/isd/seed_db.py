@@ -50,12 +50,17 @@ def ensure_config(session: Session, config: dict) -> None:
 def ensure_reference_data(session: Session) -> None:
     """The content allow-list and sample job listings (safe to run repeatedly)."""
     now = datetime.now(UTC)
-    if session.execute(select(ApprovedContentSource.id)).first() is None:
-        session.add(
-            ApprovedContentSource(
-                name="Bundled public-domain texts", kind="bundled", active=True, approved_at=now
+    have = set(session.execute(select(ApprovedContentSource.name)).scalars())
+    for name, protected in (
+        ("Bundled public-domain texts", False),
+        ("Bundled baseline texts", True),
+    ):
+        if name not in have:
+            session.add(
+                ApprovedContentSource(
+                    name=name, kind="bundled", active=True, protected=protected, approved_at=now
+                )
             )
-        )
     if session.execute(select(JobListing.id)).first() is None:
         session.add_all(
             [

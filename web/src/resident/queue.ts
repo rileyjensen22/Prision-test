@@ -2,6 +2,12 @@
 export type QueuedEvent =
   | { type: 'request'; client_id: string; payload: { kind: string; created_at: string } }
   | { type: 'appeal'; client_id: string; payload: { sanction_id: number } }
+  | { type: 'reading_progress'; client_id: string; payload: { item_id: string; page: number } }
+  | {
+      type: 'reading_bookmark'
+      client_id: string
+      payload: { item_id: string; page: number; on: boolean }
+    }
 
 const KEY = 'isd.queue'
 

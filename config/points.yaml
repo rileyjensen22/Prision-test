@@ -7,3 +7,5 @@ events:
   staff_commendation:      {points: 10,   source: staff, reason_required: true, max_per_week: 3}
   confirmed_minor_infraction: {points: -25,  source: staff}
   confirmed_major_infraction: {points: -100, source: staff}
+  # Finishing a book. 0 by default (no points); set above 0 to reward reading. Once per text, capped per week.
+  book_completed:          {points: 0,    source: system, max_per_week: 3}

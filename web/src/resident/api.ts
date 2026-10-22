@@ -61,6 +61,16 @@ export function sendEvent(token: string, ev: QueuedEvent): Promise<unknown> {
       method: 'POST',
       body: JSON.stringify({ client_id: ev.client_id, ...ev.payload }),
     })
+  if (ev.type === 'reading_progress')
+    return callApi(token, `/device/reading/${ev.payload.item_id}/progress`, {
+      method: 'PUT',
+      body: JSON.stringify({ page: ev.payload.page }),
+    })
+  if (ev.type === 'reading_bookmark')
+    return callApi(token, `/device/reading/${ev.payload.item_id}/bookmarks/${ev.payload.page}`, {
+      method: 'PUT',
+      body: JSON.stringify({ on: ev.payload.on }),
+    })
   return callApi(token, '/device/appeals', { method: 'POST', body: JSON.stringify(ev.payload) })
 }
 

@@ -117,7 +117,14 @@ class ActiveIn(BaseModel):
 @router.get("/content-sources")
 def content_sources(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> list[dict]:
     return [
-        {"id": s.id, "name": s.name, "kind": s.kind, "base_url": s.base_url, "active": s.active}
+        {
+            "id": s.id,
+            "name": s.name,
+            "kind": s.kind,
+            "base_url": s.base_url,
+            "active": s.active,
+            "protected": s.protected,
+        }
         for s in reading.list_sources(db)
     ]
 
@@ -143,6 +150,8 @@ def set_content_source_active(
         row = reading.set_source_active(db, Actor(staff.id, staff.role), source_id, body.active)
     except LookupError as e:
         raise HTTPException(404, str(e)) from e
+    except ValueError as e:
+        raise HTTPException(409, str(e)) from e
     return {"id": row.id, "active": row.active}
 
 

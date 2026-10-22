@@ -432,6 +432,8 @@ class ApprovedContentSource(Base):
     kind: Mapped[str] = mapped_column(String(10))
     base_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Holds protected-baseline content (legal, religious): cannot be switched off (invariant 1).
+    protected: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
     approved_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
@@ -442,6 +444,30 @@ class ReadingLog(Base):
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
     item_id: Mapped[str] = mapped_column(String(64))
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReadingProgress(Base):
+    """Furthest page reached per resident and text. Only ever moves forward."""
+
+    __tablename__ = "reading_progress"
+    __table_args__ = (UniqueConstraint("resident_id", "item_id", name="uq_reading_progress"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    item_id: Mapped[str] = mapped_column(String(64))
+    page: Mapped[int] = mapped_column(Integer, default=0)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ReadingBookmark(Base):
+    __tablename__ = "reading_bookmarks"
+    __table_args__ = (
+        UniqueConstraint("resident_id", "item_id", "page", name="uq_reading_bookmark"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    item_id: Mapped[str] = mapped_column(String(64))
+    page: Mapped[int] = mapped_column(Integer)
 
 
 JOB_TASK_TYPES = ("transcription_public_domain", "captioning", "labeling_non_personal")

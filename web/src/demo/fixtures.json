@@ -48,7 +48,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "ends_at": "2026-10-23T00:29:56.869261Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -199,7 +199,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "ends_at": "2026-10-23T00:29:56.869261Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -226,7 +226,7 @@
                   "code": "DISRUPT",
                   "source": "sanction",
                   "how_to_appeal": "appeal",
-                  "ends_at": "2026-10-22T11:35:40.365339Z",
+                  "ends_at": "2026-10-23T00:29:56.869261Z",
                   "detail": "",
                   "params": {},
                   "sanction_id": 1
@@ -249,7 +249,7 @@
               "code": "DISRUPT",
               "source": "sanction",
               "features": ["calls", "texting", "video"],
-              "ends_at": "2026-10-22T11:35:40.365339Z",
+              "ends_at": "2026-10-23T00:29:56.869261Z",
               "detail": "",
               "params": {},
               "how_to_appeal": "appeal",
@@ -257,8 +257,8 @@
               "appeal_open": false
             }
           ],
-          "generated_at": "2026-10-21T12:36:31.817579Z",
-          "valid_until": "2026-10-21T13:36:31.817579Z",
+          "generated_at": "2026-10-22T01:30:02.786218Z",
+          "valid_until": "2026-10-22T02:30:02.786218Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -564,7 +564,7 @@
           ]
         },
         "/device/rec": {
-          "day": "2026-10-21",
+          "day": "2026-10-22",
           "baseline_minutes": 60,
           "slots": [
             {
@@ -610,6 +610,12 @@
             "title": "The Tortoise and the Hare (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -618,6 +624,12 @@
             "title": "The Lion and the Mouse (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -626,6 +638,12 @@
             "title": "Preamble to the Constitution of the United States",
             "author": "United States, 1787 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -641,6 +659,12 @@
             "title": "The Gettysburg Address (opening)",
             "author": "Abraham Lincoln, 1863 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -650,6 +674,48 @@
                 }
               }
             ]
+          },
+          {
+            "id": "bill-of-rights-selected",
+            "title": "Bill of Rights: selected amendments (placeholder law library)",
+            "author": "United States, 1791 (public domain)",
+            "catalog": "legal",
+            "feature": "legal_materials",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "psalm-23",
+            "title": "Psalm 23 (King James Version)",
+            "author": "Traditional, 1611 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "dhammapada-twin-verses",
+            "title": "The Dhammapada: the twin verses (opening)",
+            "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 2,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
           }
         ],
         "/device/reading/tortoise-hare": {
@@ -657,14 +723,26 @@
           "title": "The Tortoise and the Hare (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless.",
+          "pages": [
+            "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/lion-mouse": {
           "id": "lion-mouse",
           "title": "The Lion and the Mouse (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help.",
+          "pages": [
+            "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/preamble": {
           "__error": 409,
@@ -683,6 +761,50 @@
               "message": "this text is locked"
             }
           }
+        },
+        "/device/reading/bill-of-rights-selected": {
+          "id": "bill-of-rights-selected",
+          "title": "Bill of Rights: selected amendments (placeholder law library)",
+          "author": "United States, 1791 (public domain)",
+          "language": "en",
+          "text": "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.\n\nSixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.\n\nEighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted.\n",
+          "pages": [
+            "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.",
+            "Sixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.",
+            "Eighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/psalm-23": {
+          "id": "psalm-23",
+          "title": "Psalm 23 (King James Version)",
+          "author": "Traditional, 1611 (public domain)",
+          "language": "en",
+          "text": "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.\n\nYea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.\n\nThou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.\n",
+          "pages": [
+            "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
+            "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+            "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/dhammapada-twin-verses": {
+          "id": "dhammapada-twin-verses",
+          "title": "The Dhammapada: the twin verses (opening)",
+          "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+          "language": "en",
+          "text": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.\n\nAll that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him.\n",
+          "pages": [
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.",
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         }
       }
     },
@@ -935,8 +1057,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-21T12:36:32.033656Z",
-          "valid_until": "2026-10-21T13:36:32.033656Z",
+          "generated_at": "2026-10-22T01:30:03.081151Z",
+          "valid_until": "2026-10-22T02:30:03.081151Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -1264,7 +1386,7 @@
           ]
         },
         "/device/rec": {
-          "day": "2026-10-21",
+          "day": "2026-10-22",
           "baseline_minutes": 60,
           "slots": [
             {
@@ -1310,6 +1432,12 @@
             "title": "The Tortoise and the Hare (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -1318,6 +1446,12 @@
             "title": "The Lion and the Mouse (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -1326,6 +1460,12 @@
             "title": "Preamble to the Constitution of the United States",
             "author": "United States, 1787 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -1341,6 +1481,12 @@
             "title": "The Gettysburg Address (opening)",
             "author": "Abraham Lincoln, 1863 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -1350,6 +1496,48 @@
                 }
               }
             ]
+          },
+          {
+            "id": "bill-of-rights-selected",
+            "title": "Bill of Rights: selected amendments (placeholder law library)",
+            "author": "United States, 1791 (public domain)",
+            "catalog": "legal",
+            "feature": "legal_materials",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "psalm-23",
+            "title": "Psalm 23 (King James Version)",
+            "author": "Traditional, 1611 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "dhammapada-twin-verses",
+            "title": "The Dhammapada: the twin verses (opening)",
+            "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 2,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
           }
         ],
         "/device/reading/tortoise-hare": {
@@ -1357,14 +1545,26 @@
           "title": "The Tortoise and the Hare (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless.",
+          "pages": [
+            "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/lion-mouse": {
           "id": "lion-mouse",
           "title": "The Lion and the Mouse (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help.",
+          "pages": [
+            "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/preamble": {
           "__error": 409,
@@ -1383,6 +1583,50 @@
               "message": "this text is locked"
             }
           }
+        },
+        "/device/reading/bill-of-rights-selected": {
+          "id": "bill-of-rights-selected",
+          "title": "Bill of Rights: selected amendments (placeholder law library)",
+          "author": "United States, 1791 (public domain)",
+          "language": "en",
+          "text": "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.\n\nSixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.\n\nEighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted.\n",
+          "pages": [
+            "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.",
+            "Sixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.",
+            "Eighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/psalm-23": {
+          "id": "psalm-23",
+          "title": "Psalm 23 (King James Version)",
+          "author": "Traditional, 1611 (public domain)",
+          "language": "en",
+          "text": "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.\n\nYea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.\n\nThou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.\n",
+          "pages": [
+            "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
+            "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+            "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/dhammapada-twin-verses": {
+          "id": "dhammapada-twin-verses",
+          "title": "The Dhammapada: the twin verses (opening)",
+          "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+          "language": "en",
+          "text": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.\n\nAll that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him.\n",
+          "pages": [
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.",
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/messages?contact_id=1": [],
         "/device/messages?contact_id=2": []
@@ -1622,8 +1866,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-21T12:36:32.565052Z",
-          "valid_until": "2026-10-21T13:36:32.565052Z",
+          "generated_at": "2026-10-22T01:30:03.599203Z",
+          "valid_until": "2026-10-22T02:30:03.599203Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -1951,7 +2195,7 @@
           ]
         },
         "/device/rec": {
-          "day": "2026-10-21",
+          "day": "2026-10-22",
           "baseline_minutes": 60,
           "slots": [
             {
@@ -1997,6 +2241,12 @@
             "title": "The Tortoise and the Hare (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -2005,6 +2255,12 @@
             "title": "The Lion and the Mouse (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -2013,6 +2269,12 @@
             "title": "Preamble to the Constitution of the United States",
             "author": "United States, 1787 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -2028,6 +2290,12 @@
             "title": "The Gettysburg Address (opening)",
             "author": "Abraham Lincoln, 1863 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": false,
             "reasons": [
               {
@@ -2037,6 +2305,48 @@
                 }
               }
             ]
+          },
+          {
+            "id": "bill-of-rights-selected",
+            "title": "Bill of Rights: selected amendments (placeholder law library)",
+            "author": "United States, 1791 (public domain)",
+            "catalog": "legal",
+            "feature": "legal_materials",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "psalm-23",
+            "title": "Psalm 23 (King James Version)",
+            "author": "Traditional, 1611 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "dhammapada-twin-verses",
+            "title": "The Dhammapada: the twin verses (opening)",
+            "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 2,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
           }
         ],
         "/device/reading/tortoise-hare": {
@@ -2044,14 +2354,26 @@
           "title": "The Tortoise and the Hare (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless.",
+          "pages": [
+            "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/lion-mouse": {
           "id": "lion-mouse",
           "title": "The Lion and the Mouse (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help.",
+          "pages": [
+            "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/preamble": {
           "__error": 409,
@@ -2070,6 +2392,50 @@
               "message": "this text is locked"
             }
           }
+        },
+        "/device/reading/bill-of-rights-selected": {
+          "id": "bill-of-rights-selected",
+          "title": "Bill of Rights: selected amendments (placeholder law library)",
+          "author": "United States, 1791 (public domain)",
+          "language": "en",
+          "text": "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.\n\nSixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.\n\nEighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted.\n",
+          "pages": [
+            "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.",
+            "Sixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.",
+            "Eighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/psalm-23": {
+          "id": "psalm-23",
+          "title": "Psalm 23 (King James Version)",
+          "author": "Traditional, 1611 (public domain)",
+          "language": "en",
+          "text": "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.\n\nYea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.\n\nThou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.\n",
+          "pages": [
+            "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
+            "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+            "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/dhammapada-twin-verses": {
+          "id": "dhammapada-twin-verses",
+          "title": "The Dhammapada: the twin verses (opening)",
+          "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+          "language": "en",
+          "text": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.\n\nAll that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him.\n",
+          "pages": [
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.",
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/messages?contact_id=1": [],
         "/device/messages?contact_id=2": []
@@ -2285,8 +2651,8 @@
             }
           ],
           "locks": [],
-          "generated_at": "2026-10-21T12:36:32.274205Z",
-          "valid_until": "2026-10-21T13:36:32.274205Z",
+          "generated_at": "2026-10-22T01:30:03.278275Z",
+          "valid_until": "2026-10-22T02:30:03.278275Z",
           "simulation": false,
           "ui": {
             "inactivity_return_home_seconds": 90
@@ -2605,7 +2971,7 @@
           ]
         },
         "/device/rec": {
-          "day": "2026-10-21",
+          "day": "2026-10-22",
           "baseline_minutes": 60,
           "slots": [
             {
@@ -2651,6 +3017,12 @@
             "title": "The Tortoise and the Hare (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -2659,6 +3031,12 @@
             "title": "The Lion and the Mouse (retelling)",
             "author": "Traditional fable, retold",
             "catalog": "general",
+            "feature": "reading_general",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -2667,6 +3045,12 @@
             "title": "Preamble to the Constitution of the United States",
             "author": "United States, 1787 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           },
@@ -2675,6 +3059,54 @@
             "title": "The Gettysburg Address (opening)",
             "author": "Abraham Lincoln, 1863 (public domain)",
             "catalog": "expanded",
+            "feature": "reading_expanded",
+            "language": "en",
+            "pages": 1,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "bill-of-rights-selected",
+            "title": "Bill of Rights: selected amendments (placeholder law library)",
+            "author": "United States, 1791 (public domain)",
+            "catalog": "legal",
+            "feature": "legal_materials",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "psalm-23",
+            "title": "Psalm 23 (King James Version)",
+            "author": "Traditional, 1611 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 3,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
+            "allowed": true,
+            "reasons": []
+          },
+          {
+            "id": "dhammapada-twin-verses",
+            "title": "The Dhammapada: the twin verses (opening)",
+            "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+            "catalog": "religious",
+            "feature": "religious_texts",
+            "language": "en",
+            "pages": 2,
+            "page": 0,
+            "completed": false,
+            "bookmarks": 0,
             "allowed": true,
             "reasons": []
           }
@@ -2684,28 +3116,96 @@
           "title": "The Tortoise and the Hare (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          "text": "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless.",
+          "pages": [
+            "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/lion-mouse": {
           "id": "lion-mouse",
           "title": "The Lion and the Mouse (retelling)",
           "author": "Traditional fable, retold",
           "language": "en",
-          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          "text": "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help.",
+          "pages": [
+            "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/preamble": {
           "id": "preamble",
           "title": "Preamble to the Constitution of the United States",
           "author": "United States, 1787 (public domain)",
           "language": "en",
-          "text": "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
+          "text": "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America.",
+          "pages": [
+            "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/reading/gettysburg": {
           "id": "gettysburg",
           "title": "The Gettysburg Address (opening)",
           "author": "Abraham Lincoln, 1863 (public domain)",
           "language": "en",
-          "text": "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+          "text": "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.",
+          "pages": [
+            "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/bill-of-rights-selected": {
+          "id": "bill-of-rights-selected",
+          "title": "Bill of Rights: selected amendments (placeholder law library)",
+          "author": "United States, 1791 (public domain)",
+          "language": "en",
+          "text": "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.\n\nSixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.\n\nEighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted.\n",
+          "pages": [
+            "Fourth Amendment: The right of the people to be secure in their persons, houses, papers, and effects, against unreasonable searches and seizures, shall not be violated, and no Warrants shall issue, but upon probable cause, supported by Oath or affirmation, and particularly describing the place to be searched, and the persons or things to be seized.",
+            "Sixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.",
+            "Eighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/psalm-23": {
+          "id": "psalm-23",
+          "title": "Psalm 23 (King James Version)",
+          "author": "Traditional, 1611 (public domain)",
+          "language": "en",
+          "text": "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.\n\nYea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.\n\nThou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.\n",
+          "pages": [
+            "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
+            "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+            "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
+        },
+        "/device/reading/dhammapada-twin-verses": {
+          "id": "dhammapada-twin-verses",
+          "title": "The Dhammapada: the twin verses (opening)",
+          "author": "Translated by F. Max M\u00fcller, 1881 (public domain)",
+          "language": "en",
+          "text": "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.\n\nAll that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him.\n",
+          "pages": [
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.",
+            "All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him."
+          ],
+          "page": 0,
+          "completed": false,
+          "bookmarks": []
         },
         "/device/messages?contact_id=6": [],
         "/device/messages?contact_id=7": []
@@ -2742,7 +3242,7 @@
     "privileged": false,
     "monitored": true,
     "max_seconds": 1800,
-    "started_at": "2026-10-21T12:36:32.752163+00:00",
+    "started_at": "2026-10-22T01:30:03.807269+00:00",
     "status": "active",
     "duration_seconds": null
   },
@@ -2751,7 +3251,7 @@
     "privileged": false,
     "monitored": true,
     "max_seconds": 1800,
-    "started_at": "2026-10-21T12:36:32.752163+00:00",
+    "started_at": "2026-10-22T01:30:03.807269+00:00",
     "status": "completed",
     "duration_seconds": 0
   }

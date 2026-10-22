@@ -595,7 +595,11 @@ def test_reading_catalogs_follow_tiers_and_the_allow_list(
     with pytest.raises(reading.ReadingDenied) as e:
         reading.read_item(owner, rid, "tortoise-hare", NOW)
     assert e.value.code == "SOURCE_NOT_APPROVED"
-    assert not any(i["allowed"] for i in reading.list_items(owner, rid, NOW))
+    # only the protected baseline texts (legal, religious) stay open without an approved source
+    assert {i["catalog"] for i in reading.list_items(owner, rid, NOW) if i["allowed"]} == {
+        "legal",
+        "religious",
+    }
     with pytest.raises(ValueError):
         reading.add_source(owner, admin, "Some website", "external", "http://insecure.example", NOW)
     ok = reading.add_source(

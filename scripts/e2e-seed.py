@@ -11,6 +11,7 @@ from alembic.config import Config
 from isd import settings
 from isd.auth import hash_device_token, hash_password
 from isd.config_loader import load_config
+from isd.engine.authority import Evidence
 from isd.models import (
     CallRecord,
     Cell,
@@ -199,6 +200,9 @@ def main() -> None:
         )  # tier 4: texting, reading
         resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
         resident("cam")  # receives a cell-camera event
+        resident(
+            "lee", start_points=450
+        )  # tier 4, then a confirmed CAM_BLOCK: reading locks
         heavy = Actor(
             s.execute(select(Staff.id).where(Staff.username == "e2e_heavy")).scalar(),
             "officer",
@@ -210,6 +214,30 @@ def main() -> None:
             sanctions.issue_sanction(
                 s, heavy, zed_id, "CELL_MESS", now - timedelta(minutes=10 + i)
             )
+
+        def staff_actor(username, role):
+            return Actor(
+                s.execute(select(Staff.id).where(Staff.username == username)).scalar(),
+                role,
+            )
+
+        lee_id = s.execute(
+            select(Resident.id).where(Resident.code == "E2E-LEE")
+        ).scalar()
+        lock = sanctions.issue_sanction(
+            s,
+            staff_actor("e2e_officer", "officer"),
+            lee_id,
+            "CAM_BLOCK",
+            now - timedelta(hours=2),
+            Evidence(
+                "second_staff_report",
+                reporter_id=staff_actor("e2e_colleague", "officer").id,
+            ),
+        )
+        sanctions.confirm_sanction(
+            s, staff_actor("e2e_sup1", "supervisor"), lock.id, now - timedelta(hours=1)
+        )
     fixtures = {
         "tokens": tokens,
         "staff": STAFF,

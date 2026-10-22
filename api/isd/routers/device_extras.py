@@ -158,6 +158,41 @@ def reading_item(
         raise _err(e) from e
 
 
+class ProgressIn(BaseModel):
+    page: int = Field(ge=0, le=100_000)
+
+
+class BookmarkIn(BaseModel):
+    on: bool
+
+
+@router.put("/reading/{item_id}/progress")
+def reading_progress(
+    item_id: str,
+    body: ProgressIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    try:
+        return reading.save_progress(db, ctx.resident_id, item_id, body.page, _now())
+    except reading.ReadingDenied as e:
+        raise _err(e) from e
+
+
+@router.put("/reading/{item_id}/bookmarks/{page}")
+def reading_bookmark(
+    item_id: str,
+    page: int,
+    body: BookmarkIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    try:
+        return reading.set_bookmark(db, ctx.resident_id, item_id, page, body.on, _now())
+    except reading.ReadingDenied as e:
+        raise _err(e) from e
+
+
 # ---------------- jobs (voluntary) ----------------
 @router.get("/jobs")
 def job_list(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
