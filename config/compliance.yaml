@@ -21,3 +21,5 @@ video_booking_max_minutes: 30
 video_start_early_minutes: 5
 researcher_export_enabled: false
 outcomes_min_cell: 5
+device_lock_max_hours: 24
+pairing_code_minutes: 15

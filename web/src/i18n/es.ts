@@ -76,6 +76,7 @@ const es: Dict = {
     appealDuplicate: 'Ya tiene una apelación abierta para esto.',
   },
   code: {
+    DEVICE_LOCK: 'Pausado por el personal por ahora',
     PREREQUISITE: 'Termine primero un curso anterior',
     DISRUPT: 'Conducta perturbadora',
     CELL_MESS: 'Limpieza de la celda',
@@ -131,6 +132,13 @@ const es: Dict = {
     resourcesNote:
       'Estos son los únicos contactos externos que se muestran aquí. Pida ayuda al personal para llamar.',
     needsConnection: 'Esta página necesita conexión.',
+  },
+  pairing: {
+    title: 'Configurar este dispositivo',
+    help: 'Pida al personal un código de configuración y escríbalo aquí.',
+    code: 'Código de configuración',
+    connect: 'Conectar',
+    failed: 'Ese código no funcionó. Revíselo o pida uno nuevo al personal.',
   },
   education: {
     title: 'Aprendizaje',

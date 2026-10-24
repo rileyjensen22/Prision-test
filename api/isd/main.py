@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
-from isd import settings
+from isd import limits, settings
+from isd.logging_config import RequestLog, configure_logging
 from isd.middleware import BodyLimit, SecurityHeaders
 from isd.routers import (
     audit,
@@ -14,6 +15,7 @@ from isd.routers import (
     mock,
     staff_comms,
     staff_extras,
+    staff_fleet,
     staff_floor,
     staff_intake,
     staff_ops,
@@ -31,9 +33,12 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="ISD v1 API", lifespan=lifespan)
+configure_logging()
+app = FastAPI(title="ISD v1 API", lifespan=lifespan, dependencies=[Depends(limits.ip_limit)])
 app.add_middleware(BodyLimit, max_bytes=settings.MAX_BODY_BYTES)
-app.add_middleware(SecurityHeaders)  # added last, so it wraps everything (including 413s)
+app.add_middleware(SecurityHeaders)  # wraps the body limit, so 413s get the headers too
+# Added last, so it is outermost and logs every response, including 413s.
+app.add_middleware(RequestLog)
 app.include_router(auth.router)
 app.include_router(audit.router)
 app.include_router(config.router)
@@ -47,6 +52,7 @@ app.include_router(staff_extras.router)
 app.include_router(staff_floor.router)
 app.include_router(staff_comms.router)
 app.include_router(view_as.router)
+app.include_router(staff_fleet.router)
 app.include_router(staff_intake.router)
 app.include_router(staff_outcomes.router)
 

@@ -1,0 +1,6 @@
+[Unit]
+Description=ISD kiosk watchdog check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/isd-kiosk/watchdog.sh

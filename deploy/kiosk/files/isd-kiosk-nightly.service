@@ -1,0 +1,6 @@
+[Unit]
+Description=ISD kiosk nightly restart (clears browser memory growth)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl restart isd-kiosk.service

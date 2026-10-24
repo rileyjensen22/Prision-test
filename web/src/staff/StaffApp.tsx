@@ -19,6 +19,7 @@ import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
 import ViewAs from './pages/ViewAs'
 import Certificates from './pages/Certificates'
+import Devices from './pages/Devices'
 import Intake from './pages/Intake'
 import Outcomes from './pages/Outcomes'
 import Welfare from './pages/Welfare'
@@ -27,6 +28,7 @@ const SUPERVISION: Role[] = ['supervisor', 'admin', 'auditor']
 const NAV: { to: string; label: string; roles?: Role[] }[] = [
   { to: '/staff', label: 'Dashboard' },
   { to: '/staff/roster', label: 'Roster' },
+  { to: '/staff/devices', label: 'Devices' },
   { to: '/staff/intake', label: 'Intake', roles: ['supervisor', 'admin'] },
   { to: '/staff/out-of-cell', label: 'Out of cell' },
   { to: '/staff/schedule', label: 'Schedule' },
@@ -87,6 +89,7 @@ function Shell() {
         <Routes>
           <Route index element={<Dashboard />} />
           <Route path="roster" element={<Roster />} />
+          <Route path="devices" element={<Devices />} />
           <Route
             path="intake"
             element={

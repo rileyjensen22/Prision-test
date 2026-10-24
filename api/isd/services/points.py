@@ -28,6 +28,18 @@ def total_points(session: Session, resident_id: int, at_time: datetime) -> int:
     )
 
 
+def total_points_many(
+    session: Session, resident_ids: list[int], at_time: datetime
+) -> dict[int, int]:
+    rows = session.execute(
+        select(PointEvent.resident_id, func.sum(PointEvent.points))
+        .where(PointEvent.resident_id.in_(resident_ids), PointEvent.created_at <= at_time)
+        .group_by(PointEvent.resident_id)
+    ).all()
+    found = {rid: int(total or 0) for rid, total in rows}
+    return {rid: found.get(rid, 0) for rid in resident_ids}
+
+
 def record_points(
     session: Session,
     actor: Actor,

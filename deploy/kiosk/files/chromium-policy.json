@@ -1,0 +1,25 @@
+{
+  "URLBlocklist": ["*"],
+  "URLAllowlist": [
+    "https://@ISD_HOST@/resident",
+    "https://@ISD_HOST@/assets",
+    "https://@ISD_HOST@/api"
+  ],
+  "VideoCaptureAllowedUrls": ["https://@ISD_HOST@"],
+  "AudioCaptureAllowedUrls": ["https://@ISD_HOST@"],
+  "DeveloperToolsAvailability": 2,
+  "DownloadRestrictions": 3,
+  "PasswordManagerEnabled": false,
+  "PrintingEnabled": false,
+  "TranslateEnabled": false,
+  "IncognitoModeAvailability": 1,
+  "BrowserSignin": 0,
+  "SyncDisabled": true,
+  "DefaultPopupsSetting": 2,
+  "ExtensionInstallBlocklist": ["*"],
+  "AutofillAddressEnabled": false,
+  "AutofillCreditCardEnabled": false,
+  "MetricsReportingEnabled": false,
+  "ShowHomeButton": false,
+  "BookmarkBarEnabled": false
+}

@@ -66,7 +66,6 @@ def current_staff(
     authorization: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ) -> Staff:
-    limits.enforce("ip", limits.client_ip(request))
     scheme, _, token = (authorization or "").partition(" ")
     staff_id = parse_token(token) if scheme.lower() == "bearer" else None
     staff = db.get(Staff, staff_id) if staff_id else None
@@ -105,8 +104,6 @@ def current_device(
 ) -> DeviceContext:
     from isd.models import Device, DeviceAssignment
 
-    limits.enforce("ip", limits.client_ip(request))
-
     device = (
         db.execute(
             select(Device).where(Device.token_hash == hash_device_token(x_device_token or ""))
@@ -129,3 +126,27 @@ def current_device(
 
 
 current_device.device_auth = True  # marker checked by the route-guard test
+
+
+def current_paired_device(
+    request: Request,
+    x_device_token: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    """A kiosk that has its token but may not be assigned to a resident yet (heartbeats)."""
+    from isd.models import Device
+
+    device = (
+        db.execute(
+            select(Device).where(Device.token_hash == hash_device_token(x_device_token or ""))
+        ).scalar()
+        if x_device_token
+        else None
+    )
+    if device is None:
+        raise HTTPException(401, "unknown device")
+    limits.enforce("device", f"device:{device.id}")
+    return device
+
+
+current_paired_device.device_auth = True  # type: ignore[attr-defined]

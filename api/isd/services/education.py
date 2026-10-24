@@ -116,6 +116,14 @@ def _titles(session: Session, codes: list[str]) -> dict[str, dict]:
 
 def list_courses(session: Session, resident_id: int, now: datetime) -> list[dict]:
     out = []
+    ent = get_entitlements(session, resident_id, now)  # once, not once per course
+    done = _completed_codes(session, resident_id)
+    progress = {
+        p.course_code: p
+        for p in session.execute(
+            select(CourseProgress).where(CourseProgress.resident_id == resident_id)
+        ).scalars()
+    }
     certs = {
         c.course_code: c.serial
         for c in session.execute(
@@ -123,9 +131,9 @@ def list_courses(session: Session, resident_id: int, now: datetime) -> list[dict
         ).scalars()
     }
     for c in _courses(session).values():
-        _, fe = _gate(session, resident_id, c, now)
-        p = _progress_readonly(session, resident_id, c["code"])
-        missing = prerequisites_missing(session, resident_id, c)
+        fe = ent.features[LEVEL_TO_FEATURE[c["level"]]]
+        p = progress.get(c["code"])
+        missing = [q for q in c["prerequisites"] if q not in done]
         reasons = [
             {"code": r.code, "params": r.params, "ends_at": r.ends_at, "source": r.source}
             for r in fe.reasons

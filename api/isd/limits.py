@@ -32,6 +32,7 @@ def reset_defaults() -> None:
     configure("device", _env("DEVICE_MAX_PER_MINUTE", 300), 60)
     configure("staff", _env("STAFF_MAX_PER_MINUTE", 600), 60)
     configure("ip", _env("IP_MAX_PER_MINUTE", 1200), 60)
+    configure("pairing", _env("PAIRING_MAX_PER_MINUTE_IP", 10), 60)
 
 
 reset_defaults()
@@ -47,6 +48,11 @@ def _too_many(lim: SlidingWindowLimiter, key: str) -> HTTPException:
     return HTTPException(
         429, "too many requests", headers={"Retry-After": str(lim.retry_after(key))}
     )
+
+
+def ip_limit(request: Request) -> None:
+    """Applied to every route (FastAPI app dependency), public ones included."""
+    enforce("ip", client_ip(request))
 
 
 def enforce(name: str, key: str) -> None:

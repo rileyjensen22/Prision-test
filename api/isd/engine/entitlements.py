@@ -46,6 +46,17 @@ class SanctionFact:
 
 
 @dataclass(frozen=True)
+class DeviceLockFact:
+    """Staff paused this resident's device (maintenance, security). Not a sanction: no points,
+    no tier effect, no appeal; the resident is told to ask staff. Always has an end time."""
+
+    id: int
+    starts_at: datetime
+    ends_at: datetime
+    reason_code: str = "DEVICE_LOCK"
+
+
+@dataclass(frozen=True)
 class OffenseFact:
     category: str
     next_review_at: datetime | None = None
@@ -58,6 +69,7 @@ class ResidentFacts:
     offenses: tuple[OffenseFact, ...] = ()
     sanctions: tuple[SanctionFact, ...] = ()
     blocked_contact_ids: tuple[int, ...] = ()
+    device_locks: tuple[DeviceLockFact, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -168,6 +180,13 @@ def compute_entitlements(
                 Reason(s.reason_code, "sanction", APPEAL, ends_at=s.ends_at, ref_id=s.id)
             )
 
+    for d in facts.device_locks:  # step 4b: a staff device lock, non-baseline only
+        if d.starts_at <= at_time < d.ends_at:
+            for feature in NON_BASELINE_FEATURES:
+                reasons[feature].append(
+                    Reason(d.reason_code, "device", ASK_STAFF, ends_at=d.ends_at, ref_id=d.id)
+                )
+
     features: dict[str, FeatureEntitlement] = {}
     for feature in NON_BASELINE_FEATURES:
         ok = limits[feature] is not None and not reasons[feature]
@@ -183,7 +202,8 @@ def compute_entitlements(
             True, lim if feature == "out_of_cell_minimum" else {}
         )
 
-    boundaries = [t for s in facts.sanctions for t in (s.starts_at, s.ends_at) if t > at_time]
+    timed = [*facts.sanctions, *facts.device_locks]
+    boundaries = [t for s in timed for t in (s.starts_at, s.ends_at) if t > at_time]
     return Entitlements(
         at_time=at_time,
         earned_tier=facts.earned_tier,

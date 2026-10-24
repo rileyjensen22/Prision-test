@@ -15,6 +15,7 @@ PUBLIC = {
     "/health",
     "/auth/login",
     "/auth/sso",
+    "/device/pair",
     "/docs",
     "/redoc",
     "/openapi.json",

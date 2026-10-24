@@ -1,0 +1,10 @@
+[Unit]
+Description=Restart the ISD kiosk once a night
+
+[Timer]
+OnCalendar=*-*-* 04:10:00
+RandomizedDelaySec=20min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

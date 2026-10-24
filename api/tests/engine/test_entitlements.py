@@ -1,9 +1,11 @@
+from dataclasses import replace
 from datetime import timedelta
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from isd.engine.entitlements import (
+    DeviceLockFact,
     OffenseFact,
     ResidentFacts,
     SanctionFact,
@@ -37,6 +39,14 @@ def facts(draw):
         ),
         sanctions=tuple(draw(st.lists(sanctions(), max_size=5))),
         blocked_contact_ids=tuple(draw(st.lists(st.integers(1, 9), max_size=3))),
+        device_locks=tuple(
+            DeviceLockFact(
+                id=draw(st.integers(1, 99)),
+                starts_at=T0 + timedelta(hours=draw(st.integers(-50, 50))),
+                ends_at=T0 + timedelta(hours=draw(st.integers(51, 200))),
+            )
+            for _ in range(draw(st.integers(0, 2)))
+        ),
     )
 
 
@@ -68,9 +78,7 @@ def test_every_lock_has_reason_and_appeal_path(cfg, f):
 @given(facts(), sanctions())
 def test_adding_a_sanction_never_grants_more(cfg, f, extra):
     before = compute_entitlements(f, cfg, T0)
-    more = ResidentFacts(
-        f.earned_tier, f.prior_returns, f.offenses, f.sanctions + (extra,), f.blocked_contact_ids
-    )
+    more = replace(f, sanctions=f.sanctions + (extra,))
     after = compute_entitlements(more, cfg, T0)
     for feature in NON_BASELINE_FEATURES:
         assert after.allowed(feature) <= before.allowed(feature)

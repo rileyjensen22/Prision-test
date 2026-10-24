@@ -22,8 +22,12 @@ from isd.models import (
 )
 from isd.services import out_of_cell, welfare
 from isd.services.config_store import get_current
-from isd.services.entitlement_service import get_entitlements, load_engine_config
-from isd.services.points import total_points
+from isd.services.entitlement_service import (
+    get_entitlements,
+    get_entitlements_many,
+    load_engine_config,
+)
+from isd.services.points import total_points, total_points_many
 
 DEFAULT_OUTLIER = {"window_days": 30, "z_threshold": 2.0, "min_peers": 3, "min_count": 3}
 EVENT_ACTIONS = (
@@ -60,56 +64,72 @@ def colleagues(session: Session) -> list[dict]:
 
 
 def roster(session: Session, now: datetime) -> list[dict]:
+    """One row per resident. A fixed number of queries however many residents there are."""
     cfg = load_engine_config(session)
     offline_after = timedelta(
         minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
     )
-    out = []
     residents = session.execute(select(Resident).order_by(Resident.code)).scalars().all()
-    for r in residents:
-        asg = session.execute(
-            select(DeviceAssignment, Device, Cell)
+    ids = [r.id for r in residents]
+    placed = {
+        rid: (device, cell)
+        for rid, device, cell in session.execute(
+            select(DeviceAssignment.resident_id, Device, Cell)
             .join(Device, Device.id == DeviceAssignment.device_id)
             .join(Cell, Cell.id == DeviceAssignment.cell_id)
-            .where(DeviceAssignment.resident_id == r.id, DeviceAssignment.ended_at.is_(None))
-        ).first()
-        ent = get_entitlements(session, r.id, now, cfg)
-        active = session.execute(
-            select(Sanction).where(
-                Sanction.resident_id == r.id, Sanction.status == "active", Sanction.ends_at > now
-            )
-        ).scalars()
-        pending = session.execute(
-            select(func.count()).where(Sanction.resident_id == r.id, Sanction.status == "pending")
-        ).scalar()
-        open_appeals = session.execute(
-            select(func.count())
+            .where(DeviceAssignment.ended_at.is_(None))
+        )
+    }
+    ents = get_entitlements_many(session, ids, now, cfg)
+    active: dict[int, list[Sanction]] = {}
+    for s in session.execute(
+        select(Sanction).where(Sanction.status == "active", Sanction.ends_at > now)
+    ).scalars():
+        active.setdefault(s.resident_id, []).append(s)
+    pending = dict(
+        session.execute(
+            select(Sanction.resident_id, func.count())
+            .where(Sanction.status == "pending")
+            .group_by(Sanction.resident_id)
+        ).all()
+    )
+    open_appeals = dict(
+        session.execute(
+            select(Sanction.resident_id, func.count())
             .select_from(Appeal)
             .join(Sanction, Sanction.id == Appeal.sanction_id)
-            .where(Sanction.resident_id == r.id, Appeal.status == "open")
-        ).scalar()
-        last_sync = asg[1].last_sync_at if asg else None
+            .where(Appeal.status == "open")
+            .group_by(Sanction.resident_id)
+        ).all()
+    )
+    points = total_points_many(session, ids, now)
+    out = []
+    for r in residents:
+        device, cell = placed.get(r.id, (None, None))
+        ent = ents[r.id]
+        last_sync = device.last_sync_at if device else None
         out.append(
             {
                 "resident_id": r.id,
                 "code": r.code,
                 "display_name": r.display_name,
-                "cell": asg[2].code if asg else None,
-                "device": asg[1].code if asg else None,
+                "cell": cell.code if cell else None,
+                "device": device.code if device else None,
                 "last_sync_at": last_sync.isoformat() if last_sync else None,
-                "offline": bool(asg) and (last_sync is None or now - last_sync > offline_after),
+                "offline": device is not None
+                and (last_sync is None or now - last_sync > offline_after),
                 "tier": {
                     "earned": ent.earned_tier,
                     "ceiling": ent.ceiling_tier,
                     "effective": ent.effective_tier,
                 },
-                "points": total_points(session, r.id, now),
+                "points": points.get(r.id, 0),
                 "active_sanctions": [
                     {"id": s.id, "code": s.reason_code, "ends_at": s.ends_at.isoformat()}
-                    for s in active
+                    for s in active.get(r.id, [])
                 ],
-                "pending_sanctions": pending,
-                "open_appeals": open_appeals,
+                "pending_sanctions": pending.get(r.id, 0),
+                "open_appeals": open_appeals.get(r.id, 0),
             }
         )
     return out
@@ -364,7 +384,7 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
     ro = roster(session, now)
     appeals = appeals_queue(session, viewer_id, viewer_role, now)
     show_outliers = viewer_role in ("supervisor", "admin", "auditor")
-    flags = welfare.all_flags(session, now)
+    flags = welfare.all_flags(session, now, max_age_seconds=300)  # polled: not every refresh
     return {
         "residents": len(ro),
         "pending_confirmations": session.execute(

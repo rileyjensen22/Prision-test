@@ -1,0 +1,28 @@
+[Unit]
+Description=ISD resident kiosk (Chromium in kiosk mode)
+After=network-online.target systemd-user-sessions.service
+Wants=network-online.target
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+StartLimitIntervalSec=0
+
+[Service]
+User=isd-kiosk
+Group=isd-kiosk
+PAMName=login
+TTYPath=/dev/tty1
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+EnvironmentFile=/etc/isd-kiosk/kiosk.env
+ExecStart=/usr/bin/xinit /usr/local/lib/isd-kiosk/session.sh -- /usr/bin/Xorg :0 vt1 -nolisten tcp -nocursor -noreset
+# Come back whatever happens, forever: a kiosk that stays down is worse than one that flaps.
+Restart=always
+RestartSec=2
+# Nothing here needs to see the rest of the system.
+NoNewPrivileges=true
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=graphical.target

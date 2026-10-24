@@ -90,6 +90,8 @@ class Device(Base):
     token_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     current_screen: Mapped[str | None] = mapped_column(String(100), nullable=True)
     screen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    health: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # last heartbeat body
+    health_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class DeviceAssignment(Base):
@@ -865,3 +867,42 @@ class OutcomeRecord(Base):
     corrects_id: Mapped[int | None] = mapped_column(ForeignKey("outcome_records.id"), nullable=True)
     entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     entered_at: Mapped[datetime] = _now()
+
+
+class DevicePairing(Base):
+    """A short-lived, single-use code that lets a new kiosk fetch its own token. Only a hash."""
+
+    __tablename__ = "device_pairings"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_id: Mapped[int] = mapped_column(ForeignKey("devices.id"), index=True)
+    code_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    created_at: Mapped[datetime] = _now()
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class DeviceCommand(Base):
+    """Staff actions on a device: pause (lock) until a time, lift it, or restart the kiosk app."""
+
+    __tablename__ = "device_commands"
+    __table_args__ = (
+        CheckConstraint("kind IN ('lock', 'unlock', 'restart')", name="ck_device_command_kind"),
+        CheckConstraint("kind <> 'lock' OR ends_at IS NOT NULL", name="ck_lock_has_end"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_id: Mapped[int] = mapped_column(ForeignKey("devices.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(8))
+    reason: Mapped[str] = mapped_column(String(200))
+    issued_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    issued_at: Mapped[datetime] = _now()
+    ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class SweepState(Base):
+    """When a periodic check last ran, so a busy screen does not re-run it on every refresh."""
+
+    __tablename__ = "sweep_state"
+    name: Mapped[str] = mapped_column(String(32), primary_key=True)
+    last_run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

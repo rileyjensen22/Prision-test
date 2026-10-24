@@ -4,7 +4,7 @@ missing out-of-cell time. Computed on demand; acknowledgements are recorded and 
 from collections import Counter
 from datetime import date, datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from isd.engine.welfare import (
@@ -25,6 +25,7 @@ from isd.models import (
     ReadingLog,
     Resident,
     StaffRequest,
+    SweepState,
     WelfareAck,
     WelfareFlag,
 )
@@ -145,6 +146,18 @@ def _tracked(session: Session, rid: int, now: datetime) -> int | None:
     return None if first is None else (now.date() - first.date()).days
 
 
+_SYNC_NAME = "welfare_sync"
+_SYNC_LOCK_KEY = 7_160_001
+
+
+def _mark_synced(session: Session, now: datetime) -> None:
+    state = session.get(SweepState, _SYNC_NAME)
+    if state is None:
+        session.add(SweepState(name=_SYNC_NAME, last_run_at=now))
+    else:
+        state.last_run_at = now
+
+
 def sync_flags(session: Session, now: datetime) -> dict:
     """Makes the stored flags match what is true now: raises new ones, escalates the ones nobody
     has acknowledged in time, and clears the ones that no longer apply. Safe to repeat."""
@@ -211,13 +224,30 @@ def sync_flags(session: Session, now: datetime) -> dict:
             else:
                 by_id[row_id].status, by_id[row_id].cleared_at = "cleared", now
                 cleared += 1
+    _mark_synced(session, now)
     session.flush()
     return {"raised": raised, "escalated": escalated, "cleared": cleared}
 
 
-def all_flags(session: Session, now: datetime) -> list[dict]:
-    """Open flags (not yet acknowledged), grouped by resident. Escalated ones say so."""
+def sync_if_stale(session: Session, now: datetime, max_age_seconds: int) -> bool:
+    """Runs `sync_flags` unless it ran recently (by any process). Returns whether it ran.
+
+    A dashboard that refreshes every few seconds would otherwise redo the whole check each time.
+    The scheduled sweep and the Welfare page always run it; this is only for polling screens."""
+    session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _SYNC_LOCK_KEY})
+    state = session.get(SweepState, _SYNC_NAME)
+    if state is not None and (now - state.last_run_at).total_seconds() < max_age_seconds:
+        return False
     sync_flags(session, now)
+    return True
+
+
+def all_flags(session: Session, now: datetime, max_age_seconds: int | None = None) -> list[dict]:
+    """Open flags (not yet acknowledged), grouped by resident. Escalated ones say so."""
+    if max_age_seconds is None:
+        sync_flags(session, now)
+    else:
+        sync_if_stale(session, now, max_age_seconds)
     rows = session.execute(
         select(WelfareFlag, Resident.code)
         .join(Resident, Resident.id == WelfareFlag.resident_id)

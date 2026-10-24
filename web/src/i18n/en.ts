@@ -71,6 +71,7 @@ const en = {
     appealDuplicate: 'You already have an appeal open for this.',
   },
   code: {
+    DEVICE_LOCK: 'Paused by staff for now',
     PREREQUISITE: 'Finish an earlier course first',
     DISRUPT: 'Disruptive behavior',
     CELL_MESS: 'Cell cleanliness',
@@ -125,6 +126,13 @@ const en = {
     resources: 'Approved resources',
     resourcesNote: 'These are the only outside contacts shown here. Ask staff to help you call.',
     needsConnection: 'This page needs a connection.',
+  },
+  pairing: {
+    title: 'Set up this device',
+    help: 'Ask staff for a setup code and type it here.',
+    code: 'Setup code',
+    connect: 'Connect',
+    failed: 'That code did not work. Check it, or ask staff for a new one.',
   },
   education: {
     title: 'Learning',

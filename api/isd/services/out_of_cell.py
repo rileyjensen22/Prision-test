@@ -85,11 +85,18 @@ def below_minimum(session: Session, now: datetime, within_days: int = 3) -> list
         .group_by(Resident.id, Resident.code)
         .order_by(Resident.code)
     ).all()
+    first = today - timedelta(days=within_days)  # the window ends yesterday
+    logged: dict[int, dict[date, int]] = {}
+    for rid, day, minutes in session.execute(
+        select(OutOfCellLog.resident_id, OutOfCellLog.day, OutOfCellLog.minutes)
+        .where(OutOfCellLog.day >= first, OutOfCellLog.day <= today - timedelta(days=1))
+        .order_by(OutOfCellLog.id)
+    ):
+        logged.setdefault(rid, {})[day] = minutes  # latest entry per day wins
     for rid, code in residents:
+        got = logged.get(rid, {})
         recorded = [
-            (d, m)
-            for d, m in window(session, rid, today - timedelta(days=1), within_days)
-            if m is not None
+            (d, got[d]) for d in (first + timedelta(days=i) for i in range(within_days)) if d in got
         ]
         if recorded and recorded[-1][1] < minimum:
             out.append(

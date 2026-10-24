@@ -12,6 +12,7 @@ import { Reading } from './features/Reading'
 import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
 import { Video } from './features/Video'
+import { Pairing } from './Pairing'
 import { Reentry } from './features/Reentry'
 import { CertificateView, Certificates, Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
@@ -73,7 +74,10 @@ function Shell() {
       )}
       <main className="mx-auto max-w-3xl space-y-6 p-6">
         {message ? (
-          <p data-testid="status-message">{message}</p>
+          <>
+            <p data-testid="status-message">{message}</p>
+            {status === 'no-device' && <Pairing />}
+          </>
         ) : (
           <Routes>
             <Route index element={<Home />} />

@@ -205,6 +205,7 @@ def main() -> None:
         resident("vic", start_points=1000, contacts=("family",))  # tier 6: video
         # a free cell and device for the intake e2e
         s.add_all([Cell(code="E2E-FREE-1"), Device(code="E2E-DEV-FREE-1")])
+        resident("sol")  # device pause e2e
         resident("rex")  # reentry e2e: release date, checklist
         resident("ned")  # education e2e: first course, certificate
         resident("pam")  # education e2e: offline mid-lesson

@@ -12,7 +12,7 @@ export class HttpError extends Error {
   }
 }
 
-const TOKEN_KEY = 'isd.deviceToken'
+export const TOKEN_KEY = 'isd.deviceToken'
 
 /**
  * The device token arrives once, in the URL *fragment* (`/resident#device=...`). A fragment is never

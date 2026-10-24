@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from isd.engine.config import EngineConfig
 from isd.engine.entitlements import (
+    DeviceLockFact,
     Entitlements,
     OffenseFact,
     ResidentFacts,
@@ -16,6 +17,7 @@ from isd.engine.entitlements import (
 from isd.engine.sandbox import SandboxOverrides, apply_to_facts
 from isd.models import Contact, OffenseFlag, Resident, Sanction, TierHistory
 from isd.services.config_store import get_current
+from isd.services.device_locks import locks_for_residents
 
 ENGINE_SECTIONS = ("tiers", "points", "sanctions", "offenses")
 
@@ -31,41 +33,87 @@ def load_engine_config(session: Session) -> EngineConfig:
 
 
 def earned_tier(session: Session, resident_id: int, at_time: datetime) -> int:
-    row = session.execute(
-        select(TierHistory.to_tier)
-        .where(TierHistory.resident_id == resident_id, TierHistory.at <= at_time)
-        .order_by(TierHistory.at.desc(), TierHistory.id.desc())
-        .limit(1)
-    ).scalar()
-    return row or 1
+    return earned_tiers(session, [resident_id], at_time)[resident_id]
+
+
+def earned_tiers(session: Session, resident_ids: list[int], at_time: datetime) -> dict[int, int]:
+    rows = session.execute(
+        select(TierHistory.resident_id, TierHistory.to_tier)
+        .where(TierHistory.resident_id.in_(resident_ids), TierHistory.at <= at_time)
+        .distinct(TierHistory.resident_id)
+        .order_by(TierHistory.resident_id, TierHistory.at.desc(), TierHistory.id.desc())
+    ).all()
+    found = {rid: tier for rid, tier in rows}
+    return {rid: found.get(rid) or 1 for rid in resident_ids}
+
+
+def load_facts_many(
+    session: Session, resident_ids: list[int], at_time: datetime
+) -> dict[int, ResidentFacts]:
+    """Facts for many residents in a fixed number of queries. `load_facts` uses this too, so the
+    roster and the single-resident path can never disagree."""
+    ids = list(dict.fromkeys(resident_ids))
+    if not ids:
+        return {}
+    returns = {
+        rid: n
+        for rid, n in session.execute(
+            select(Resident.id, Resident.prior_returns).where(Resident.id.in_(ids))
+        )
+    }
+    missing = [i for i in ids if i not in returns]
+    if missing:
+        raise LookupError(f"resident {missing[0]} not found")
+    tiers = earned_tiers(session, ids, at_time)
+    sanctions: dict[int, list[SanctionFact]] = {}
+    for s in session.execute(
+        select(Sanction).where(Sanction.resident_id.in_(ids), Sanction.status == "active")
+    ).scalars():
+        if s.starts_at and s.ends_at:
+            sanctions.setdefault(s.resident_id, []).append(
+                SanctionFact(s.id, s.reason_code, s.scope, s.starts_at, s.ends_at)
+            )
+    offenses: dict[int, list[OffenseFact]] = {}
+    for o in session.execute(
+        select(OffenseFlag).where(OffenseFlag.resident_id.in_(ids), OffenseFlag.added_at <= at_time)
+    ).scalars():
+        offenses.setdefault(o.resident_id, []).append(
+            OffenseFact(o.offense_category, o.next_review_at)
+        )
+    blocked: dict[int, list[int]] = {}
+    for cid, rid in session.execute(
+        select(Contact.id, Contact.resident_id).where(
+            Contact.resident_id.in_(ids), Contact.blocked.is_(True)
+        )
+    ):
+        blocked.setdefault(rid, []).append(cid)
+    locks = locks_for_residents(session, ids)
+    return {
+        rid: ResidentFacts(
+            earned_tier=tiers[rid],
+            prior_returns=returns[rid],
+            offenses=tuple(offenses.get(rid, ())),
+            sanctions=tuple(sanctions.get(rid, ())),
+            blocked_contact_ids=tuple(blocked.get(rid, ())),
+            device_locks=tuple(DeviceLockFact(i, a, b) for i, a, b in locks.get(rid, ())),
+        )
+        for rid in ids
+    }
 
 
 def load_facts(session: Session, resident_id: int, at_time: datetime) -> ResidentFacts:
-    resident = session.get(Resident, resident_id)
-    if resident is None:
-        raise LookupError(f"resident {resident_id} not found")
-    sanctions = session.execute(
-        select(Sanction).where(Sanction.resident_id == resident_id, Sanction.status == "active")
-    ).scalars()
-    offenses = session.execute(
-        select(OffenseFlag).where(
-            OffenseFlag.resident_id == resident_id, OffenseFlag.added_at <= at_time
-        )
-    ).scalars()
-    blocked = session.execute(
-        select(Contact.id).where(Contact.resident_id == resident_id, Contact.blocked.is_(True))
-    ).scalars()
-    return ResidentFacts(
-        earned_tier=earned_tier(session, resident_id, at_time),
-        prior_returns=resident.prior_returns,
-        offenses=tuple(OffenseFact(o.offense_category, o.next_review_at) for o in offenses),
-        sanctions=tuple(
-            SanctionFact(s.id, s.reason_code, s.scope, s.starts_at, s.ends_at)
-            for s in sanctions
-            if s.starts_at and s.ends_at
-        ),
-        blocked_contact_ids=tuple(blocked),
-    )
+    return load_facts_many(session, [resident_id], at_time)[resident_id]
+
+
+def get_entitlements_many(
+    session: Session, resident_ids: list[int], at_time: datetime, cfg: EngineConfig | None = None
+) -> dict[int, Entitlements]:
+    """The same answers as `get_entitlements`, for a list of residents (the staff roster)."""
+    cfg = cfg or load_engine_config(session)
+    return {
+        rid: compute_entitlements(f, cfg, at_time)
+        for rid, f in load_facts_many(session, resident_ids, at_time).items()
+    }
 
 
 def get_entitlements(

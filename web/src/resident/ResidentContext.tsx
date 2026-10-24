@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { HttpError, NetworkError, callApi, fetchView, resolveDeviceToken, sendEvent } from './api'
+import { beat } from './heartbeat'
 import { enqueue, flushQueue, loadQueue, newClientId } from './queue'
 import type { QueuedEvent } from './queue'
 import { effectiveFeatures, isStale } from './snapshot'
@@ -12,6 +13,7 @@ import { useNow } from './useNow'
 const SNAPSHOT_KEY = 'isd.snapshot'
 const OFFSET_KEY = 'isd.clockOffset'
 const POLL_MS = 30_000
+const HEARTBEAT_MS = 60_000
 
 type Status = 'loading' | 'ready' | 'no-device' | 'unassigned'
 
@@ -107,6 +109,22 @@ export function ResidentProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('offline', onDown)
     }
   }, [refresh])
+
+  useEffect(() => {
+    // Health report every minute, for ready and not-yet-assigned devices alike. Best effort.
+    if (!token.current || (status !== 'ready' && status !== 'unassigned')) return
+    const run = () =>
+      void beat(
+        token.current as string,
+        navigator,
+        loadQueue().length,
+        () => window.location.reload(),
+        import.meta.env.VITE_APP_VERSION,
+      ).catch(() => {})
+    run()
+    const id = setInterval(run, HEARTBEAT_MS)
+    return () => clearInterval(id)
+  }, [status])
 
   useEffect(() => {
     if (view) void i18n.changeLanguage(view.settings.language)

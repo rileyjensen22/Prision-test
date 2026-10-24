@@ -1,18 +1,20 @@
 """Endpoints called by the resident kiosk. Authenticated by device token, not by staff login."""
 
 from datetime import UTC, datetime
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from isd.auth import DeviceContext, current_device
+from isd import limits
+from isd.auth import DeviceContext, current_device, current_paired_device
 from isd.db import get_db
 from isd.engine.authority import AuthorityError
 from isd.models import Sanction
 from isd.schemas import ResidentView
-from isd.services import sanctions, staff_requests
+from isd.services import device_fleet, sanctions, staff_requests
 from isd.services.resident_view import build_resident_view
 
 router = APIRouter(prefix="/device", tags=["device"])
@@ -77,3 +79,42 @@ def report_screen(
     if not is_valid_screen_path(body.path):
         raise HTTPException(422, "invalid screen path")
     record_screen(db, ctx.device, body.path, datetime.now(UTC))
+
+
+# ---------------- enrollment and health ----------------
+class PairIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    code: str = Field(min_length=6, max_length=16)
+
+
+@router.post("/pair")
+def pair(body: PairIn, request: Request, db: Session = Depends(get_db)) -> dict:
+    """Public: a new kiosk trades the one-time code staff gave it for its own token."""
+    limits.enforce("pairing", limits.client_ip(request))
+    try:
+        return device_fleet.pair(db, body.code, datetime.now(UTC))
+    except device_fleet.FleetError as e:
+        raise HTTPException(400, {"code": e.code, "message": str(e)}) from e
+
+
+class HeartbeatIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    storage_used_mb: int = Field(ge=0, le=10_000_000)
+    storage_quota_mb: int = Field(ge=0, le=10_000_000)
+    camera: Literal["ok", "missing", "blocked", "unknown"] = "unknown"
+    microphone: Literal["ok", "missing", "blocked", "unknown"] = "unknown"
+    app_version: str = Field(default="", max_length=32)
+    queue_pending: int = Field(default=0, ge=0, le=100_000)
+    online: bool = True
+    ack: list[int] = Field(default_factory=list, max_length=20)
+
+
+@router.post("/heartbeat")
+def heartbeat(
+    body: HeartbeatIn, device=Depends(current_paired_device), db: Session = Depends(get_db)
+) -> dict:
+    """Health numbers only. No picture, no audio, no resident data."""
+    now = datetime.now(UTC)
+    payload = body.model_dump(exclude={"ack"})
+    commands = device_fleet.record_heartbeat(db, device, payload, body.ack, now)
+    return {"commands": commands, "server_time": now.isoformat()}
