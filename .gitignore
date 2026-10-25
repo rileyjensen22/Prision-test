@@ -11,4 +11,3 @@ __pycache__
 web/test-results
 web/playwright-report
 *.tsbuildinfo
-web/dist-demo/

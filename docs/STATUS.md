@@ -41,8 +41,6 @@ Last updated: Phase 15 (intake, reentry, outcomes). Everything below was checked
 | 7 Transparency and stubs | **Partial** | Public log, welfare flags, out-of-cell log, compliance config and ASSUMPTIONS.md are built. Texting, video, chess, reading, jobs and rec are **stubs** (data model, interface, thin UI). Phases 10 to 13 replace them. |
 | 8 Hardening | **Partial** | Rate limiting, CSP, production guard, secrets scan, kiosk doc and the simulated week are done. The kiosk was never tested on a real Linux device, and MFA, shared rate-limit store, retention jobs and encryption at rest are not done (see `docs/security.md`). |
 
-Extra, not in the original phases: a phone-viewable demo of the resident UI (`web/src/demo`, `scripts/build-demo.py`, `scripts/record-demo-fixtures.py`). It uses recorded synthetic responses and is not part of the product.
-
 ## Invariants 1 to 11
 
 All hold. Each has a test, and the simulated week re-checks 1, 2, 3, 4, 5, 6, 7, 8 and 11 end to end. No deviations.
