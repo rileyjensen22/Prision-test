@@ -53,17 +53,17 @@ export function Contacts() {
     }
   }
 
-  const field = 'min-h-14 w-full rounded-lg border-2 border-white bg-slate-900 px-3'
+  const field = 'min-h-touch w-full rounded-ctl border-2 border-ink bg-surface px-3 text-body'
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('contacts.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('contacts.title')}</h1>
       <p>{t('contacts.explain')}</p>
       {message && (
         <p
           role={message.ok ? 'status' : 'alert'}
           data-testid="contact-message"
-          className="rounded-lg border-2 border-amber-400 p-3"
+          className="rounded-ctl border-2 border-notice bg-notice-soft p-3"
         >
           {message.text}
         </p>
@@ -72,7 +72,7 @@ export function Contacts() {
         {(list ?? []).map((c) => (
           <li key={c.id}>
             <Card data-testid={`contact-row-${c.id}`} data-status={c.status}>
-              <p className="text-xl font-semibold">{c.name}</p>
+              <p className="text-label font-bold">{c.name}</p>
               <p>
                 {t(`calls.type.${c.type}`)} · <span>{t(`contacts.status.${c.status}`)}</span>
               </p>
@@ -83,7 +83,7 @@ export function Contacts() {
       </ul>
       {list?.length === 0 && <p>{t('calls.none')}</p>}
       <Card data-testid="contact-form">
-        <h2 className="mb-3 text-2xl font-bold">{t('contacts.request')}</h2>
+        <h2 className="mb-3 text-h2 font-bold">{t('contacts.request')}</h2>
         <label className="block">
           {t('contacts.name')}
           <input
@@ -116,7 +116,7 @@ export function Contacts() {
         <button
           disabled={!name.trim() || !phone.trim()}
           onClick={() => void send()}
-          className="mt-4 min-h-14 rounded-lg bg-blue-700 px-6 py-3 font-semibold disabled:opacity-40"
+          className="mt-4 min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110 disabled:opacity-40"
         >
           {t('contacts.send')}
         </button>

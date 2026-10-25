@@ -29,17 +29,17 @@ export function Reentry() {
   }, [request, online])
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('reentry.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('reentry.title')}</h1>
       {error && <p>{t('reentry.needsConnection')}</p>}
       {data && (
         <>
           <Card data-testid="reentry-countdown">
             {data.countdown ? (
               <>
-                <p className="text-lg">{t('reentry.countdownLabel')}</p>
-                <p className="text-4xl font-bold">
+                <p className="text-body">{t('reentry.countdownLabel')}</p>
+                <p className="text-display font-bold">
                   {t('reentry.daysLeft', { count: data.countdown.days_left })}
                 </p>
               </>
@@ -49,7 +49,7 @@ export function Reentry() {
           </Card>
 
           <Card>
-            <h2 className="text-2xl font-bold">{t('reentry.checklist')}</h2>
+            <h2 className="text-h2 font-bold">{t('reentry.checklist')}</h2>
             <p data-testid="reentry-progress">
               {t('reentry.progress', { done: data.progress.resolved, total: data.progress.total })}
             </p>
@@ -59,13 +59,15 @@ export function Reentry() {
                   key={i.code}
                   data-testid={`reentry-item-${i.code}`}
                   data-status={i.status}
-                  className="rounded-lg border-2 border-slate-500 p-4"
+                  className="rounded-card border border-line bg-surface p-4 shadow-card"
                 >
-                  <p className="text-xl font-semibold">
+                  <p className="text-label font-bold">
                     {i.status === 'done' ? '✓ ' : ''}
                     {L(i.title, lang)}
                   </p>
-                  <p className="text-sm uppercase">{t(`reentry.status.${i.status}`)}</p>
+                  <p className="text-sm font-bold text-ink-soft">
+                    {t(`reentry.status.${i.status}`)}
+                  </p>
                   <p className="mt-1">{L(i.detail, lang)}</p>
                 </li>
               ))}
@@ -75,13 +77,13 @@ export function Reentry() {
 
           {data.courses.length > 0 && (
             <Card>
-              <h2 className="text-2xl font-bold">{t('reentry.courses')}</h2>
+              <h2 className="text-h2 font-bold">{t('reentry.courses')}</h2>
               <ul className="mt-3 space-y-2">
                 {data.courses.map((c) => (
                   <li key={c.code}>
                     <Link
                       to={`/resident/course/${c.code}`}
-                      className="block min-h-14 rounded-lg border-2 border-slate-500 p-3 underline"
+                      className="block min-h-touch rounded-card border border-line bg-surface p-4 font-bold text-primary shadow-card hover:border-primary"
                     >
                       {L(c.title, lang)}{' '}
                       {c.completed
@@ -95,12 +97,15 @@ export function Reentry() {
           )}
 
           <Card data-testid="reentry-resources">
-            <h2 className="text-2xl font-bold">{t('reentry.resources')}</h2>
+            <h2 className="text-h2 font-bold">{t('reentry.resources')}</h2>
             <p className="text-sm">{t('reentry.resourcesNote')}</p>
             <ul className="mt-3 space-y-3">
               {data.resources.map((r) => (
-                <li key={r.code} className="rounded-lg border-2 border-slate-500 p-4">
-                  <p className="text-xl font-semibold">{L(r.title, lang)}</p>
+                <li
+                  key={r.code}
+                  className="rounded-card border border-line bg-surface p-4 shadow-card"
+                >
+                  <p className="text-label font-bold">{L(r.title, lang)}</p>
                   <p>{L(r.description, lang)}</p>
                   <p className="font-mono">{r.phone}</p>
                 </li>

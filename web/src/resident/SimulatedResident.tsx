@@ -9,6 +9,7 @@ import { createI18n } from '../i18n'
 import { Card } from './components'
 import { StaticResidentProvider, useResident } from './ResidentContext'
 import { Appeal, Home, Locks, TierScreen } from './screens'
+import { Banner } from '../ui/Banner'
 import { TEXT_SIZE } from './theme'
 import type { ResidentView } from './types'
 
@@ -19,18 +20,18 @@ function LiveScreen({ name }: { name: string }) {
   const f = features[name]
   return (
     <div className="space-y-4" data-testid="sim-live-screen">
-      <h1 className="text-3xl font-bold">
+      <h1 className="text-h1 font-bold">
         {name ? t(`feature.${name}`, { defaultValue: name }) : ''}
       </h1>
       <Card>
-        <p>{f?.allowed === false ? `🔒 ${t('home.locked')}` : t('home.open')}</p>
+        <p className="font-bold">{f?.allowed === false ? t('home.locked') : t('home.open')}</p>
         {f &&
           Object.entries(f.limits).map(([k, v]) => (
             <p key={k}>
               {k}: {v}
             </p>
           ))}
-        <p className="mt-2 text-base opacity-80">Live content is not shown in this view.</p>
+        <p className="mt-2 text-ink-soft">{t('app.liveHidden')}</p>
       </Card>
     </div>
   )
@@ -95,22 +96,18 @@ export function SimulatedResident({
         <StaticResidentProvider view={view}>
           <MemoryRouter key={mode === 'mirror' ? path : 'sandbox'} initialEntries={[path]}>
             <div
-              className={`rounded-lg bg-slate-950 text-white ${TEXT_SIZE[view.settings.text_size]}`}
+              className={`theme-resident rounded-card bg-bg text-body text-ink ${TEXT_SIZE[view.settings.text_size]}`}
               data-testid="sim-screen"
               data-mode={mode}
             >
-              {view.simulation && (
-                <div className="rounded-t-lg bg-red-700 p-2 text-center font-bold">
-                  {i18n.t('app.simulation')}
-                </div>
-              )}
+              {view.simulation && <Banner tone="simulation">{i18n.t('app.simulation')}</Banner>}
               <div
                 className={`space-y-6 p-6 ${mode === 'mirror' ? 'pointer-events-none select-none' : ''}`}
                 aria-readonly={mode === 'mirror'}
                 data-testid="sim-body"
               >
                 <Screens />
-                <div className="rounded-xl bg-blue-700 px-6 py-4 text-center font-bold">
+                <div className="rounded-ctl bg-primary px-6 py-4 text-center text-label font-bold text-primary-ink">
                   {i18n.t('request.button')}
                 </div>
               </div>

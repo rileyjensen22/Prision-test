@@ -67,7 +67,7 @@ export default function Welfare() {
 
   return (
     <Page title="Welfare">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Each resident is compared with their own usual pattern. A flag means “please check in”, not
         that something is wrong.
       </p>
@@ -80,8 +80,8 @@ export default function Welfare() {
       )}
       {(data ?? []).map((r) => (
         <Panel key={r.resident_id} data-testid={`welfare-${r.code}`}>
-          <h2 className="mb-2 text-lg font-semibold">
-            <Link className="text-blue-700 underline" to={`/staff/residents/${r.resident_id}`}>
+          <h2 className="mb-2 text-h3 font-semibold">
+            <Link className="text-primary underline" to={`/staff/residents/${r.resident_id}`}>
               {r.code}
             </Link>
           </h2>
@@ -95,9 +95,9 @@ export default function Welfare() {
                   </Badge>
                 )}{' '}
                 <strong>{f.message}</strong>
-                <div className="text-sm text-gray-700">{describe(f)}</div>
+                <div className="text-sm text-ink-soft">{describe(f)}</div>
                 {f.escalated && !canHandleEscalated && (
-                  <p className="mt-1 text-sm text-gray-600">A supervisor must handle this flag.</p>
+                  <p className="mt-1 text-sm text-ink-soft">A supervisor must handle this flag.</p>
                 )}
                 {canAck &&
                   (f.escalated ? canHandleEscalated : true) &&
@@ -107,7 +107,7 @@ export default function Welfare() {
                         aria-label="Action taken"
                         value={action}
                         onChange={(e) => setAction(e.target.value)}
-                        className="rounded border px-2 py-1"
+                        className="rounded-ctl border px-2 py-1"
                       >
                         <option value="checked_in">Checked in with the resident</option>
                         <option value="referred_medical">Referred to medical</option>
@@ -120,7 +120,7 @@ export default function Welfare() {
                         placeholder="What was done?"
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        className="min-w-64 rounded border px-2 py-1"
+                        className="min-w-64 rounded-ctl border px-2 py-1"
                       />
                       <Btn disabled={note.trim().length < 3} onClick={() => void ack(r, f)}>
                         Record check-in

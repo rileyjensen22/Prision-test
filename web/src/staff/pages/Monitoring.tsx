@@ -64,7 +64,7 @@ export default function Monitoring() {
 
   return (
     <Page title="Message monitoring">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         This list shows who, when and which keyword rule matched, never the text. To read a message
         you must state a reason, and every read is logged. A keyword match is only a prompt to look:
         it never creates a sanction. Attorney messages are private and do not appear here.
@@ -85,7 +85,7 @@ export default function Monitoring() {
             Reason for reading
             <input
               aria-label="Reason for reading"
-              className="ml-2 w-72 rounded border px-2 py-1"
+              className="ml-2 w-72 rounded-ctl border px-2 py-1"
               placeholder="Why do you need to read this?"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -133,10 +133,10 @@ export default function Monitoring() {
       </Panel>
       {opened && (
         <Panel title={`Message ${opened.message_id}`} data-testid="opened-message">
-          <p className="rounded bg-gray-50 p-3" data-testid="opened-body">
+          <p className="rounded-ctl bg-surface-2 p-3" data-testid="opened-body">
             {opened.body}
           </p>
-          <p className="mt-1 text-xs text-gray-600">
+          <p className="mt-1 text-sm text-ink-soft">
             This read was logged with your reason. Do not copy or share the text.
           </p>
           {canReview &&
@@ -148,7 +148,7 @@ export default function Monitoring() {
                   <span className="text-sm">{f.label}:</span>
                   <input
                     aria-label="Reason for outcome"
-                    className="w-64 rounded border px-2 py-1"
+                    className="w-64 rounded-ctl border px-2 py-1"
                     placeholder="Reason for this outcome"
                     value={outcomeReason}
                     onChange={(e) => setOutcomeReason(e.target.value)}

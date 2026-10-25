@@ -1,3 +1,162 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Self-hosted (CSP: font-src 'self'). Latin subset covers English and Spanish. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/atkinson-hyperlegible-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/atkinson-hyperlegible-latin-700-normal.woff2') format('woff2');
+}
+
+/*
+ * Design tokens. One set of names, three value sets:
+ *   .theme-resident                      kiosk, day
+ *   .theme-resident[data-mode='night']   kiosk, dimmed on a schedule
+ *   .theme-staff                         dense desktop tool
+ * Components only ever use the names (bg-surface, text-ink, text-body ...), never raw values.
+ */
+@layer base {
+  :root {
+    --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+    --scale: 1; /* 1 / 1.25 / 1.5 for normal / large / xlarge resident text */
+  }
+
+  .theme-resident {
+    --bg: #f2f5f3;
+    --surface: #ffffff;
+    --surface-2: #e8eeeb;
+    --ink: #16222b;
+    --ink-soft: #43505b;
+    --line: #aebcb6;
+    --primary: #0b5563;
+    --primary-ink: #ffffff;
+    --primary-soft: #d5e9ec;
+    --ok: #1f6b4a;
+    --ok-soft: #e0f1e7;
+    --lock: #3c4a7d;
+    --lock-soft: #e5e9f6;
+    --notice: #7a4b00;
+    --notice-soft: #fff0cc;
+    --danger: #9b1c1c;
+    --danger-soft: #fde8e8;
+    --fs-sm: calc(1.25rem * var(--scale));
+    --fs-body: calc(1.375rem * var(--scale));
+    --fs-label: calc(1.5rem * var(--scale));
+    --fs-h3: calc(1.75rem * var(--scale));
+    --fs-h2: calc(2.125rem * var(--scale));
+    --fs-h1: calc(2.75rem * var(--scale));
+    --fs-display: calc(4rem * var(--scale));
+    --touch: 4rem; /* 64px minimum target */
+    --r-card: 1rem;
+    --r-ctl: 0.75rem;
+    --shadow-card: 0 1px 2px rgb(22 34 43 / 0.08), 0 4px 12px rgb(22 34 43 / 0.06);
+  }
+
+  .theme-resident[data-mode='night'] {
+    --bg: #14181c;
+    --surface: #1d2328;
+    --surface-2: #262e34;
+    --ink: #e8e3d8;
+    --ink-soft: #b9b4a8;
+    --line: #4a555d;
+    --primary: #7cc8d2;
+    --primary-ink: #0e1417;
+    --primary-soft: #1d3a40;
+    --ok: #8fd6ae;
+    --ok-soft: #1f3a2d;
+    --lock: #aebbf0;
+    --lock-soft: #252c4a;
+    --notice: #f0c674;
+    --notice-soft: #3a2e12;
+    --danger: #f2a0a0;
+    --danger-soft: #3d1d1d;
+    --shadow-card: none;
+  }
+
+  .theme-staff {
+    --bg: #f3f5f8;
+    --surface: #ffffff;
+    --surface-2: #eaeef3;
+    --ink: #17212b;
+    --ink-soft: #4a5663;
+    --line: #cdd5de;
+    --primary: #0b5563;
+    --primary-ink: #ffffff;
+    --primary-soft: #d9ecef;
+    --ok: #1f6b4a;
+    --ok-soft: #e0f1e7;
+    --lock: #3c4a7d;
+    --lock-soft: #e5e9f6;
+    --notice: #7a4b00;
+    --notice-soft: #fff0cc;
+    --danger: #9b1c1c;
+    --danger-soft: #fde8e8;
+    --fs-sm: 0.8125rem;
+    --fs-body: 0.875rem;
+    --fs-label: 1rem;
+    --fs-h3: 1.125rem;
+    --fs-h2: 1.25rem;
+    --fs-h1: 1.5rem;
+    --fs-display: 1.75rem;
+    --touch: 2.25rem;
+    --r-card: 0.5rem;
+    --r-ctl: 0.375rem;
+    --shadow-card: none;
+  }
+
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background: var(--bg, #f2f5f3);
+    color: var(--ink, #16222b);
+  }
+
+  /* Staff forms: unstyled controls still get a real size and a visible border. */
+  .theme-staff input:not([type='checkbox'], [type='radio'], [type='range']),
+  .theme-staff select,
+  .theme-staff textarea {
+    min-height: var(--touch);
+    border: 1px solid var(--ink-soft);
+    border-radius: var(--r-ctl);
+    background: var(--surface);
+    color: var(--ink);
+    padding-inline: 0.5rem;
+  }
+  .theme-staff textarea {
+    padding-block: 0.375rem;
+  }
+  .theme-staff input[type='checkbox'],
+  .theme-staff input[type='radio'] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--primary);
+  }
+
+  /* Visible keyboard and switch-access focus everywhere. */
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

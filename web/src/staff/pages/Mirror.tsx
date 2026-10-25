@@ -94,7 +94,7 @@ export default function Mirror() {
 
   return (
     <Page title="Live mirror">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         A read-only view of where a resident is on their device. Every session is logged with who,
         which resident, why, and for how long. Attorney calls and legal, grievance and health
         screens are never shown. Sessions end after a time limit or when idle.
@@ -110,7 +110,7 @@ export default function Mirror() {
                 aria-label="Resident"
                 value={residentId}
                 onChange={(e) => setResidentId(e.target.value)}
-                className="mt-1 block w-full rounded border px-2 py-2"
+                className="mt-1 block w-full rounded-ctl border px-2 py-2"
               >
                 <option value="">Choose…</option>
                 {(roster.data ?? [])
@@ -128,7 +128,7 @@ export default function Mirror() {
                 aria-label="Reason for mirroring"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="mt-1 block w-full rounded border px-2 py-2"
+                className="mt-1 block w-full rounded-ctl border px-2 py-2"
               />
             </label>
             <Btn onClick={() => void start()} disabled={!residentId || reason.trim().length < 5}>
@@ -141,7 +141,7 @@ export default function Mirror() {
       {sessionId !== null && (
         <div className="space-y-3" data-testid="mirror-live">
           <div
-            className="flex flex-wrap items-center gap-3 rounded bg-amber-100 px-3 py-2 text-amber-950"
+            className="flex flex-wrap items-center gap-3 rounded-ctl bg-notice-soft px-3 py-2 text-ink"
             role="status"
           >
             <strong>LIVE MIRROR · read-only</strong>
@@ -156,7 +156,7 @@ export default function Mirror() {
           {frame?.redacted && (
             <Panel data-testid="mirror-redacted">
               <p className="font-medium">Private screen</p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-ink-soft">
                 {frame.redacted === 'PRIVILEGED_CALL'
                   ? 'A private attorney call is in progress.'
                   : 'The resident is on a private service (legal, grievance or health).'}{' '}
@@ -166,7 +166,7 @@ export default function Mirror() {
           )}
           {frame?.view && (
             <div className="max-w-xl">
-              <p className="mb-1 text-xs text-gray-600" data-testid="mirror-screen">
+              <p className="mb-1 text-sm text-ink-soft" data-testid="mirror-screen">
                 Screen: {frame.screen?.path ?? 'unknown'}
                 {frame.screen?.age_seconds != null && ` (updated ${frame.screen.age_seconds}s ago)`}
               </p>

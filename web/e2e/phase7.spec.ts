@@ -44,7 +44,7 @@ test('jobs are optional and joining or leaving changes nothing about the residen
   await job.getByRole('button', { name: 'Leave' }).click()
   await expect(job.getByRole('button', { name: 'Join' })).toBeVisible()
 
-  await page.getByRole('link', { name: '← Back' }).click()
+  await page.getByRole('link', { name: 'Back' }).click()
   await expect(page.getByTestId('tier-label')).toHaveText(tier)
   await expect(page.getByTestId('lock')).toHaveCount(lockCount)
   expect(await auditCount()).toBe(before) // no audit entry, points or sanction event was created

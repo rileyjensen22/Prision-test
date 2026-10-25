@@ -34,7 +34,7 @@ export default function Outliers() {
       <ErrorLine error={error} />
       {data && (
         <>
-          <p className="text-sm text-gray-600" data-testid="outlier-settings">
+          <p className="text-sm text-ink-soft" data-testid="outlier-settings">
             Last {data.settings.window_days} days, compared with others in the same role. A person
             is flagged when a number is at least {data.settings.z_threshold} standard deviations
             above their peers (needs {data.settings.min_peers}+ peers and {data.settings.min_count}+

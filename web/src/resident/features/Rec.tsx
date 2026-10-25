@@ -51,9 +51,9 @@ export function Rec() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('rec.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('rec.title')}</h1>
       {day && <p data-testid="rec-baseline">{t('rec.baseline', { n: day.baseline_minutes })}</p>}
       {error && (
         <p role="alert" data-testid="rec-error">
@@ -69,10 +69,10 @@ export function Rec() {
               data-allowed={s.allowed}
               data-booked={s.booked}
             >
-              <p className="text-xl font-semibold">
+              <p className="text-label font-bold">
                 {s.slot} · {s.title ?? t(`rec.${s.kind}`)}
               </p>
-              <p className="opacity-80">
+              <p className="text-ink-soft">
                 {t(`rec.${s.kind}`)} · {t('rec.minutes', { n: s.minutes })}
               </p>
               {s.cancelled ? (
@@ -87,7 +87,7 @@ export function Rec() {
                       <span>✓ {t('rec.booked')}</span>
                       <button
                         onClick={() => void act(s.slot, s.block_id, 'cancel')}
-                        className="min-h-14 rounded-lg border-2 border-white px-5 py-3"
+                        className="min-h-touch rounded-ctl border-2 border-ink bg-surface px-6 py-3 text-label font-bold text-ink hover:bg-surface-2"
                       >
                         {t('rec.cancel')}
                       </button>
@@ -95,7 +95,7 @@ export function Rec() {
                   ) : (
                     <button
                       onClick={() => void act(s.slot, s.block_id, 'book')}
-                      className="min-h-14 rounded-lg bg-green-700 px-5 py-3 font-semibold"
+                      className="min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110"
                     >
                       {t('rec.book')}
                     </button>

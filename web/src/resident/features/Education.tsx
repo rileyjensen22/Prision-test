@@ -1,9 +1,25 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  CheckCircle2,
+  Lock,
+  PlayCircle,
+  RotateCcw,
+  SendHorizontal,
+} from 'lucide-react'
 
+import { Button, LinkButton } from '../../ui/Button'
+import { cn } from '../../ui/cn'
+import { Notice } from '../../ui/Notice'
+import { StatusBadge } from '../../ui/StatusBadge'
+import { EmptyState, ErrorState, LoadingState } from '../../ui/States'
 import { NetworkError } from '../api'
-import { BackLink, Card, reasonTitle } from '../components'
+import { Card, ScreenFrame, reasonTitle } from '../components'
+import { ProgressMeter } from '../parts'
 import { useResident } from '../ResidentContext'
 import { loadCourse, markLessonDone, mergeCourse, resumeStep, saveCourse } from './courseCache'
 import type { CachedCourse } from './courseCache'
@@ -63,8 +79,6 @@ export interface CertificateData {
   resident: string
 }
 
-const btn = 'mt-3 min-h-14 rounded-lg bg-blue-700 px-5 py-3 font-semibold'
-
 export function Education() {
   const { t, i18n } = useTranslation()
   const { request, online } = useResident()
@@ -72,63 +86,110 @@ export function Education() {
   const [courses, setCourses] = useState<CourseSummary[] | null>(null)
   const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setError(false)
     request<CourseSummary[]>('/device/courses')
       .then(setCourses)
       .catch(() => setError(true))
-  }, [request, online])
+  }, [request])
+  useEffect(load, [load, online])
 
   return (
-    <div className="space-y-6">
-      <BackLink />
-      <h1 className="text-3xl font-bold">{t('education.title')}</h1>
-      <Link to="/resident/certificates" className="block underline" data-testid="my-certificates">
+    <ScreenFrame title={t('education.title')}>
+      <LinkButton
+        to="/resident/certificates"
+        icon={Award}
+        className="self-start"
+        data-testid="my-certificates"
+      >
         {t('education.myCertificates')}
-      </Link>
-      {error && <p>{t('calls.needsConnection')}</p>}
-      <ul className="space-y-4">
-        {(courses ?? []).map((c) => (
-          <li key={c.code}>
-            <Card data-testid={`course-${c.code}`} data-allowed={c.allowed}>
-              <p className="text-sm uppercase">{t(`education.${c.level}`)}</p>
-              <h2 className="text-2xl font-semibold">{L(c.title, i18n.language)}</h2>
-              {c.summary && <p>{L(c.summary, i18n.language)}</p>}
-              <p>{t('education.progress', { done: c.lessons_done, total: c.lessons })}</p>
-              {c.completed && <p data-testid="course-done">✓ {t('education.done')}</p>}
-              {c.certificate && (
-                <Link to={`/resident/certificate/${c.certificate}`} className="underline">
-                  {t('education.viewCertificate')}
-                </Link>
-              )}
-              {c.allowed ? (
-                <button onClick={() => navigate(`/resident/course/${c.code}`)} className={btn}>
-                  {c.completed
-                    ? t('education.review')
-                    : c.lessons_done
-                      ? t('education.resume')
-                      : t('education.start')}
-                </button>
-              ) : (
-                <div data-testid="course-locked" className="mt-2">
-                  <p>
-                    🔒 {c.reasons[0] ? reasonTitle(t, c.reasons[0]) : t('education.lockedHint')}
-                  </p>
-                  {c.missing.length > 0 && (
-                    <p data-testid="course-missing">
-                      {t('education.finishFirst', {
-                        titles: c.missing
-                          .map((m) => L(c.missing_titles[m], i18n.language) || m)
-                          .join(', '),
-                      })}
+      </LinkButton>
+      {error && <ErrorState title={t('calls.needsConnection')} onRetry={load} />}
+      {!error && !courses && <LoadingState />}
+      {courses?.length === 0 && (
+        <EmptyState title={t('education.none', { defaultValue: t('education.title') })} />
+      )}
+      <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(24rem,1fr))]">
+        {(courses ?? []).map((c) => {
+          const pct = c.lessons ? Math.round((c.lessons_done / c.lessons) * 100) : 0
+          return (
+            <li key={c.code}>
+              <Card
+                data-testid={`course-${c.code}`}
+                data-allowed={c.allowed}
+                className={cn('flex h-full flex-col gap-3', !c.allowed && 'bg-lock-soft')}
+              >
+                <StatusBadge tone="neutral" className="self-start">
+                  {t(`education.${c.level}`)}
+                </StatusBadge>
+                <h2 className="text-h3 font-bold">{L(c.title, i18n.language)}</h2>
+                {c.summary && <p className="text-ink-soft">{L(c.summary, i18n.language)}</p>}
+                <div className="mt-auto space-y-3">
+                  {c.allowed && (
+                    <div className="rounded-full border-2 border-primary/40 bg-primary-soft">
+                      <ProgressMeter
+                        pct={pct}
+                        label={t('education.progress', { done: c.lessons_done, total: c.lessons })}
+                        tone="on-light"
+                      />
+                    </div>
+                  )}
+                  <p>{t('education.progress', { done: c.lessons_done, total: c.lessons })}</p>
+                  {c.completed && (
+                    <p
+                      data-testid="course-done"
+                      className="flex items-center gap-2 font-bold text-ok"
+                    >
+                      <CheckCircle2 aria-hidden="true" className="size-6" />
+                      {t('education.done')}
                     </p>
                   )}
+                  {c.certificate && (
+                    <LinkButton
+                      to={`/resident/certificate/${c.certificate}`}
+                      variant="quiet"
+                      icon={Award}
+                    >
+                      {t('education.viewCertificate')}
+                    </LinkButton>
+                  )}
+                  {c.allowed ? (
+                    <Button
+                      variant={c.completed ? 'secondary' : 'primary'}
+                      icon={PlayCircle}
+                      onClick={() => navigate(`/resident/course/${c.code}`)}
+                      className="w-full"
+                    >
+                      {c.completed
+                        ? t('education.review')
+                        : c.lessons_done
+                          ? t('education.resume')
+                          : t('education.start')}
+                    </Button>
+                  ) : (
+                    <div data-testid="course-locked" className="space-y-1">
+                      <p className="flex items-center gap-2 font-bold text-lock">
+                        <Lock aria-hidden="true" className="size-6 shrink-0" />
+                        {c.reasons[0] ? reasonTitle(t, c.reasons[0]) : t('education.lockedHint')}
+                      </p>
+                      {c.missing.length > 0 && (
+                        <p data-testid="course-missing">
+                          {t('education.finishFirst', {
+                            titles: c.missing
+                              .map((m) => L(c.missing_titles[m], i18n.language) || m)
+                              .join(', '),
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </Card>
-          </li>
-        ))}
+              </Card>
+            </li>
+          )
+        })}
       </ul>
-    </div>
+    </ScreenFrame>
   )
 }
 
@@ -226,26 +287,23 @@ export function Course() {
 
   if (!course)
     return (
-      <div className="space-y-6">
-        <BackLink />
-        {message && <p>{message}</p>}
-      </div>
+      <ScreenFrame title={t('education.title')} narrow>
+        {message ? <ErrorState title={message} /> : <LoadingState />}
+      </ScreenFrame>
     )
   const onQuiz = step >= course.lessons.length
   const when = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString(lang) : '')
 
   return (
-    <div className="space-y-6">
-      <BackLink />
-      <h1 className="text-3xl font-bold">{L(course.title, lang)}</h1>
+    <ScreenFrame title={L(course.title, lang)} narrow>
       {offlineCopy && (
-        <p role="status" data-testid="offline-copy">
+        <Notice tone="info" role="status" data-testid="offline-copy">
           {t('education.offlineCopy')}
-        </p>
+        </Notice>
       )}
       {result ? (
-        <Card data-testid="quiz-result">
-          <h2 className="text-3xl font-bold">
+        <Card data-testid="quiz-result" className="space-y-3">
+          <h2 className="text-h2 font-bold">
             {result.passed
               ? t('education.passed')
               : t('education.failed', { correct: result.correct, total: result.total })}
@@ -254,33 +312,38 @@ export function Course() {
             <p>{t('education.score', { correct: result.correct, total: result.total })}</p>
           )}
           {result.points_awarded > 0 && (
-            <p data-testid="points-earned" className="text-2xl">
+            <p data-testid="points-earned" className="text-label font-bold text-ok">
               {t('education.points', { n: result.points_awarded })}
             </p>
           )}
           {result.passed && result.already_completed && <p>{t('education.already')}</p>}
           {result.tier_after > result.tier_before && (
-            <p data-testid="tier-up">
-              {t('education.tierUp', { from: result.tier_before, to: result.tier_after })}
-            </p>
+            <Notice tone="ok" data-testid="tier-up">
+              <span className="font-bold">
+                {t('education.tierUp', { from: result.tier_before, to: result.tier_after })}
+              </span>
+            </Notice>
           )}
           {result.calls_minutes_after != null &&
             result.calls_minutes_after !== result.calls_minutes_before && (
-              <p data-testid="calls-up">
-                {t('education.callsUp', {
-                  from: result.calls_minutes_before,
-                  to: result.calls_minutes_after,
-                })}
-              </p>
+              <Notice tone="ok" data-testid="calls-up">
+                <span className="font-bold">
+                  {t('education.callsUp', {
+                    from: result.calls_minutes_before,
+                    to: result.calls_minutes_after,
+                  })}
+                </span>
+              </Notice>
             )}
           {result.certificate && (
-            <Link
+            <LinkButton
               to={`/resident/certificate/${result.certificate}`}
-              className="mt-3 block underline"
+              icon={Award}
               data-testid="certificate-link"
+              className="self-start"
             >
               {t('education.viewCertificate')}
-            </Link>
+            </LinkButton>
           )}
           {!result.passed && (
             <>
@@ -289,41 +352,42 @@ export function Course() {
                   {t('education.tryAgainAt', { time: when(result.attempts.retry_at) })}
                 </p>
               )}
-              <button
-                className={btn}
+              <Button
+                variant="primary"
+                icon={RotateCcw}
                 onClick={() => {
                   setResult(null)
                   setStep(0)
                 }}
               >
                 {t('education.retry')}
-              </button>
+              </Button>
             </>
           )}
         </Card>
       ) : !onQuiz ? (
-        <Card data-testid="lesson">
-          <p className="text-sm">
+        <Card data-testid="lesson" className="space-y-4">
+          <p className="font-bold text-ink-soft">
             {t('education.lesson', { n: step + 1, total: course.lessons.length })}
           </p>
-          <h2 className="text-2xl font-semibold">{L(course.lessons[step].title, lang)}</h2>
-          <div className="mt-3">
+          <h2 className="text-h2 font-bold">{L(course.lessons[step].title, lang)}</h2>
+          <div className="max-w-[60ch]">
             <Markdown source={L(course.lessons[step].body, lang)} />
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 pt-2">
             {step > 0 && (
-              <button onClick={() => setStep(step - 1)} className={btn + ' bg-slate-700'}>
+              <Button icon={ArrowLeft} onClick={() => setStep(step - 1)}>
                 {t('education.back')}
-              </button>
+              </Button>
             )}
-            <button onClick={() => void next()} className={btn}>
+            <Button variant="primary" icon={ArrowRight} onClick={() => void next()}>
               {step === course.lessons.length - 1 ? t('education.startQuiz') : t('education.next')}
-            </button>
+            </Button>
           </div>
         </Card>
       ) : !paper ? (
-        <Card data-testid="quiz-intro">
-          <h2 className="text-2xl font-semibold">{t('education.quiz')}</h2>
+        <Card data-testid="quiz-intro" className="space-y-4">
+          <h2 className="text-h2 font-bold">{t('education.quiz')}</h2>
           <p>
             {t('education.quizInfo', {
               count: course.quiz.count,
@@ -331,56 +395,77 @@ export function Course() {
             })}
           </p>
           {pacing && (
-            <p role="alert" data-testid="pacing">
+            <Notice tone="notice" role="alert" data-testid="pacing">
               {pacing.code === 'COOLDOWN'
                 ? t('education.cooldown', { time: when(pacing.retry_at) })
                 : t('education.exhausted', { time: when(pacing.retry_at) })}
-            </p>
+            </Notice>
           )}
-          {message && <p role="alert">{message}</p>}
-          <button onClick={() => void startQuiz()} className={btn} data-testid="begin-quiz">
-            {t('education.beginQuiz')}
-          </button>
-          <button onClick={() => setStep(0)} className={btn + ' ml-3 bg-slate-700'}>
-            {t('education.rereadLessons')}
-          </button>
+          {message && (
+            <Notice tone="danger" role="alert">
+              {message}
+            </Notice>
+          )}
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="primary"
+              icon={PlayCircle}
+              onClick={() => void startQuiz()}
+              data-testid="begin-quiz"
+            >
+              {t('education.beginQuiz')}
+            </Button>
+            <Button icon={ArrowLeft} onClick={() => setStep(0)}>
+              {t('education.rereadLessons')}
+            </Button>
+          </div>
         </Card>
       ) : (
-        <Card data-testid="quiz">
-          <h2 className="text-2xl font-semibold">{t('education.quiz')}</h2>
+        <Card data-testid="quiz" className="space-y-6">
+          <h2 className="text-h2 font-bold">{t('education.quiz')}</h2>
           {paper.questions.map((q, qi) => (
-            <fieldset key={q.id} className="mt-4" data-testid={`question-${qi}`}>
-              <legend className="font-semibold">
+            <fieldset key={q.id} className="space-y-2" data-testid={`question-${qi}`}>
+              <legend className="mb-2 text-label font-bold">
                 {qi + 1}. {L(q.prompt, lang)}
               </legend>
               {q.choices.map((c, ci) => (
                 <label
                   key={ci}
-                  className="mt-2 flex min-h-14 items-center gap-3 rounded-lg border-2 border-slate-500 px-4"
+                  className={cn(
+                    'flex min-h-touch cursor-pointer items-center gap-4 rounded-ctl border-2 px-4 py-2',
+                    answers[q.id] === ci
+                      ? 'border-primary bg-primary-soft font-bold'
+                      : 'border-line bg-surface hover:border-primary',
+                  )}
                 >
                   <input
                     type="radio"
                     name={q.id}
                     checked={answers[q.id] === ci}
                     onChange={() => setAnswers({ ...answers, [q.id]: ci })}
-                    className="h-6 w-6"
+                    className="size-6 accent-[var(--primary)]"
                   />
                   {L(c, lang)}
                 </label>
               ))}
             </fieldset>
           ))}
-          <button
+          <Button
+            variant="primary"
+            icon={SendHorizontal}
             onClick={() => void handIn()}
             disabled={paper.questions.some((q) => answers[q.id] === undefined)}
-            className={btn + ' disabled:opacity-40'}
           >
             {t('education.submit')}
-          </button>
-          {message && <p role="alert">{message}</p>}
+          </Button>
+          {message && (
+            <Notice tone="danger" role="alert">
+              {message}
+            </Notice>
+          )}
         </Card>
       )}
-    </div>
+    </ScreenFrame>
   )
 }
 
@@ -394,15 +479,16 @@ export function CertificateCard({
   t: (k: string) => string
 }) {
   return (
-    <div className="rounded-lg border-4 border-double border-white p-6 text-center">
-      <p className="text-sm uppercase">{t('education.certificateOf')}</p>
-      <h2 className="mt-2 text-3xl font-bold">{L(cert.title, lang)}</h2>
-      <p className="mt-2 text-xl">{cert.resident}</p>
-      <p className="mt-2">
+    <div className="space-y-2 rounded-card border-4 border-double border-primary bg-surface p-8 text-center">
+      <Award aria-hidden="true" className="mx-auto size-12 text-primary" strokeWidth={1.5} />
+      <p className="text-sm font-bold text-ink-soft">{t('education.certificateOf')}</p>
+      <h2 className="text-h1 font-bold">{L(cert.title, lang)}</h2>
+      <p className="text-label">{cert.resident}</p>
+      <p>
         {t('education.score')} {cert.score}
       </p>
       <p>{new Date(cert.issued_at).toLocaleDateString(lang)}</p>
-      <p className="mt-2 font-mono text-sm">{cert.serial}</p>
+      <p className="font-mono text-sm text-ink-soft">{cert.serial}</p>
     </div>
   )
 }
@@ -418,24 +504,33 @@ export function Certificates() {
       .catch(() => setError(true))
   }, [request])
   return (
-    <div className="space-y-6">
-      <BackLink />
-      <h1 className="text-3xl font-bold">{t('education.myCertificates')}</h1>
-      {error && <p>{t('calls.needsConnection')}</p>}
-      {certs?.length === 0 && <p>{t('education.noCertificates')}</p>}
+    <ScreenFrame title={t('education.myCertificates')} narrow>
+      {error && <ErrorState title={t('calls.needsConnection')} />}
+      {certs?.length === 0 && <EmptyState title={t('education.noCertificates')} />}
       <ul className="space-y-3">
         {(certs ?? []).map((c) => (
           <li key={c.serial}>
-            <Link to={`/resident/certificate/${c.serial}`} data-testid={`cert-${c.course}`}>
-              <Card>
-                <h2 className="text-xl font-semibold">{L(c.title, i18n.language)}</h2>
-                <p className="font-mono text-sm">{c.serial}</p>
+            <Link
+              to={`/resident/certificate/${c.serial}`}
+              data-testid={`cert-${c.course}`}
+              className="block"
+            >
+              <Card className="flex items-center gap-4 hover:border-primary">
+                <Award
+                  aria-hidden="true"
+                  className="size-9 shrink-0 text-primary"
+                  strokeWidth={1.75}
+                />
+                <div>
+                  <h2 className="text-label font-bold">{L(c.title, i18n.language)}</h2>
+                  <p className="font-mono text-sm text-ink-soft">{c.serial}</p>
+                </div>
               </Card>
             </Link>
           </li>
         ))}
       </ul>
-    </div>
+    </ScreenFrame>
   )
 }
 
@@ -451,10 +546,9 @@ export function CertificateView() {
       .catch(() => setError(true))
   }, [request, serial])
   return (
-    <div className="space-y-6">
-      <BackLink />
-      {error && <p>{t('calls.needsConnection')}</p>}
+    <ScreenFrame title={t('education.myCertificates')} narrow>
+      {error && <ErrorState title={t('calls.needsConnection')} />}
       {cert && <CertificateCard cert={cert} lang={i18n.language} t={t} />}
-    </div>
+    </ScreenFrame>
   )
 }

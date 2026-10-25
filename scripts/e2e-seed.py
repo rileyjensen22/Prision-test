@@ -94,11 +94,13 @@ def main() -> None:
             assigned_days_ago=0,
             quiet_after_days=None,
             unit="A",
+            text_size="normal",
         ):
             r = Resident(
                 code=f"E2E-{key.upper()}",
                 display_name=f"Synthetic {key}",
                 language=lang,
+                text_size=text_size,
                 prior_returns=prior,
             )
             cell, dev = (
@@ -225,6 +227,24 @@ def main() -> None:
         resident(
             "lee", start_points=450
         )  # tier 4, then a confirmed CAM_BLOCK: reading locks
+        # UI audit residents: large text, one per language, so overflow and a11y checks see
+        # the hardest case. Nothing else in the suite touches them.
+        resident(
+            "uxen",
+            text_size="large",
+            start_points=250,
+            contacts=("family", "attorney"),
+            funds=2500,
+        )
+        resident(
+            "uxes",
+            lang="es",
+            text_size="large",
+            start_points=250,
+            contacts=("family", "attorney"),
+            funds=2500,
+            sanction="DISRUPT",
+        )
         heavy = Actor(
             s.execute(select(Staff.id).where(Staff.username == "e2e_heavy")).scalar(),
             "officer",

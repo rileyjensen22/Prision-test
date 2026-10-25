@@ -70,9 +70,9 @@ export function Texting() {
   const privileged = who?.type === 'attorney'
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('texting.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('texting.title')}</h1>
       {allowance && (
         <p data-testid="texts-left">
           {t('texting.left', { n: Math.max(0, allowance.limit - allowance.used) })}
@@ -85,9 +85,12 @@ export function Texting() {
       )}
       {!who ? (
         <>
-          <h2 className="text-2xl font-bold">{t('texting.contacts')}</h2>
+          <h2 className="text-h2 font-bold">{t('texting.contacts')}</h2>
           {contacts.length === 0 && <p>{t('texting.none')}</p>}
-          <Link to="/resident/feature/contact_requests" className="inline-block underline">
+          <Link
+            to="/resident/feature/contact_requests"
+            className="inline-block text-primary underline underline-offset-4"
+          >
             {t('contacts.link')}
           </Link>
           <ul className="space-y-3">
@@ -97,7 +100,7 @@ export function Texting() {
                   disabled={!c.available}
                   onClick={() => setWho(c)}
                   data-testid={`text-contact-${c.type}`}
-                  className="min-h-16 w-full rounded-xl border-2 border-white px-5 py-3 text-left disabled:opacity-40"
+                  className="min-h-touch rounded-ctl border-2 border-ink bg-surface px-6 py-3 text-label font-bold text-ink hover:bg-surface-2 w-full justify-start text-left disabled:opacity-40"
                 >
                   {c.name} · {t(`calls.type.${c.type}`)}
                 </button>
@@ -112,7 +115,7 @@ export function Texting() {
               setWho(null)
               setSentPrivately(false)
             }}
-            className="rounded-lg border-2 border-white px-5 py-3"
+            className="min-h-touch rounded-ctl border-2 border-ink bg-surface px-6 py-3 text-label font-bold text-ink hover:bg-surface-2"
           >
             ← {who.name}
           </button>
@@ -126,7 +129,11 @@ export function Texting() {
                 <strong>{m.direction === 'out' ? t('texting.you') : t('texting.them')}: </strong>
                 {m.body ?? t('texting.sentPrivately')}
                 {m.direction === 'out' && (
-                  <span data-testid="delivery" data-state={m.delivery} className="ml-2 opacity-80">
+                  <span
+                    data-testid="delivery"
+                    data-state={m.delivery}
+                    className="ml-2 text-ink-soft"
+                  >
                     ({t(`texting.delivery.${m.delivery}`)})
                   </span>
                 )}
@@ -139,13 +146,13 @@ export function Texting() {
             value={text}
             maxLength={500}
             onChange={(e) => setText(e.target.value)}
-            className="w-full rounded-lg border-2 border-white bg-slate-900 p-3"
+            className="w-full rounded-ctl border-2 border-ink bg-surface p-3 text-body"
             rows={3}
           />
           <button
             disabled={!text.trim()}
             onClick={() => void send()}
-            className="min-h-14 rounded-lg bg-blue-700 px-6 py-3 font-semibold disabled:opacity-40"
+            className="min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110 disabled:opacity-40"
           >
             {t('texting.send')}
           </button>

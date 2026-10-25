@@ -96,7 +96,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
           <select
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="mt-1 block w-full rounded border px-2 py-2"
+            className="mt-1 block w-full rounded-ctl border px-2 py-2"
           >
             <option value="">Choose…</option>
             {(infractions.data ?? []).map((i) => (
@@ -107,7 +107,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
           </select>
         </label>
         {inf && (
-          <p className="text-sm text-gray-700" data-testid="infraction-help">
+          <p className="text-sm text-ink-soft" data-testid="infraction-help">
             Locks {inf.scope.replace(/_/g, ' ')} for {inf.duration_hours} hours.{' '}
             {needsSupervisor(inf)
               ? 'Needs evidence and a supervisor’s confirmation.'
@@ -115,7 +115,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
           </p>
         )}
         {inf && needsSupervisor(inf) && (
-          <fieldset className="space-y-2 rounded border p-3">
+          <fieldset className="space-y-2 rounded-ctl border p-3">
             <legend className="px-1 text-sm font-medium">Evidence</legend>
             <label className="mr-4 text-sm">
               <input
@@ -139,7 +139,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
                 <select
                   value={reporter}
                   onChange={(e) => setReporter(e.target.value)}
-                  className="mt-1 block w-full rounded border px-2 py-2"
+                  className="mt-1 block w-full rounded-ctl border px-2 py-2"
                   aria-label="Reported by"
                 >
                   <option value="">Choose a colleague…</option>
@@ -158,7 +158,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
                 <input
                   value={ref}
                   onChange={(e) => setRef(e.target.value)}
-                  className="mt-1 block w-full rounded border px-2 py-2"
+                  className="mt-1 block w-full rounded-ctl border px-2 py-2"
                 />
               </label>
             )}
@@ -207,7 +207,7 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
       <select
         value={s[key]}
         onChange={(e) => setS({ ...s, [key]: e.target.value })}
-        className="mt-1 block w-full rounded border px-2 py-2"
+        className="mt-1 block w-full rounded-ctl border px-2 py-2"
       >
         {opts.map((o) => (
           <option key={o}>{o}</option>
@@ -234,7 +234,7 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="mt-1 block w-full rounded border px-2 py-2"
+            className="mt-1 block w-full rounded-ctl border px-2 py-2"
           />
         </label>
         <div className="md:col-span-2">
@@ -277,7 +277,7 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
           <span
             key={d.day}
             title={d.day}
-            className={`rounded px-2 py-1 text-xs ${d.minutes === null ? 'bg-gray-100 text-gray-500' : d.minutes < 60 ? 'bg-red-100 text-red-900' : 'bg-green-100 text-green-900'}`}
+            className={`rounded-ctl px-2 py-1 text-sm ${d.minutes === null ? 'bg-surface-2 text-ink-soft' : d.minutes < 60 ? 'bg-danger-soft text-ink' : 'bg-ok-soft text-ink'}`}
           >
             {d.day.slice(5)}: {d.minutes ?? '—'}
           </span>
@@ -292,7 +292,7 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
               type="date"
               value={day}
               onChange={(e) => setDay(e.target.value)}
-              className="mt-1 block rounded border px-2 py-1"
+              className="mt-1 block rounded-ctl border px-2 py-1"
             />
           </label>
           <label className="text-sm">
@@ -304,13 +304,13 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
               max={1440}
               value={minutes}
               onChange={(e) => setMinutes(e.target.value)}
-              className="mt-1 block w-28 rounded border px-2 py-1"
+              className="mt-1 block w-28 rounded-ctl border px-2 py-1"
             />
           </label>
           <Btn type="submit" disabled={minutes === ''}>
             Record
           </Btn>
-          <span className="text-xs text-gray-600">
+          <span className="text-sm text-ink-soft">
             Entries are never edited; a correction is a new entry.
           </span>
         </form>
@@ -354,7 +354,7 @@ function Activity({ residentId }: { residentId: number }) {
       .join(', ')
   return (
     <Panel title="Activity (metadata only)" data-testid="activity-panel">
-      <p className="mb-2 text-sm text-gray-600">
+      <p className="mb-2 text-sm text-ink-soft">
         Shows that things happened and for how long, never message text or call content. Each look
         is recorded in the audit log with your reason.
       </p>
@@ -366,7 +366,7 @@ function Activity({ residentId }: { residentId: number }) {
               aria-label="Reason for viewing activity"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="mt-1 block w-full rounded border px-2 py-2"
+              className="mt-1 block w-full rounded-ctl border px-2 py-2"
             />
           </label>
           <Btn type="submit" disabled={reason.trim().length < 5}>

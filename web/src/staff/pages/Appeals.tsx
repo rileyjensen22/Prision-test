@@ -45,7 +45,7 @@ export default function Appeals() {
 
   return (
     <Page title="Appeals">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Reviewed by someone other than the person who recorded the infraction, within the review
         window.
       </p>
@@ -85,15 +85,15 @@ export default function Appeals() {
               <Td>
                 {a.status}
                 {a.reviewer && ` by ${a.reviewer.username}`}
-                {a.outcome_note && <div className="text-gray-600">{a.outcome_note}</div>}
+                {a.outcome_note && <div className="text-ink-soft">{a.outcome_note}</div>}
               </Td>
               <Td>
                 {a.status !== 'open' ? (
                   ''
                 ) : user?.role !== 'supervisor' ? (
-                  <span className="text-gray-500">Supervisors only</span>
+                  <span className="text-ink-soft">Supervisors only</span>
                 ) : !a.can_review ? (
-                  <span data-testid="own-appeal" className="text-gray-600">
+                  <span data-testid="own-appeal" className="text-ink-soft">
                     You recorded this; another supervisor must review.
                   </span>
                 ) : open === a.appeal_id ? (
@@ -102,7 +102,7 @@ export default function Appeals() {
                       aria-label="Outcome"
                       value={outcome}
                       onChange={(e) => setOutcome(e.target.value as 'upheld' | 'overturned')}
-                      className="rounded border px-2 py-1"
+                      className="rounded-ctl border px-2 py-1"
                     >
                       <option value="upheld">Uphold</option>
                       <option value="overturned">Overturn</option>
@@ -112,7 +112,7 @@ export default function Appeals() {
                       placeholder="Reason"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      className="rounded border px-2 py-1"
+                      className="rounded-ctl border px-2 py-1"
                     />
                     <Btn disabled={!note.trim()} onClick={() => void review(a.appeal_id)}>
                       Submit decision

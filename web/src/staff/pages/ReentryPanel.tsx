@@ -66,14 +66,14 @@ export default function ReentryPanel({
               <input
                 aria-label="Release date"
                 type="date"
-                className="rounded border px-2 py-1"
+                className="rounded-ctl border px-2 py-1"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
               <input
                 aria-label="Reason for the date"
                 placeholder="Reason"
-                className="rounded border px-2 py-1"
+                className="rounded-ctl border px-2 py-1"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
@@ -110,13 +110,13 @@ export default function ReentryPanel({
                       <input
                         aria-label={`Note for ${i.code}`}
                         placeholder="Note"
-                        className="mr-2 rounded border px-2 py-1"
+                        className="mr-2 rounded-ctl border px-2 py-1"
                         value={notes[i.code] ?? ''}
                         onChange={(e) => setNotes({ ...notes, [i.code]: e.target.value })}
                       />
                       <select
                         aria-label={`Status for ${i.code}`}
-                        className="rounded border px-2 py-1"
+                        className="rounded-ctl border px-2 py-1"
                         value={i.status}
                         onChange={(e) => void setStatus(i.code, e.target.value)}
                       >

@@ -109,7 +109,7 @@ test('live mirror: logged, read-only, follows the device, hides private screens'
   await expect(sup.getByTestId('sim-screen')).not.toContainText('SIMULATION')
 
   // The mirror follows the resident to the home screen...
-  await kiosk.getByRole('link', { name: '← Back' }).click()
+  await kiosk.getByRole('link', { name: 'Back' }).click()
   await expect(sup.getByTestId('mirror-screen')).toContainText(/Screen: \/resident( |\()/, {
     timeout: 10_000,
   })
@@ -123,7 +123,7 @@ test('live mirror: logged, read-only, follows the device, hides private screens'
   await expect(sup.getByTestId('sim-screen')).toHaveCount(0)
   await expect(sup.getByTestId('mirror-redacted')).not.toContainText('legal_materials')
 
-  await kiosk.getByRole('link', { name: '← Back' }).click()
+  await kiosk.getByRole('link', { name: 'Back' }).click()
   await expect(sup.getByTestId('sim-screen')).toBeVisible({ timeout: 10_000 })
 
   await sup.getByRole('button', { name: 'End mirror' }).click()

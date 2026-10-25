@@ -42,10 +42,10 @@ function Stat({
     <Link
       to={to}
       data-testid={id}
-      className={`rounded-lg border bg-white p-4 shadow-sm ${warn && value > 0 ? 'border-amber-500' : ''}`}
+      className={`rounded-card border bg-surface p-4  ${warn && value > 0 ? 'border-notice' : ''}`}
     >
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
+      <div className="text-h1 font-semibold">{value}</div>
+      <div className="text-sm text-ink-soft">{label}</div>
     </Link>
   )
 }
@@ -61,7 +61,7 @@ export default function Dashboard() {
         <p
           role="alert"
           data-testid="ledger-alert"
-          className="rounded border border-red-400 bg-red-50 px-3 py-2 text-red-900"
+          className="rounded-ctl border border-danger bg-danger-soft px-3 py-2 text-ink"
         >
           The last nightly reconciliation found a mismatch between a balance and its ledger.{' '}
           <Link className="underline" to="/staff/finance">
@@ -124,7 +124,7 @@ export default function Dashboard() {
         </div>
       )}
       {s && s.overdue_appeals > 0 && (
-        <p role="alert" className="rounded bg-red-50 px-3 py-2 text-red-900">
+        <p role="alert" className="rounded-ctl bg-danger-soft px-3 py-2 text-ink">
           {s.overdue_appeals} appeal(s) are past their review deadline.
         </p>
       )}

@@ -47,7 +47,7 @@ export default function ContentJobs() {
     <Page title="Content sources and jobs">
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <Panel title="Approved content sources">
-        <p className="mb-2 text-sm text-gray-600">
+        <p className="mb-2 text-sm text-ink-soft">
           Nothing outside this list can be shown to residents. External sources must use https.
         </p>
         <ErrorLine error={sources.error} />
@@ -98,14 +98,14 @@ export default function ContentJobs() {
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <input
               aria-label="Source address"
               placeholder="https://…"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <Btn
               disabled={name.trim().length < 3}
@@ -123,7 +123,7 @@ export default function ContentJobs() {
       </Panel>
 
       <Panel title="Job listings">
-        <p className="mb-2 text-sm text-gray-600">
+        <p className="mb-2 text-sm text-ink-soft">
           Jobs are voluntary and never change a resident’s tier, points or privileges. Only the
           number of participants is shown here, never who. Wages, deductions and voluntariness need
           a compliance review before real use.
@@ -176,20 +176,20 @@ export default function ContentJobs() {
               placeholder="Code"
               value={job.code}
               onChange={(e) => setJob({ ...job, code: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <input
               aria-label="Job title"
               placeholder="Title"
               value={job.title}
               onChange={(e) => setJob({ ...job, title: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <select
               aria-label="Task type"
               value={job.task_type}
               onChange={(e) => setJob({ ...job, task_type: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             >
               {TYPES.map((t) => (
                 <option key={t}>{t}</option>
@@ -200,7 +200,7 @@ export default function ContentJobs() {
               placeholder="Description"
               value={job.description}
               onChange={(e) => setJob({ ...job, description: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <Btn
               disabled={job.code.length < 2 || job.title.length < 3 || !job.description}

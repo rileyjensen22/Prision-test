@@ -74,7 +74,7 @@ export default function Outcomes() {
     <Page title="Outcomes">
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      <p className="text-sm text-gray-700" data-testid="outcomes-note">
+      <p className="text-sm text-ink-soft" data-testid="outcomes-note">
         {data?.note} Groups smaller than {data?.minimum_group_size ?? 5} are not shown. There are no
         individual scores.
       </p>
@@ -140,13 +140,13 @@ export default function Outcomes() {
             <input
               aria-label="Resident code"
               placeholder="Resident code"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
             <select
               aria-label="Months after release"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={window}
               onChange={(e) => setWindow(Number(e.target.value))}
             >
@@ -156,7 +156,7 @@ export default function Outcomes() {
             </select>
             <select
               aria-label="Outcome"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={outcome}
               onChange={(e) => setOutcome(e.target.value)}
             >
@@ -167,7 +167,7 @@ export default function Outcomes() {
             <input
               aria-label="Source record"
               placeholder="Source record"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={source}
               onChange={(e) => setSource(e.target.value)}
             />
@@ -187,7 +187,7 @@ export default function Outcomes() {
             <input
               aria-label="Reason for export"
               placeholder="Reason"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />

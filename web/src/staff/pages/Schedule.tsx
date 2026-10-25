@@ -52,10 +52,10 @@ export default function Schedule() {
     }
   }
 
-  const field = 'rounded border px-2 py-1'
+  const field = 'rounded-ctl border px-2 py-1'
   return (
     <Page title="Unit schedule">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no
         changes uses the default template. Who can sign up comes from the entitlement rules (for
         example outdoor time at tiers 9 and 10), not from this page.

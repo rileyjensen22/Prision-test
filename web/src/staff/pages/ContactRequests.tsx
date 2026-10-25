@@ -42,7 +42,7 @@ export default function ContactRequests() {
 
   return (
     <Page title="Contact requests">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Residents ask to add people to their call and text lists. Nothing can be used until it is
         approved. Attorney contacts need a supervisor. Number checks are a stub in this version.
       </p>
@@ -68,7 +68,7 @@ export default function ContactRequests() {
                 <tr key={r.id} data-testid={`request-${r.id}`}>
                   <Td>
                     <Link
-                      className="text-blue-700 underline"
+                      className="text-primary underline"
                       to={`/staff/residents/${r.resident_id}`}
                     >
                       #{r.resident_id}
@@ -89,7 +89,7 @@ export default function ContactRequests() {
                         <input
                           aria-label={`Note for request ${r.id}`}
                           placeholder="Note (needed to refuse)"
-                          className="rounded border px-2 py-1"
+                          className="rounded-ctl border px-2 py-1"
                           value={note[r.id] ?? ''}
                           onChange={(e) => setNote({ ...note, [r.id]: e.target.value })}
                         />
@@ -99,7 +99,7 @@ export default function ContactRequests() {
                         </Btn>
                       </div>
                     ) : (
-                      <span className="text-gray-600">A supervisor must review this.</span>
+                      <span className="text-ink-soft">A supervisor must review this.</span>
                     )}
                   </Td>
                 </tr>

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { SimulatedResident } from '../../resident/SimulatedResident'
 import type { ResidentView } from '../../resident/types'
 import { errorText, post } from '../api'
-import { Btn, ErrorLine, Page, Panel, useLoad } from '../ui'
+import { Btn, ErrorLine, Page, Panel, SimulationBanner, useLoad } from '../ui'
 
 interface RosterRow {
   resident_id: number
@@ -23,7 +23,7 @@ interface Sanc {
   hours: string
 }
 
-const sel = 'mt-1 block w-full rounded border px-2 py-1.5'
+const sel = 'mt-1 block w-full rounded-ctl border px-2 py-1.5'
 
 export default function ViewAs() {
   const roster = useLoad<RosterRow[]>('/staff/roster')
@@ -98,15 +98,11 @@ export default function ViewAs() {
 
   return (
     <Page title="View as resident">
-      <p
-        role="note"
-        className="rounded bg-red-50 px-3 py-2 text-sm text-red-900"
-        data-testid="sandbox-note"
-      >
+      <SimulationBanner testId="sandbox-note">
         SIMULATION: a read-only dry run. Nothing here is saved, sent, or visible to the resident,
         and the database refuses writes while it runs. Buttons inside the simulated screen do
         nothing.
-      </p>
+      </SimulationBanner>
       <div className="grid gap-4 lg:grid-cols-[22rem_1fr]">
         <Panel title="What to simulate">
           <div className="space-y-3 text-sm">
@@ -187,7 +183,7 @@ export default function ViewAs() {
                 </select>
               </label>
             </div>
-            <fieldset className="rounded border p-2">
+            <fieldset className="rounded-ctl border p-2">
               <legend className="px-1">Offense restrictions</legend>
               <label className="block">
                 <input
@@ -215,7 +211,7 @@ export default function ViewAs() {
                   </label>
                 ))}
             </fieldset>
-            <fieldset className="rounded border p-2">
+            <fieldset className="rounded-ctl border p-2">
               <legend className="px-1">Sanctions</legend>
               <label className="block">
                 <input
@@ -228,7 +224,7 @@ export default function ViewAs() {
               <div className="mt-2 flex gap-2">
                 <select
                   aria-label="Add sanction"
-                  className="w-full rounded border px-2 py-1.5"
+                  className="w-full rounded-ctl border px-2 py-1.5"
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)}
                 >
@@ -244,7 +240,7 @@ export default function ViewAs() {
                   type="number"
                   min={1}
                   placeholder="hrs left"
-                  className="w-24 rounded border px-2 py-1.5"
+                  className="w-24 rounded-ctl border px-2 py-1.5"
                   value={newHours}
                   onChange={(e) => setNewHours(e.target.value)}
                 />
@@ -293,7 +289,7 @@ export default function ViewAs() {
         </Panel>
         <div>
           <ErrorLine error={error} />
-          {!residentId && <p className="text-gray-600">Choose a resident to see their screen.</p>}
+          {!residentId && <p className="text-ink-soft">Choose a resident to see their screen.</p>}
           {view && (
             <div className="max-w-xl">
               <SimulatedResident view={view} mode="sandbox" />

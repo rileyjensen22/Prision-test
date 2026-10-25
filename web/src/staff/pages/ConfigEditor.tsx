@@ -63,7 +63,7 @@ function RepeatReturn({
             aria-label="N"
             value={n}
             onChange={(e) => setN(e.target.value)}
-            className="mt-1 block w-24 rounded border px-2 py-1"
+            className="mt-1 block w-24 rounded-ctl border px-2 py-1"
           />
         </label>
         <label className="text-sm">
@@ -72,7 +72,7 @@ function RepeatReturn({
             aria-label="p"
             value={pp}
             onChange={(e) => setP(e.target.value)}
-            className="mt-1 block w-24 rounded border px-2 py-1"
+            className="mt-1 block w-24 rounded-ctl border px-2 py-1"
           />
         </label>
         {editable && (
@@ -140,7 +140,7 @@ export default function ConfigEditor() {
 
   return (
     <Page title="Configuration">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Every change creates a new version and an audit entry.{' '}
         {isAdmin ? 'You can edit.' : 'You can view; only admins can edit.'}
       </p>
@@ -154,7 +154,7 @@ export default function ConfigEditor() {
               setName(s.name)
               setMsg(null)
             }}
-            className={`rounded px-3 py-1.5 text-sm ${s.name === name ? 'bg-blue-700 text-white' : 'border bg-white'}`}
+            className={`rounded-ctl px-3 py-1.5 text-sm ${s.name === name ? 'bg-primary text-primary-ink' : 'border bg-surface'}`}
           >
             {s.name} <span className="opacity-70">v{s.version}</span>
           </button>
@@ -171,7 +171,7 @@ export default function ConfigEditor() {
           onChange={(e) => setText(e.target.value)}
           rows={18}
           spellCheck={false}
-          className="w-full rounded border bg-gray-50 p-2 font-mono text-xs"
+          className="w-full rounded-ctl border bg-surface-2 p-2 font-mono text-sm"
         />
         {isAdmin && (
           <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -181,7 +181,7 @@ export default function ConfigEditor() {
                 aria-label="Reason for change"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="mt-1 block w-full rounded border px-2 py-2"
+                className="mt-1 block w-full rounded-ctl border px-2 py-2"
               />
             </label>
             <Btn onClick={() => void save()} disabled={reason.trim().length < 3}>

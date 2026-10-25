@@ -61,6 +61,10 @@ export interface ResidentView {
   generated_at: string
   valid_until: string
   simulation: boolean
-  ui: { inactivity_return_home_seconds: number }
+  ui: {
+    inactivity_return_home_seconds: number
+    /** Optional night-mode window; the kiosk falls back to 21:00 to 06:00 until the API sends it. */
+    night_mode?: { start: string; end: string }
+  }
   reentry?: { release_date: string; days_left: number; weeks_left: number } | null
 }

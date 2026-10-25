@@ -111,7 +111,7 @@ export default function OutOfCell() {
 
   return (
     <Page title="Out of cell">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Tap residents out when they leave the cell and in when they return. Time is counted from
         these taps. Every resident should have at least the minimum each day.
       </p>
@@ -174,7 +174,7 @@ export default function OutOfCell() {
               Out for
               <select
                 aria-label="Out for"
-                className="ml-2 rounded border px-2 py-1"
+                className="ml-2 rounded-ctl border px-2 py-1"
                 value={activity}
                 onChange={(e) => setActivity(e.target.value)}
               >
@@ -190,7 +190,7 @@ export default function OutOfCell() {
           <ul className="grid grid-cols-2 gap-1 text-sm md:grid-cols-4" data-testid="pick-list">
             {(roster.data ?? []).map((r) => (
               <li key={r.resident_id}>
-                <label className={outIds.has(r.resident_id) ? 'text-gray-400' : ''}>
+                <label className={outIds.has(r.resident_id) ? 'text-ink-soft' : ''}>
                   <input
                     type="checkbox"
                     aria-label={`Select ${r.code}`}
@@ -239,7 +239,7 @@ export default function OutOfCell() {
             <input
               aria-label="Report day"
               type="date"
-              className="ml-2 rounded border px-2 py-1"
+              className="ml-2 rounded-ctl border px-2 py-1"
               value={day}
               onChange={(e) => setDay(e.target.value)}
             />

@@ -20,7 +20,7 @@ interface SeparateRow {
   reason: string
 }
 
-const input = 'rounded border px-2 py-1'
+const input = 'rounded-ctl border px-2 py-1'
 
 export default function Intake() {
   const { data: options, error } = useLoad<Options>('/staff/intake/options')
@@ -72,7 +72,7 @@ export default function Intake() {
         <>
           <Notice kind={msg.kind}>{msg.text}</Notice>
           {msg.id && (
-            <Link className="text-blue-700 underline" to={`/staff/residents/${msg.id}`}>
+            <Link className="text-primary underline" to={`/staff/residents/${msg.id}`}>
               Open the resident
             </Link>
           )}
@@ -215,7 +215,7 @@ export default function Intake() {
                   )
                 }
               />{' '}
-              {c.code} <span className="text-gray-600">— {c.reason_text}</span>
+              {c.code} <span className="text-ink-soft">— {c.reason_text}</span>
             </label>
           ))}
         </Panel>

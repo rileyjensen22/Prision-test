@@ -41,7 +41,7 @@ export default function Confirmations() {
 
   return (
     <Page title="Awaiting confirmation">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         A supervisor other than the person who recorded it must confirm each one. Nothing is locked
         for the resident until then.
       </p>
@@ -70,7 +70,7 @@ export default function Confirmations() {
               <Td>
                 {q.infraction_code}{' '}
                 <Badge tone={q.severity === 'major' ? 'red' : 'gray'}>{q.severity}</Badge>
-                <div className="text-gray-600">
+                <div className="text-ink-soft">
                   {q.label}, {q.duration_hours}h · {fmt(q.issued_at)}
                 </div>
               </Td>
@@ -85,9 +85,9 @@ export default function Confirmations() {
               <Td>{q.why_pending}</Td>
               <Td>
                 {!isSupervisor ? (
-                  <span className="text-gray-500">Supervisors only</span>
+                  <span className="text-ink-soft">Supervisors only</span>
                 ) : !q.can_confirm ? (
-                  <span data-testid="own-sanction" className="text-gray-600">
+                  <span data-testid="own-sanction" className="text-ink-soft">
                     You recorded this; another supervisor must confirm.
                   </span>
                 ) : rejecting === q.id ? (
@@ -96,7 +96,7 @@ export default function Confirmations() {
                       aria-label="Reason for rejecting"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
-                      className="rounded border px-2 py-1"
+                      className="rounded-ctl border px-2 py-1"
                     />
                     <Btn
                       kind="danger"

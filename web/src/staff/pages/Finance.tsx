@@ -53,7 +53,7 @@ export default function Finance() {
       <ErrorLine error={partners.error ?? runs.error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <Panel title="Nightly reconciliation">
-        <p className="mb-3 text-sm text-gray-600">
+        <p className="mb-3 text-sm text-ink-soft">
           Each night the system checks that every trust-account balance equals its append-only
           ledger, and that work earnings, payouts and trust deposits match. Any mismatch is an alert
           here and in the audit log. It never changes a balance; people investigate and add a
@@ -103,7 +103,7 @@ export default function Finance() {
         </Table>
       </Panel>
       <Panel title="Work partner dashboard (demo partner)">
-        <p className="mb-3 text-sm text-gray-600">
+        <p className="mb-3 text-sm text-ink-soft">
           Totals only. Individual participation is never shown, so work never becomes part of a
           behaviour record.
         </p>

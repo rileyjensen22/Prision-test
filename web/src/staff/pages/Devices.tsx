@@ -55,7 +55,7 @@ export default function Devices() {
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {pairing && (
         <Panel title={`Setup code for ${pairing.device}`}>
-          <p className="font-mono text-3xl" data-testid="pairing-code">
+          <p className="font-mono text-h1" data-testid="pairing-code">
             {pairing.code}
           </p>
           <p className="text-sm">
@@ -70,7 +70,7 @@ export default function Devices() {
             <input
               aria-label="New device code"
               placeholder="Device code"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
             />
@@ -94,7 +94,7 @@ export default function Devices() {
             <input
               aria-label="Reason"
               placeholder="Reason"
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -106,7 +106,7 @@ export default function Devices() {
                 min={0.5}
                 max={24}
                 step={0.5}
-                className="mx-2 w-20 rounded border px-2 py-1"
+                className="mx-2 w-20 rounded-ctl border px-2 py-1"
                 value={hours}
                 onChange={(e) => setHours(Number(e.target.value))}
               />

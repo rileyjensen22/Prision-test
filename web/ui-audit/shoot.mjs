@@ -8,6 +8,10 @@ import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const out = process.argv[2]
+// Optional filters for quick iteration: ONLY=home,locks  LANGS=en  TEXTS=normal  VIEWPORTS=1280x800  SURFACE=resident|staff
+const only = (process.env.ONLY ?? '').split(',').filter(Boolean)
+const pick = (name) => !only.length || only.some((o) => name.startsWith(o))
+const list = (key, all) => (process.env[key] ? process.env[key].split(',') : all)
 if (!out) throw new Error('usage: shoot.mjs <outDir>')
 const BASE = 'http://localhost:4173'
 const fx = JSON.parse(readFileSync(join('e2e', '.fixtures.json'), 'utf8'))
@@ -67,20 +71,22 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 async function residentShots() {
   const dir = join(out, 'resident')
   mkdirSync(dir, { recursive: true })
-  for (const lang of ['en', 'es']) {
-    for (const size of ['normal', 'large']) {
+  for (const lang of list('LANGS', ['en', 'es'])) {
+    for (const size of list('TEXTS', ['normal', 'large'])) {
       setResidents(lang, size)
-      for (const [sizeName, [width, height]] of Object.entries(SIZES)) {
+      for (const [sizeName, [width, height]] of Object.entries(SIZES).filter(([k]) => list('VIEWPORTS', Object.keys(SIZES)).includes(k))) {
         const ctx = await browser.newContext({ baseURL: BASE, viewport: { width, height } })
         for (const [name, who, path, full] of RESIDENT) {
           // Reduced matrix for secondary screens: one size, plus Spanish at large text.
+          if (!pick(name)) continue
           if (!full && !(sizeName === '1280x800' && (size === 'normal' || lang === 'es'))) continue
           const page = await ctx.newPage()
-          await page.goto(who ? `${path}#device=${fx.tokens[who]}` : path)
+          const q = process.env.MODE ? `${path.includes('?') ? '&' : '?'}mode=${process.env.MODE}` : ''
+          await page.goto(who ? `${path}${q}#device=${fx.tokens[who]}` : `${path}${q}`)
           await page.waitForTimeout(700)
           await page.screenshot({
             path: join(dir, `${name}__${lang}__${size}__${sizeName}.png`),
-            fullPage: true,
+            fullPage: process.env.FULLPAGE !== '0',
           })
           await page.close()
         }
@@ -94,7 +100,7 @@ async function residentShots() {
 async function staffShots() {
   const dir = join(out, 'staff')
   mkdirSync(dir, { recursive: true })
-  for (const [sizeName, [width, height]] of Object.entries(SIZES)) {
+  for (const [sizeName, [width, height]] of Object.entries(SIZES).filter(([k]) => list('VIEWPORTS', Object.keys(SIZES)).includes(k))) {
     const ctx = await browser.newContext({ baseURL: BASE, viewport: { width, height } })
     const page = await ctx.newPage()
     await page.goto('/staff'.replace(/^/, BASE))
@@ -104,6 +110,7 @@ async function staffShots() {
     await page.getByRole('button', { name: 'Sign in' }).click()
     await page.getByTestId('whoami').waitFor()
     for (const [name, path] of STAFF) {
+      if (!pick(name)) continue
       // In-app navigation keeps the session (it lives in sessionStorage).
       await page.evaluate((p) => {
         window.history.pushState({}, '', p)
@@ -116,7 +123,7 @@ async function staffShots() {
   }
 }
 
-await residentShots()
-await staffShots()
+if (process.env.SURFACE !== 'staff') await residentShots()
+if (process.env.SURFACE !== 'resident') await staffShots()
 await browser.close()
 console.log('done ->', out)

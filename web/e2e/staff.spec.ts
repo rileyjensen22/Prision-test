@@ -190,5 +190,5 @@ test('staff change a resident’s settings (with a reason); the kiosk follows', 
 
   const kiosk = await context.newPage()
   await openKiosk(kiosk, 'fay')
-  await expect(kiosk.getByTestId('kiosk')).toHaveClass(/text-4xl/)
+  await expect(kiosk.getByTestId('kiosk')).toHaveClass(/--scale:1.5/)
 })

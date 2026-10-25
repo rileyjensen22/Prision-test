@@ -63,7 +63,7 @@ export default function AuditLog() {
 
   return (
     <Page title="Audit log">
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-ink-soft">
         Append-only and hash-chained. Entries are never edited or deleted; mistakes are fixed by
         adding a correcting entry.
       </p>
@@ -118,14 +118,14 @@ export default function AuditLog() {
                             placeholder="Reason code"
                             value={reasonCode}
                             onChange={(ev) => setReasonCode(ev.target.value)}
-                            className="w-32 rounded border px-2 py-1"
+                            className="w-32 rounded-ctl border px-2 py-1"
                           />
                           <input
                             aria-label="Correction note"
                             placeholder="What is wrong"
                             value={note}
                             onChange={(ev) => setNote(ev.target.value)}
-                            className="rounded border px-2 py-1"
+                            className="rounded-ctl border px-2 py-1"
                           />
                           <Btn
                             disabled={!reasonCode.trim() || !note.trim()}
