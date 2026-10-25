@@ -477,6 +477,7 @@ const en = {
       styleguide: 'Style guide',
     },
     table: {
+      region: 'Scrollable table',
       filter: 'Filter',
       filterHint: 'Type to filter rows',
       showing: 'Showing {{shown}} of {{total}}',

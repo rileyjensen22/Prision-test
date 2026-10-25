@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import i18n from '../i18n'
 import { cn } from '../ui/cn'
 import { EmptyState } from '../ui/States'
 import { api, errorText } from './api'
@@ -79,7 +80,12 @@ export const Table = ({
   className,
   ...rest
 }: { children: ReactNode; className?: string } & Record<string, unknown>) => (
-  <div className="max-h-[calc(100vh-13rem)] overflow-auto rounded-card border border-line bg-surface">
+  <div
+    role="region"
+    aria-label={i18n.t('staff.table.region')}
+    tabIndex={0}
+    className="max-h-[calc(100vh-13rem)] overflow-auto rounded-card border border-line bg-surface"
+  >
     <table className={cn('w-full border-collapse text-left', className)} {...rest}>
       {children}
     </table>

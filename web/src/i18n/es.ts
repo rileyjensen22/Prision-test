@@ -496,6 +496,7 @@ const es: Dict = {
       styleguide: 'Guía de estilo',
     },
     table: {
+      region: 'Tabla desplazable',
       filter: 'Filtrar',
       filterHint: 'Escriba para filtrar las filas',
       showing: 'Mostrando {{shown}} de {{total}}',
