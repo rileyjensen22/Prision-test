@@ -1,10 +1,23 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { api, errorText, fmt, post, put } from '../api'
 import { useAuth } from '../auth'
-import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import {
+  Badge,
+  Btn,
+  DataTable,
+  ErrorLine,
+  Notice,
+  Page,
+  Panel,
+  Table,
+  Td,
+  Th,
+  useLoad,
+} from '../ui'
 import ReentryPanel from './ReentryPanel'
 
 interface Detail {
@@ -48,6 +61,8 @@ const needsSupervisor = (i: Infraction) =>
   i.confirmation !== 'officer_immediate' || i.duration_hours > 24
 
 function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () => void }) {
+  const { t: tr } = useTranslation()
+
   const { user } = useAuth()
   const infractions = useLoad<Infraction[]>('/staff/infractions')
   const colleagues = useLoad<Colleague[]>('/staff/colleagues')
@@ -89,16 +104,16 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
   }
 
   return (
-    <Panel title="Record an infraction" data-testid="issue-panel">
+    <Panel title={tr('staff.pages.ResidentDetail.recordAnInfraction')} data-testid="issue-panel">
       <form onSubmit={submit} className="space-y-3">
         <label className="block text-sm">
-          Infraction
+          {tr('staff.pages.ResidentDetail.infraction')}
           <select
             value={code}
             onChange={(e) => setCode(e.target.value)}
             className="mt-1 block w-full rounded-ctl border px-2 py-2"
           >
-            <option value="">Choose…</option>
+            <option value="">{tr('staff.pages.ResidentDetail.choose')}</option>
             {(infractions.data ?? []).map((i) => (
               <option key={i.code} value={i.code}>
                 {i.code} — {i.label}
@@ -116,7 +131,9 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
         )}
         {inf && needsSupervisor(inf) && (
           <fieldset className="space-y-2 rounded-ctl border p-3">
-            <legend className="px-1 text-sm font-medium">Evidence</legend>
+            <legend className="px-1 text-sm font-medium">
+              {tr('staff.pages.ResidentDetail.evidence')}
+            </legend>
             <label className="mr-4 text-sm">
               <input
                 type="radio"
@@ -135,14 +152,14 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
             </label>
             {evType === 'second_staff_report' ? (
               <label className="block text-sm">
-                Reported by
+                {tr('staff.pages.ResidentDetail.reportedBy')}
                 <select
                   value={reporter}
                   onChange={(e) => setReporter(e.target.value)}
                   className="mt-1 block w-full rounded-ctl border px-2 py-2"
-                  aria-label="Reported by"
+                  aria-label={tr('staff.pages.ResidentDetail.reportedBy')}
                 >
-                  <option value="">Choose a colleague…</option>
+                  <option value="">{tr('staff.pages.ResidentDetail.chooseAColleague')}</option>
                   {(colleagues.data ?? [])
                     .filter((c) => c.id !== user?.id)
                     .map((c) => (
@@ -154,7 +171,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
               </label>
             ) : (
               <label className="block text-sm">
-                Event reference
+                {tr('staff.pages.ResidentDetail.eventReference')}
                 <input
                   value={ref}
                   onChange={(e) => setRef(e.target.value)}
@@ -173,7 +190,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
               (evType === 'second_staff_report' ? !reporter : !ref.trim()))
           }
         >
-          Submit
+          {tr('staff.pages.ResidentDetail.submit')}
         </Btn>
         {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       </form>
@@ -182,6 +199,8 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
 }
 
 function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
+  const { t: tr } = useTranslation()
+
   const [s, setS] = useState(d.settings)
   const [reason, setReason] = useState('')
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
@@ -216,7 +235,10 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
     </label>
   )
   return (
-    <Panel title="Resident settings (staff only)" data-testid="settings-panel">
+    <Panel
+      title={tr('staff.pages.ResidentDetail.residentSettingsStaffOnly')}
+      data-testid="settings-panel"
+    >
       <form onSubmit={save} className="grid gap-3 md:grid-cols-2">
         {sel('Language', 'language', ['en', 'es'])}
         {sel('Text size', 'text_size', ['normal', 'large', 'xlarge'])}
@@ -230,7 +252,7 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
           Captions
         </label>
         <label className="block text-sm md:col-span-2">
-          Reason for change
+          {tr('staff.pages.ResidentDetail.reasonForChange')}
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -239,7 +261,7 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
         </label>
         <div className="md:col-span-2">
           <Btn type="submit" disabled={reason.trim().length < 3}>
-            Save settings
+            {tr('staff.pages.ResidentDetail.saveSettings')}
           </Btn>
         </div>
         {msg && (
@@ -253,6 +275,8 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
 }
 
 function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boolean }) {
+  const { t: tr } = useTranslation()
+
   const { data, reload } = useLoad<{ day: string; minutes: number | null }[]>(
     `/staff/residents/${residentId}/out-of-cell?days=14`,
   )
@@ -271,7 +295,7 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
     }
   }
   return (
-    <Panel title="Out-of-cell time (last 14 days)" data-testid="ooc-panel">
+    <Panel title={tr('staff.pages.ResidentDetail.outOfCellTime')} data-testid="ooc-panel">
       <div className="flex flex-wrap gap-1" data-testid="ooc-days">
         {(data ?? []).map((d) => (
           <span
@@ -286,9 +310,9 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
       {canEdit && (
         <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-2">
           <label className="text-sm">
-            Day
+            {tr('staff.pages.ResidentDetail.day')}
             <input
-              aria-label="Out-of-cell day"
+              aria-label={tr('staff.pages.ResidentDetail.outOfCellDay')}
               type="date"
               value={day}
               onChange={(e) => setDay(e.target.value)}
@@ -296,9 +320,9 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
             />
           </label>
           <label className="text-sm">
-            Minutes out of cell
+            {tr('staff.pages.ResidentDetail.minutesOutOfCell')}
             <input
-              aria-label="Minutes out of cell"
+              aria-label={tr('staff.pages.ResidentDetail.minutesOutOfCell')}
               type="number"
               min={0}
               max={1440}
@@ -308,10 +332,10 @@ function OutOfCell({ residentId, canEdit }: { residentId: number; canEdit: boole
             />
           </label>
           <Btn type="submit" disabled={minutes === ''}>
-            Record
+            {tr('staff.pages.ResidentDetail.record')}
           </Btn>
           <span className="text-sm text-ink-soft">
-            Entries are never edited; a correction is a new entry.
+            {tr('staff.pages.ResidentDetail.entriesAreNeverEdited')}
           </span>
         </form>
       )}
@@ -331,6 +355,8 @@ interface TimelineEvent {
 }
 
 function Activity({ residentId }: { residentId: number }) {
+  const { t: tr } = useTranslation()
+
   const [reason, setReason] = useState('')
   const [events, setEvents] = useState<TimelineEvent[] | null>(null)
   const [err, setErr] = useState<string | null>(null)
@@ -353,45 +379,45 @@ function Activity({ residentId }: { residentId: number }) {
       .map(([k, v]) => `${k.replace(/_/g, ' ')}: ${String(v)}`)
       .join(', ')
   return (
-    <Panel title="Activity (metadata only)" data-testid="activity-panel">
+    <Panel
+      title={tr('staff.pages.ResidentDetail.activityMetadataOnly')}
+      data-testid="activity-panel"
+    >
       <p className="mb-2 text-sm text-ink-soft">
-        Shows that things happened and for how long, never message text or call content. Each look
-        is recorded in the audit log with your reason.
+        {tr('staff.pages.ResidentDetail.showsThatThingsHappened')}
       </p>
       {events === null ? (
         <form onSubmit={open} className="flex flex-wrap items-end gap-2">
           <label className="flex-1 text-sm">
-            Why are you viewing this?
+            {tr('staff.pages.ResidentDetail.whyAreYouViewing')}
             <input
-              aria-label="Reason for viewing activity"
+              aria-label={tr('staff.pages.ResidentDetail.reasonForViewingActivity')}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="mt-1 block w-full rounded-ctl border px-2 py-2"
             />
           </label>
           <Btn type="submit" disabled={reason.trim().length < 5}>
-            View activity
+            {tr('staff.pages.ResidentDetail.viewActivity')}
           </Btn>
         </form>
       ) : (
-        <Table data-testid="timeline">
-          <thead>
-            <tr>
-              <Th>When</Th>
-              <Th>What</Th>
-              <Th>Details</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((e, i) => (
-              <tr key={i}>
-                <Td>{fmt(e.at)}</Td>
-                <Td>{e.kind}</Td>
-                <Td>{text(e)}</Td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <DataTable
+          testId="timeline"
+          rows={events}
+          rowKey={(e) => `${e.at}-${e.kind}-${text(e)}`}
+          columns={[
+            { key: 'when', header: 'When', sort: (e) => e.at, cell: (e) => fmt(e.at) },
+            {
+              key: 'what',
+              header: 'What',
+              sort: (e) => e.kind,
+              text: (e) => e.kind,
+              cell: (e) => e.kind,
+            },
+            { key: 'details', header: 'Details', text, cell: text },
+          ]}
+        />
       )}
       <ErrorLine error={err} />
     </Panel>
@@ -399,6 +425,8 @@ function Activity({ residentId }: { residentId: number }) {
 }
 
 export default function ResidentDetail() {
+  const { t: tr } = useTranslation()
+
   const { id } = useParams()
   const { user } = useAuth()
   const { data: d, error, reload } = useLoad<Detail>(`/staff/residents/${id}`)
@@ -406,7 +434,7 @@ export default function ResidentDetail() {
   const canEdit = user && ['officer', 'supervisor', 'admin'].includes(user.role)
   if (!d)
     return (
-      <Page title="Resident">
+      <Page title={tr('staff.pages.ResidentDetail.resident')}>
         <ErrorLine error={error} />
       </Page>
     )
@@ -414,10 +442,20 @@ export default function ResidentDetail() {
     <Page title={d.code}>
       <ErrorLine error={error} />
       <Panel>
-        <p data-testid="resident-summary">
-          Tier {d.tier.effective} (earned {d.tier.earned}, ceiling {d.tier.ceiling}) · {d.points}{' '}
-          points · cell {d.cell ?? '—'} · device {d.device ?? '—'} · prior returns {d.prior_returns}
-        </p>
+        <ul data-testid="resident-summary" className="flex flex-wrap gap-x-8 gap-y-3">
+          {[
+            ['tier', `${d.tier.effective} (earned ${d.tier.earned}, ceiling ${d.tier.ceiling})`],
+            ['points', String(d.points)],
+            ['cell', d.cell ?? '—'],
+            ['device', d.device ?? '—'],
+            ['prior returns', String(d.prior_returns)],
+          ].map(([label, value]) => (
+            <li key={label}>
+              <span className="text-ink-soft">{label}</span>{' '}
+              <strong className="text-h3">{value}</strong>
+            </li>
+          ))}
+        </ul>
       </Panel>
       <ReentryPanel
         residentId={d.resident_id}
@@ -426,50 +464,66 @@ export default function ResidentDetail() {
       />
       <p>
         <Link to={`/staff/residents/${d.resident_id}/certificates`} className="underline">
-          Certificates
+          {tr('staff.pages.ResidentDetail.certificates')}
         </Link>
       </p>
       {canRecord && <IssueSanction residentId={d.resident_id} onDone={() => void reload()} />}
-      <Panel title="Sanctions">
-        <Table data-testid="sanction-history">
-          <thead>
-            <tr>
-              <Th>#</Th>
-              <Th>Code</Th>
-              <Th>Status</Th>
-              <Th>Issued</Th>
-              <Th>By</Th>
-              <Th>Confirmed by</Th>
-              <Th>Ends</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.sanctions.map((s) => (
-              <tr key={s.id} data-testid={`sanction-${s.id}`}>
-                <Td>{s.id}</Td>
-                <Td>{s.code}</Td>
-                <Td>
-                  <Badge tone={s.active ? 'amber' : s.status === 'pending' ? 'red' : 'gray'}>
-                    {s.active ? 'active' : s.status}
-                  </Badge>
-                </Td>
-                <Td>{fmt(s.issued_at)}</Td>
-                <Td>{s.issued_by?.username ?? 'system'}</Td>
-                <Td>{s.confirmed_by?.username ?? ''}</Td>
-                <Td>{fmt(s.ends_at)}</Td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+      <Panel title={tr('staff.pages.ResidentDetail.sanctions')}>
+        <DataTable
+          testId="sanction-history"
+          rows={d.sanctions}
+          rowKey={(x) => x.id}
+          rowTestId={(x) => `sanction-${x.id}`}
+          columns={[
+            { key: 'id', header: '#', sort: (x) => x.id, cell: (x) => x.id },
+            {
+              key: 'code',
+              header: 'Code',
+              sort: (x) => x.code,
+              text: (x) => x.code,
+              cell: (x) => x.code,
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              sort: (x) => (x.active ? 'active' : x.status),
+              text: (x) => (x.active ? 'active' : x.status),
+              cell: (x) => (
+                <Badge tone={x.active ? 'amber' : x.status === 'pending' ? 'red' : 'gray'}>
+                  {x.active ? 'active' : x.status}
+                </Badge>
+              ),
+            },
+            {
+              key: 'issued',
+              header: 'Issued',
+              sort: (x) => x.issued_at,
+              cell: (x) => fmt(x.issued_at),
+            },
+            {
+              key: 'by',
+              header: 'By',
+              text: (x) => x.issued_by?.username ?? 'system',
+              cell: (x) => x.issued_by?.username ?? 'system',
+            },
+            { key: 'conf', header: 'Confirmed by', cell: (x) => x.confirmed_by?.username ?? '' },
+            {
+              key: 'ends',
+              header: 'Ends',
+              sort: (x) => x.ends_at ?? '',
+              cell: (x) => fmt(x.ends_at),
+            },
+          ]}
+        />
       </Panel>
       <div className="grid gap-4 md:grid-cols-2">
-        <Panel title="Points">
+        <Panel title={tr('staff.pages.ResidentDetail.points')}>
           <Table>
             <thead>
               <tr>
-                <Th>When</Th>
-                <Th>Event</Th>
-                <Th>Points</Th>
+                <Th>{tr('staff.pages.ResidentDetail.when')}</Th>
+                <Th>{tr('staff.pages.ResidentDetail.event')}</Th>
+                <Th>{tr('staff.pages.ResidentDetail.points')}</Th>
               </tr>
             </thead>
             <tbody>
@@ -483,13 +537,13 @@ export default function ResidentDetail() {
             </tbody>
           </Table>
         </Panel>
-        <Panel title="Tier history">
+        <Panel title={tr('staff.pages.ResidentDetail.tierHistory')}>
           <Table>
             <thead>
               <tr>
-                <Th>When</Th>
-                <Th>Change</Th>
-                <Th>Points</Th>
+                <Th>{tr('staff.pages.ResidentDetail.when')}</Th>
+                <Th>{tr('staff.pages.ResidentDetail.change')}</Th>
+                <Th>{tr('staff.pages.ResidentDetail.points')}</Th>
               </tr>
             </thead>
             <tbody>

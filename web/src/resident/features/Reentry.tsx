@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { ErrorState, LoadingState } from '../../ui/States'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
 import { L } from './helpers'
@@ -32,7 +33,8 @@ export function Reentry() {
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
       <h1 className="text-h1 font-bold">{t('reentry.title')}</h1>
-      {error && <p>{t('reentry.needsConnection')}</p>}
+      {error && <ErrorState title={t('reentry.needsConnection')} />}
+      {!data && !error && <LoadingState />}
       {data && (
         <>
           <Card data-testid="reentry-countdown">

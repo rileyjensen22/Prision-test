@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState, LoadingState } from '../../ui/States'
 import { BackLink, Card, reasonTitle } from '../components'
 import { NetworkError } from '../api'
 import { useResident } from '../ResidentContext'
@@ -85,9 +87,14 @@ export function Reading() {
       <BackLink />
       <h1 className="text-h1 font-bold">{t('reading.title')}</h1>
       {!online && <p data-testid="reading-offline">{t('reading.offline')}</p>}
-      {notice && <p role="alert">{notice}</p>}
+      {notice && (
+        <Notice tone="danger" role="alert">
+          {notice}
+        </Notice>
+      )}
       {items === null && online === false && <p>{t('reading.notSaved')}</p>}
-      {items?.length === 0 && <p>{t('reading.none')}</p>}
+      {!items && !notice && <LoadingState />}
+      {items?.length === 0 && <EmptyState title={t('reading.none')} />}
       <ul className="space-y-3">
         {shown.map((i) => (
           <li key={i.id}>

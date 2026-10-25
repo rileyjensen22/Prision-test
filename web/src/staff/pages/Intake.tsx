@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { errorText, post } from '../api'
@@ -23,6 +24,8 @@ interface SeparateRow {
 const input = 'rounded-ctl border px-2 py-1'
 
 export default function Intake() {
+  const { t: tr } = useTranslation()
+
   const { data: options, error } = useLoad<Options>('/staff/intake/options')
   const [name, setName] = useState('')
   const [cell, setCell] = useState('')
@@ -66,23 +69,23 @@ export default function Intake() {
   }
 
   return (
-    <Page title="Intake">
+    <Page title={tr('staff.pages.Intake.intake')}>
       <ErrorLine error={error} />
       {msg && (
         <>
           <Notice kind={msg.kind}>{msg.text}</Notice>
           {msg.id && (
             <Link className="text-primary underline" to={`/staff/residents/${msg.id}`}>
-              Open the resident
+              {tr('staff.pages.Intake.openTheResident')}
             </Link>
           )}
         </>
       )}
       <form onSubmit={(e) => void submit(e)} className="space-y-4" data-testid="intake-form">
-        <Panel title="Who and where">
+        <Panel title={tr('staff.pages.Intake.whoAndWhere')}>
           <div className="grid gap-3 sm:grid-cols-3">
             <label className="block text-sm">
-              Name
+              {tr('staff.pages.Intake.name')}
               <input
                 className={input + ' w-full'}
                 value={name}
@@ -90,13 +93,13 @@ export default function Intake() {
               />
             </label>
             <label className="block text-sm">
-              Cell
+              {tr('staff.pages.Intake.cell')}
               <select
                 className={input + ' w-full'}
                 value={cell}
                 onChange={(e) => setCell(e.target.value)}
               >
-                <option value="">Choose…</option>
+                <option value="">{tr('staff.pages.Intake.choose')}</option>
                 {options?.vacant_cells.map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.code} (unit {c.unit})
@@ -105,13 +108,13 @@ export default function Intake() {
               </select>
             </label>
             <label className="block text-sm">
-              Device
+              {tr('staff.pages.Intake.device')}
               <select
                 className={input + ' w-full'}
                 value={device}
                 onChange={(e) => setDevice(e.target.value)}
               >
-                <option value="">Choose…</option>
+                <option value="">{tr('staff.pages.Intake.choose')}</option>
                 {options?.free_devices.map((d) => (
                   <option key={d}>{d}</option>
                 ))}
@@ -120,40 +123,40 @@ export default function Intake() {
           </div>
         </Panel>
 
-        <Panel title="Settings the resident cannot change">
+        <Panel title={tr('staff.pages.Intake.settingsTheResidentCannot')}>
           <div className="flex flex-wrap gap-3 text-sm">
             <label>
-              Language
+              {tr('staff.pages.Intake.language')}
               <select
                 className={input + ' ml-2'}
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
               >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
+                <option value="en">{tr('staff.pages.Intake.english')}</option>
+                <option value="es">{tr('staff.pages.Intake.spanish')}</option>
               </select>
             </label>
             <label>
-              Text size
+              {tr('staff.pages.Intake.textSize')}
               <select
                 className={input + ' ml-2'}
                 value={textSize}
                 onChange={(e) => setTextSize(e.target.value)}
               >
-                <option>normal</option>
-                <option>large</option>
-                <option>xlarge</option>
+                <option>{tr('staff.pages.Intake.normal')}</option>
+                <option>{tr('staff.pages.Intake.large')}</option>
+                <option>{tr('staff.pages.Intake.xlarge')}</option>
               </select>
             </label>
             <label>
-              Reading level
+              {tr('staff.pages.Intake.readingLevel')}
               <select
                 className={input + ' ml-2'}
                 value={readingLevel}
                 onChange={(e) => setReadingLevel(e.target.value)}
               >
-                <option>standard</option>
-                <option>simple</option>
+                <option>{tr('staff.pages.Intake.standard')}</option>
+                <option>{tr('staff.pages.Intake.simple')}</option>
               </select>
             </label>
             <label>
@@ -167,10 +170,10 @@ export default function Intake() {
           </div>
         </Panel>
 
-        <Panel title="History and release">
+        <Panel title={tr('staff.pages.Intake.historyAndRelease')}>
           <div className="flex flex-wrap gap-3 text-sm">
             <label>
-              Prior returns
+              {tr('staff.pages.Intake.priorReturns')}
               <input
                 type="number"
                 min={0}
@@ -181,7 +184,7 @@ export default function Intake() {
             </label>
             {prior > 0 && (
               <label>
-                Source of that number
+                {tr('staff.pages.Intake.sourceOfThatNumber')}
                 <input
                   className={input + ' ml-2'}
                   value={source}
@@ -190,7 +193,7 @@ export default function Intake() {
               </label>
             )}
             <label>
-              Release date
+              {tr('staff.pages.Intake.releaseDate')}
               <input
                 type="date"
                 className={input + ' ml-2'}
@@ -201,7 +204,7 @@ export default function Intake() {
           </div>
         </Panel>
 
-        <Panel title="Offense categories (restrictions come from configuration)">
+        <Panel title={tr('staff.pages.Intake.offenseCategoriesRestrictionsCome')}>
           {options?.offense_categories.map((c) => (
             <label key={c.code} className="block text-sm">
               <input
@@ -220,13 +223,13 @@ export default function Intake() {
           ))}
         </Panel>
 
-        <Panel title="Approved contacts">
+        <Panel title={tr('staff.pages.Intake.approvedContacts')}>
           {contacts.map((c, i) => (
             <div key={i} className="mb-2 flex flex-wrap gap-2">
               <input
                 aria-label={`Contact ${i + 1} name`}
                 className={input}
-                placeholder="Name"
+                placeholder={tr('staff.pages.Intake.name')}
                 value={c.name}
                 onChange={(e) =>
                   setContacts(
@@ -251,7 +254,7 @@ export default function Intake() {
               <input
                 aria-label={`Contact ${i + 1} number`}
                 className={input}
-                placeholder="Number"
+                placeholder={tr('staff.pages.Intake.number')}
                 value={c.phone}
                 onChange={(e) =>
                   setContacts(
@@ -264,7 +267,7 @@ export default function Intake() {
                 kind="plain"
                 onClick={() => setContacts(contacts.filter((_, j) => j !== i))}
               >
-                Remove
+                {tr('staff.pages.Intake.remove')}
               </Btn>
             </div>
           ))}
@@ -273,17 +276,17 @@ export default function Intake() {
             kind="plain"
             onClick={() => setContacts([...contacts, { name: '', type: 'family', phone: '' }])}
           >
-            Add contact
+            {tr('staff.pages.Intake.addContact')}
           </Btn>
         </Panel>
 
-        <Panel title="Keep separate from">
+        <Panel title={tr('staff.pages.Intake.keepSeparateFrom')}>
           {separate.map((s, i) => (
             <div key={i} className="mb-2 flex flex-wrap gap-2">
               <input
                 aria-label={`Keep-separate ${i + 1} code`}
                 className={input}
-                placeholder="Resident code"
+                placeholder={tr('staff.pages.Intake.residentCode')}
                 value={s.resident_code}
                 onChange={(e) =>
                   setSeparate(
@@ -294,7 +297,7 @@ export default function Intake() {
               <input
                 aria-label={`Keep-separate ${i + 1} reason`}
                 className={input}
-                placeholder="Reason (staff only)"
+                placeholder={tr('staff.pages.Intake.reasonStaffOnly')}
                 value={s.reason}
                 onChange={(e) =>
                   setSeparate(
@@ -307,7 +310,7 @@ export default function Intake() {
                 kind="plain"
                 onClick={() => setSeparate(separate.filter((_, j) => j !== i))}
               >
-                Remove
+                {tr('staff.pages.Intake.remove')}
               </Btn>
             </div>
           ))}
@@ -316,13 +319,13 @@ export default function Intake() {
             kind="plain"
             onClick={() => setSeparate([...separate, { resident_code: '', reason: '' }])}
           >
-            Add entry
+            {tr('staff.pages.Intake.addEntry')}
           </Btn>
         </Panel>
 
         <Panel>
           <label className="block text-sm">
-            Reason for admission (recorded in the audit log)
+            {tr('staff.pages.Intake.reasonForAdmissionRecorded')}
             <input
               className={input + ' w-full'}
               value={reason}
@@ -330,7 +333,7 @@ export default function Intake() {
             />
           </label>
           <div className="mt-3">
-            <Btn type="submit">Admit resident</Btn>
+            <Btn type="submit">{tr('staff.pages.Intake.admitResident')}</Btn>
           </div>
         </Panel>
       </form>

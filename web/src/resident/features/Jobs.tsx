@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState } from '../../ui/States'
 import { NetworkError } from '../api'
 import { BackLink, Card, EndTime } from '../components'
 import { useResident } from '../ResidentContext'
@@ -107,7 +109,7 @@ export function Jobs() {
           </Link>
         </Card>
       )}
-      {data?.jobs.length === 0 && <p>{t('jobs.none')}</p>}
+      {data?.jobs.length === 0 && <EmptyState title={t('jobs.none')} />}
       <ul className="space-y-3">
         {(data?.jobs ?? []).map((j) => (
           <li key={j.id}>
@@ -231,9 +233,9 @@ function Work({ job, onClose }: { job: Job; onClose: () => void }) {
       <h1 className="text-h1 font-bold">{job.title}</h1>
       <p>{t('jobs.voluntary')}</p>
       {message && (
-        <p role="alert" data-testid="work-message">
+        <Notice tone="danger" role="alert" data-testid="work-message">
           {message}
-        </p>
+        </Notice>
       )}
       {result && (
         <Card data-testid="work-result" data-accepted={result.ok}>

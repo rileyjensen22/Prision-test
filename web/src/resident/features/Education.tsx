@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Award,
   CheckCircle2,
+  Layers,
   Lock,
   PlayCircle,
   RotateCcw,
@@ -119,7 +120,7 @@ export function Education() {
                 data-allowed={c.allowed}
                 className={cn('flex h-full flex-col gap-3', !c.allowed && 'bg-lock-soft')}
               >
-                <StatusBadge tone="neutral" className="self-start">
+                <StatusBadge tone="neutral" icon={Layers} className="self-start">
                   {t(`education.${c.level}`)}
                 </StatusBadge>
                 <h2 className="text-h3 font-bold">{L(c.title, i18n.language)}</h2>

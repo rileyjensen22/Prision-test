@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { api, errorText, post } from '../api'
 import { useAuth } from '../auth'
@@ -26,6 +27,8 @@ const pct = (n?: number) => (n === undefined ? '—' : `${Math.round(n * 100)}%`
 const num = (n?: number | null) => (n === undefined || n === null ? '—' : String(n))
 
 export default function Outcomes() {
+  const { t: tr } = useTranslation()
+
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Data>('/staff/outcomes')
   const canEnter = user?.role === 'admin'
@@ -71,24 +74,24 @@ export default function Outcomes() {
   }
 
   return (
-    <Page title="Outcomes">
+    <Page title={tr('staff.pages.Outcomes.outcomes')}>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <p className="text-sm text-ink-soft" data-testid="outcomes-note">
         {data?.note} Groups smaller than {data?.minimum_group_size ?? 5} are not shown. There are no
         individual scores.
       </p>
-      <Panel title="Cohorts (by quarter admitted)">
+      <Panel title={tr('staff.pages.Outcomes.cohortsByQuarterAdmitted')}>
         <Table data-testid="cohort-table">
           <thead>
             <tr>
-              <Th>Cohort</Th>
-              <Th>Residents</Th>
-              <Th>Moved up a tier</Th>
-              <Th>Mean tier change</Th>
-              <Th>Finished a course</Th>
-              <Th>Contacts / week</Th>
-              <Th>Sanctions / 100 weeks</Th>
+              <Th>{tr('staff.pages.Outcomes.cohort')}</Th>
+              <Th>{tr('staff.pages.Outcomes.residents')}</Th>
+              <Th>{tr('staff.pages.Outcomes.movedUpATier')}</Th>
+              <Th>{tr('staff.pages.Outcomes.meanTierChange')}</Th>
+              <Th>{tr('staff.pages.Outcomes.finishedACourse')}</Th>
+              <Th>{tr('staff.pages.Outcomes.contactsWeek')}</Th>
+              <Th>{tr('staff.pages.Outcomes.sanctions100Weeks')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -113,11 +116,11 @@ export default function Outcomes() {
             <Table>
               <thead>
                 <tr>
-                  <Th>Months</Th>
-                  <Th>No return</Th>
-                  <Th>Returned</Th>
-                  <Th>Unknown</Th>
-                  <Th>Not entered</Th>
+                  <Th>{tr('staff.pages.Outcomes.months')}</Th>
+                  <Th>{tr('staff.pages.Outcomes.noReturn')}</Th>
+                  <Th>{tr('staff.pages.Outcomes.returned')}</Th>
+                  <Th>{tr('staff.pages.Outcomes.unknown')}</Th>
+                  <Th>{tr('staff.pages.Outcomes.notEntered')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -135,64 +138,61 @@ export default function Outcomes() {
           </Panel>
         ))}
       {canEnter && (
-        <Panel title="Enter an outcome from customer records">
+        <Panel title={tr('staff.pages.Outcomes.enterAnOutcomeFrom')}>
           <div className="flex flex-wrap gap-2">
             <input
-              aria-label="Resident code"
-              placeholder="Resident code"
+              aria-label={tr('staff.pages.Outcomes.residentCode')}
+              placeholder={tr('staff.pages.Outcomes.residentCode')}
               className="rounded-ctl border px-2 py-1"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
             <select
-              aria-label="Months after release"
+              aria-label={tr('staff.pages.Outcomes.monthsAfterRelease')}
               className="rounded-ctl border px-2 py-1"
               value={window}
               onChange={(e) => setWindow(Number(e.target.value))}
             >
-              <option value={6}>6 months</option>
-              <option value={12}>12 months</option>
-              <option value={24}>24 months</option>
+              <option value={6}>{tr('staff.pages.Outcomes.6Months')}</option>
+              <option value={12}>{tr('staff.pages.Outcomes.12Months')}</option>
+              <option value={24}>{tr('staff.pages.Outcomes.24Months')}</option>
             </select>
             <select
-              aria-label="Outcome"
+              aria-label={tr('staff.pages.Outcomes.outcome')}
               className="rounded-ctl border px-2 py-1"
               value={outcome}
               onChange={(e) => setOutcome(e.target.value)}
             >
-              <option value="no_return">No return</option>
-              <option value="returned">Returned</option>
-              <option value="unknown">Unknown</option>
+              <option value="no_return">{tr('staff.pages.Outcomes.noReturn')}</option>
+              <option value="returned">{tr('staff.pages.Outcomes.returned')}</option>
+              <option value="unknown">{tr('staff.pages.Outcomes.unknown')}</option>
             </select>
             <input
-              aria-label="Source record"
-              placeholder="Source record"
+              aria-label={tr('staff.pages.Outcomes.sourceRecord')}
+              placeholder={tr('staff.pages.Outcomes.sourceRecord')}
               className="rounded-ctl border px-2 py-1"
               value={source}
               onChange={(e) => setSource(e.target.value)}
             />
             <Btn disabled={!code || !source} onClick={() => void enter()}>
-              Record
+              {tr('staff.pages.Outcomes.record')}
             </Btn>
           </div>
         </Panel>
       )}
       {canExport && (
-        <Panel title="Researcher export">
-          <p className="mb-2 text-sm">
-            Pseudonymized rows with bands instead of exact counts and no dates. Off unless an
-            operator turns it on; every export needs a reason and is logged.
-          </p>
+        <Panel title={tr('staff.pages.Outcomes.researcherExport')}>
+          <p className="mb-2 text-sm">{tr('staff.pages.Outcomes.pseudonymizedRowsWithBands')}</p>
           <div className="flex flex-wrap gap-2">
             <input
-              aria-label="Reason for export"
-              placeholder="Reason"
+              aria-label={tr('staff.pages.Outcomes.reasonForExport')}
+              placeholder={tr('staff.pages.Outcomes.reason')}
               className="rounded-ctl border px-2 py-1"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
             <Btn disabled={reason.trim().length < 3} onClick={() => void download()}>
-              Export
+              {tr('staff.pages.Outcomes.export')}
             </Btn>
           </div>
         </Panel>

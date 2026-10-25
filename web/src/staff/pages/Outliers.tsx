@@ -1,4 +1,5 @@
 import { Badge, ErrorLine, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import { useTranslation } from 'react-i18next'
 
 interface Flag {
   metric: string
@@ -28,9 +29,11 @@ const LABEL: Record<string, string> = {
 }
 
 export default function Outliers() {
+  const { t } = useTranslation()
+
   const { data, error } = useLoad<Data>('/staff/outliers')
   return (
-    <Page title="Staff outlier view">
+    <Page title={t('staff.pages.Outliers.staffOutlierView')}>
       <ErrorLine error={error} />
       {data && (
         <>
@@ -45,12 +48,12 @@ export default function Outliers() {
               <Table data-testid={`outliers-${role}`}>
                 <thead>
                   <tr>
-                    <Th>Who</Th>
-                    <Th>Recorded</Th>
-                    <Th>Applied</Th>
-                    <Th>Overturned</Th>
-                    <Th>Rejected</Th>
-                    <Th>Flags</Th>
+                    <Th>{t('staff.pages.Outliers.who')}</Th>
+                    <Th>{t('staff.pages.Outliers.recorded')}</Th>
+                    <Th>{t('staff.pages.Outliers.applied')}</Th>
+                    <Th>{t('staff.pages.Outliers.overturned')}</Th>
+                    <Th>{t('staff.pages.Outliers.rejected')}</Th>
+                    <Th>{t('staff.pages.Outliers.flags')}</Th>
                   </tr>
                 </thead>
                 <tbody>

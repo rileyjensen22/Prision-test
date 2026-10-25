@@ -100,7 +100,7 @@ export function Commissary() {
           {message.text}
         </Notice>
       )}
-      <div className="grid gap-6 lg:grid-cols-[1fr_22rem] lg:items-start">
+      <div className="grid gap-6 min-[1180px]:grid-cols-[1fr_22rem] min-[1180px]:items-start">
         <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]">
           {cat.items.map((i) => (
             <li key={i.code}>
@@ -133,7 +133,7 @@ export function Commissary() {
             </li>
           ))}
         </ul>
-        <Card className="space-y-4 lg:sticky lg:top-6">
+        <Card className="space-y-4 min-[1180px]:sticky min-[1180px]:top-6">
           <p data-testid="balance" className="text-label font-bold">
             {t('commissary.balance', { amount: money(cat.balance_cents, lang) })}
           </p>

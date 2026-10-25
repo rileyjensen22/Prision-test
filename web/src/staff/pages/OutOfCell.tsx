@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { api, errorText, fmt, getToken, post } from '../api'
 import { useAuth } from '../auth'
@@ -53,6 +54,8 @@ interface Below {
 const yesterday = () => new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
 
 export default function OutOfCell() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const roster = useLoad<Roster[]>('/staff/roster')
   const out = useLoad<OutNow[]>('/staff/movement/now')
@@ -110,25 +113,24 @@ export default function OutOfCell() {
     setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
 
   return (
-    <Page title="Out of cell">
-      <p className="text-sm text-ink-soft">
-        Tap residents out when they leave the cell and in when they return. Time is counted from
-        these taps. Every resident should have at least the minimum each day.
-      </p>
+    <Page title={t('staff.pages.OutOfCell.outOfCell')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.OutOfCell.tapResidentsOutWhen')}</p>
       <ErrorLine error={roster.error ?? out.error ?? report.error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
 
-      <Panel title="Who is out now">
-        {out.data?.length === 0 && <p data-testid="nobody-out">Nobody is out of their cell.</p>}
+      <Panel title={t('staff.pages.OutOfCell.whoIsOutNow')}>
+        {out.data?.length === 0 && (
+          <p data-testid="nobody-out">{t('staff.pages.OutOfCell.nobodyIsOutOf')}</p>
+        )}
         {!!out.data?.length && (
           <Table data-testid="out-now">
             <thead>
               <tr>
-                <Th>Resident</Th>
-                <Th>Unit</Th>
-                <Th>For</Th>
-                <Th>Since</Th>
-                <Th>Minutes</Th>
+                <Th>{t('staff.pages.OutOfCell.resident')}</Th>
+                <Th>{t('staff.pages.OutOfCell.unit')}</Th>
+                <Th>{t('staff.pages.OutOfCell.for')}</Th>
+                <Th>{t('staff.pages.OutOfCell.since')}</Th>
+                <Th>{t('staff.pages.OutOfCell.minutes')}</Th>
                 <Th></Th>
               </tr>
             </thead>
@@ -143,7 +145,7 @@ export default function OutOfCell() {
                   <Td>
                     {canLog && (
                       <Btn kind="plain" onClick={() => void move('in', [o.resident_id])}>
-                        Tap in
+                        {t('staff.pages.OutOfCell.tapIn')}
                       </Btn>
                     )}
                   </Td>
@@ -162,18 +164,18 @@ export default function OutOfCell() {
               )
             }
           >
-            Tap everyone in
+            {t('staff.pages.OutOfCell.tapEveryoneIn')}
           </Btn>
         )}
       </Panel>
 
       {canLog && (
-        <Panel title="Tap residents out">
+        <Panel title={t('staff.pages.OutOfCell.tapResidentsOut')}>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <label className="text-sm">
-              Out for
+              {t('staff.pages.OutOfCell.outFor')}
               <select
-                aria-label="Out for"
+                aria-label={t('staff.pages.OutOfCell.outFor')}
                 className="ml-2 rounded-ctl border px-2 py-1"
                 value={activity}
                 onChange={(e) => setActivity(e.target.value)}
@@ -206,16 +208,18 @@ export default function OutOfCell() {
         </Panel>
       )}
 
-      <Panel title="Below the minimum">
-        {below.data?.length === 0 && <p data-testid="none-below">Nobody was under the minimum.</p>}
+      <Panel title={t('staff.pages.OutOfCell.belowTheMinimum')}>
+        {below.data?.length === 0 && (
+          <p data-testid="none-below">{t('staff.pages.OutOfCell.nobodyWasUnderThe')}</p>
+        )}
         {!!below.data?.length && (
           <Table data-testid="below-minimum">
             <thead>
               <tr>
-                <Th>Resident</Th>
-                <Th>Day</Th>
-                <Th>Minutes out</Th>
-                <Th>Minimum</Th>
+                <Th>{t('staff.pages.OutOfCell.resident')}</Th>
+                <Th>{t('staff.pages.OutOfCell.day')}</Th>
+                <Th>{t('staff.pages.OutOfCell.minutesOut')}</Th>
+                <Th>{t('staff.pages.OutOfCell.minimum')}</Th>
               </tr>
             </thead>
             <tbody>
@@ -232,12 +236,12 @@ export default function OutOfCell() {
         )}
       </Panel>
 
-      <Panel title="Scheduled versus actual">
+      <Panel title={t('staff.pages.OutOfCell.scheduledVersusActual')}>
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <label className="text-sm">
-            Day
+            {t('staff.pages.OutOfCell.day')}
             <input
-              aria-label="Report day"
+              aria-label={t('staff.pages.OutOfCell.reportDay')}
               type="date"
               className="ml-2 rounded-ctl border px-2 py-1"
               value={day}
@@ -247,10 +251,10 @@ export default function OutOfCell() {
           {canExport && (
             <>
               <Btn kind="plain" onClick={() => void download('csv')}>
-                Export CSV
+                {t('staff.pages.OutOfCell.exportCsv')}
               </Btn>
               <Btn kind="plain" onClick={() => void download('json')}>
-                Export JSON
+                {t('staff.pages.OutOfCell.exportJson')}
               </Btn>
             </>
           )}
@@ -258,11 +262,11 @@ export default function OutOfCell() {
         <Table data-testid="discrepancy-blocks">
           <thead>
             <tr>
-              <Th>Block</Th>
-              <Th>Signed up</Th>
-              <Th>Attended</Th>
-              <Th>Part of it</Th>
-              <Th>Did not come out</Th>
+              <Th>{t('staff.pages.OutOfCell.block')}</Th>
+              <Th>{t('staff.pages.OutOfCell.signedUp')}</Th>
+              <Th>{t('staff.pages.OutOfCell.attended')}</Th>
+              <Th>{t('staff.pages.OutOfCell.partOfIt')}</Th>
+              <Th>{t('staff.pages.OutOfCell.didNotComeOut')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -284,11 +288,11 @@ export default function OutOfCell() {
         <Table data-testid="discrepancy-residents">
           <thead>
             <tr>
-              <Th>Resident</Th>
-              <Th>Unit</Th>
-              <Th>Booked minutes</Th>
-              <Th>Minutes out</Th>
-              <Th>Notes</Th>
+              <Th>{t('staff.pages.OutOfCell.resident')}</Th>
+              <Th>{t('staff.pages.OutOfCell.unit')}</Th>
+              <Th>{t('staff.pages.OutOfCell.bookedMinutes')}</Th>
+              <Th>{t('staff.pages.OutOfCell.minutesOut')}</Th>
+              <Th>{t('staff.pages.OutOfCell.notes')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -299,8 +303,12 @@ export default function OutOfCell() {
                 <Td>{r.scheduled_minutes}</Td>
                 <Td>{r.actual_minutes}</Td>
                 <Td>
-                  {r.below_minimum && <Badge tone="red">below minimum</Badge>}{' '}
-                  {r.short_of_schedule && <Badge tone="amber">short of schedule</Badge>}
+                  {r.below_minimum && (
+                    <Badge tone="red">{t('staff.pages.OutOfCell.belowMinimum')}</Badge>
+                  )}{' '}
+                  {r.short_of_schedule && (
+                    <Badge tone="amber">{t('staff.pages.OutOfCell.shortOfSchedule')}</Badge>
+                  )}
                 </Td>
               </tr>
             ))}

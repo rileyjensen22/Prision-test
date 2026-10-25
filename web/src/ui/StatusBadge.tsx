@@ -17,12 +17,15 @@ export function StatusBadge({
   tone,
   children,
   className,
+  icon,
 }: {
   tone: StatusTone
+  icon?: LucideIcon
   children: React.ReactNode
   className?: string
 }) {
-  const { cls, icon: Icon } = TONE[tone]
+  const { cls, icon: toneIcon } = TONE[tone]
+  const Icon = icon ?? toneIcon
   return (
     <span
       className={cn(

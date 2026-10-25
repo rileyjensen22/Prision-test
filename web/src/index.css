@@ -123,9 +123,11 @@
   }
 
   /* Staff forms: unstyled controls still get a real size and a visible border. */
-  .theme-staff input:not([type='checkbox'], [type='radio'], [type='range']),
-  .theme-staff select,
-  .theme-staff textarea {
+  :where(
+    .theme-staff input:not([type='checkbox'], [type='radio'], [type='range']),
+    .theme-staff select,
+    .theme-staff textarea
+  ) {
     min-height: var(--touch);
     border: 1px solid var(--ink-soft);
     border-radius: var(--r-ctl);
@@ -133,7 +135,7 @@
     color: var(--ink);
     padding-inline: 0.5rem;
   }
-  .theme-staff textarea {
+  :where(.theme-staff textarea) {
     padding-block: 0.375rem;
   }
   .theme-staff input[type='checkbox'],

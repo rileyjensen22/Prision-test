@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState } from '../../ui/States'
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
@@ -110,13 +112,13 @@ export function Video() {
         </p>
       )}
       {notice && (
-        <p
+        <Notice
+          tone={notice.kind === 'ok' ? 'ok' : notice.kind === 'tamper' ? 'notice' : 'danger'}
           role={notice.kind === 'ok' ? 'status' : 'alert'}
           data-testid={notice.kind === 'tamper' ? 'video-tamper' : 'video-notice'}
-          className="rounded-ctl border-2 border-notice bg-notice-soft p-3"
         >
           {notice.text}
-        </p>
+        </Notice>
       )}
       <div className="flex gap-3" role="tablist">
         {(['now', 'schedule'] as const).map((k) => (
@@ -153,7 +155,7 @@ export function Video() {
               </li>
             ))}
           </ul>
-          {contacts?.length === 0 && <p>{t('calls.none')}</p>}
+          {contacts?.length === 0 && <EmptyState title={t('calls.none')} />}
         </>
       ) : (
         <Schedule
@@ -428,7 +430,11 @@ function Schedule({
         </button>
       </Card>
       <h2 className="text-h2 font-bold">{t('video.upcoming')}</h2>
-      {bookings.length === 0 && <p data-testid="no-bookings">{t('video.noneBooked')}</p>}
+      {bookings.length === 0 && (
+        <div data-testid="no-bookings">
+          <EmptyState title={t('video.noneBooked')} />
+        </div>
+      )}
       <ul className="space-y-3">
         {bookings.map((b) => (
           <li key={b.id}>

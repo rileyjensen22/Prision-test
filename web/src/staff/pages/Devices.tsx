@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
@@ -25,6 +26,8 @@ interface Row {
 const mb = (n?: number) => (n === undefined ? '—' : `${n} MB`)
 
 export default function Devices() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Row[]>('/staff/devices')
   const isAdmin = user?.role === 'admin'
@@ -50,7 +53,7 @@ export default function Devices() {
   }
 
   return (
-    <Page title="Devices">
+    <Page title={t('staff.pages.Devices.devices')}>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {pairing && (
@@ -65,11 +68,11 @@ export default function Devices() {
         </Panel>
       )}
       {isAdmin && (
-        <Panel title="Enroll a device">
+        <Panel title={t('staff.pages.Devices.enrollADevice')}>
           <div className="flex flex-wrap gap-2">
             <input
-              aria-label="New device code"
-              placeholder="Device code"
+              aria-label={t('staff.pages.Devices.newDeviceCode')}
+              placeholder={t('staff.pages.Devices.deviceCode')}
               className="rounded-ctl border px-2 py-1"
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
@@ -83,25 +86,25 @@ export default function Devices() {
                 })
               }
             >
-              Enroll
+              {t('staff.pages.Devices.enroll')}
             </Btn>
           </div>
         </Panel>
       )}
       {isAdmin && (
-        <Panel title="Pause or restart (needs a reason)">
+        <Panel title={t('staff.pages.Devices.pauseOrRestartNeeds')}>
           <div className="flex flex-wrap gap-2 text-sm">
             <input
-              aria-label="Reason"
-              placeholder="Reason"
+              aria-label={t('staff.pages.Devices.reason')}
+              placeholder={t('staff.pages.Devices.reason')}
               className="rounded-ctl border px-2 py-1"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
             <label>
-              Pause for
+              {t('staff.pages.Devices.pauseFor')}
               <input
-                aria-label="Pause hours"
+                aria-label={t('staff.pages.Devices.pauseHours')}
                 type="number"
                 min={0.5}
                 max={24}
@@ -110,7 +113,7 @@ export default function Devices() {
                 value={hours}
                 onChange={(e) => setHours(Number(e.target.value))}
               />
-              hours
+              {t('staff.pages.Devices.hours')}
             </label>
           </div>
         </Panel>
@@ -118,24 +121,26 @@ export default function Devices() {
       <Table data-testid="device-table">
         <thead>
           <tr>
-            <Th>Device</Th>
-            <Th>Cell</Th>
-            <Th>Resident</Th>
-            <Th>Last seen</Th>
-            <Th>Health</Th>
-            <Th>Actions</Th>
+            <Th>{t('staff.pages.Devices.device')}</Th>
+            <Th>{t('staff.pages.Devices.cell')}</Th>
+            <Th>{t('staff.pages.Devices.resident')}</Th>
+            <Th>{t('staff.pages.Devices.lastSeen')}</Th>
+            <Th>{t('staff.pages.Devices.health')}</Th>
+            <Th>{t('staff.pages.Devices.actions')}</Th>
           </tr>
         </thead>
         <tbody>
           {(data ?? []).map((d) => (
             <tr key={d.device} data-testid={`device-${d.device}`}>
               <Td>
-                {d.device} {!d.paired && <Badge tone="gray">not paired</Badge>}
+                {d.device}{' '}
+                {!d.paired && <Badge tone="gray">{t('staff.pages.Devices.notPaired')}</Badge>}
               </Td>
               <Td>{d.cell ?? '—'}</Td>
               <Td>{d.resident ?? '—'}</Td>
               <Td>
-                {fmt(d.last_seen)} {d.offline && <Badge tone="red">offline</Badge>}
+                {fmt(d.last_seen)}{' '}
+                {d.offline && <Badge tone="red">{t('staff.pages.Devices.offline')}</Badge>}
               </Td>
               <Td>
                 {d.health ? (
@@ -160,7 +165,7 @@ export default function Devices() {
                         )
                       }
                     >
-                      Setup code
+                      {t('staff.pages.Devices.setupCode')}
                     </Btn>
                   )}
                   {isAdmin && (
@@ -174,7 +179,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Pause
+                        {t('staff.pages.Devices.pause')}
                       </Btn>
                       <Btn
                         kind="plain"
@@ -185,7 +190,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Resume
+                        {t('staff.pages.Devices.resume')}
                       </Btn>
                       <Btn
                         kind="plain"
@@ -196,7 +201,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Restart
+                        {t('staff.pages.Devices.restart')}
                       </Btn>
                     </>
                   )}

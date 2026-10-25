@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState } from '../../ui/States'
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
@@ -79,14 +81,14 @@ export function Texting() {
         </p>
       )}
       {error && (
-        <p role="alert" data-testid="text-error">
+        <Notice tone="danger" role="alert" data-testid="text-error">
           {error}
-        </p>
+        </Notice>
       )}
       {!who ? (
         <>
           <h2 className="text-h2 font-bold">{t('texting.contacts')}</h2>
-          {contacts.length === 0 && <p>{t('texting.none')}</p>}
+          {contacts.length === 0 && <EmptyState title={t('texting.none')} />}
           <Link
             to="/resident/feature/contact_requests"
             className="inline-block text-primary underline underline-offset-4"

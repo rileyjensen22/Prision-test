@@ -28,7 +28,7 @@ const RESIDENT = [
   ['home-locked', 'alice', '/resident', true],
   ['home-spanish-locked', 'benito', '/resident', false],
   ['locks', 'alice', '/resident/locks', true],
-  ['why-locked', 'alice', '/resident/feature/calls', true],
+  ['why-locked', 'alice', '/resident/locks?feature=calls', true],
   ['tier', 'carla', '/resident/tier', true],
   ['education', 'ned', '/resident/feature/basic_education', true],
   ['commissary', 'hal', '/resident/feature/commissary', true],
@@ -64,6 +64,7 @@ const STAFF = [
   ['finance', '/staff/finance'],
   ['config', '/staff/config'],
   ['audit', '/staff/audit'],
+  ['styleguide', '/staff/styleguide'],
 ]
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined })
@@ -80,15 +81,17 @@ async function residentShots() {
           // Reduced matrix for secondary screens: one size, plus Spanish at large text.
           if (!pick(name)) continue
           if (!full && !(sizeName === '1280x800' && (size === 'normal' || lang === 'es'))) continue
-          const page = await ctx.newPage()
+          const fresh = who === null ? await browser.newContext({ baseURL: BASE, viewport: { width, height } }) : null
+          const page = await (fresh ?? ctx).newPage()
           const q = process.env.MODE ? `${path.includes('?') ? '&' : '?'}mode=${process.env.MODE}` : ''
           await page.goto(who ? `${path}${q}#device=${fx.tokens[who]}` : `${path}${q}`)
           await page.waitForTimeout(700)
           await page.screenshot({
-            path: join(dir, `${name}__${lang}__${size}__${sizeName}.png`),
+            path: join(dir, `${name}${process.env.MODE === 'night' ? '-night' : ''}__${lang}__${size}__${sizeName}.png`),
             fullPage: process.env.FULLPAGE !== '0',
           })
           await page.close()
+          await fresh?.close()
         }
         await ctx.close()
       }
@@ -100,26 +103,30 @@ async function residentShots() {
 async function staffShots() {
   const dir = join(out, 'staff')
   mkdirSync(dir, { recursive: true })
-  for (const [sizeName, [width, height]] of Object.entries(SIZES).filter(([k]) => list('VIEWPORTS', Object.keys(SIZES)).includes(k))) {
-    const ctx = await browser.newContext({ baseURL: BASE, viewport: { width, height } })
-    const page = await ctx.newPage()
-    await page.goto('/staff'.replace(/^/, BASE))
-    await page.getByLabel('Username').fill('e2e_admin')
-    await page.getByLabel('Password').fill(fx.staff_password)
-    await page.screenshot({ path: join(dir, `login__${sizeName}.png`) })
-    await page.getByRole('button', { name: 'Sign in' }).click()
-    await page.getByTestId('whoami').waitFor()
-    for (const [name, path] of STAFF) {
-      if (!pick(name)) continue
-      // In-app navigation keeps the session (it lives in sessionStorage).
-      await page.evaluate((p) => {
-        window.history.pushState({}, '', p)
-        window.dispatchEvent(new PopStateEvent('popstate'))
-      }, path)
-      await page.waitForTimeout(700)
-      await page.screenshot({ path: join(dir, `${name}__${sizeName}.png`), fullPage: true })
+  const views = Object.entries(SIZES).filter(([k]) => list('VIEWPORTS', Object.keys(SIZES)).includes(k))
+  for (const [sizeName, [width, height]] of views) {
+    for (const lang of list('LANGS', ['en', 'es'])) {
+      const ctx = await browser.newContext({ baseURL: BASE, viewport: { width, height } })
+      const page = await ctx.newPage()
+      await page.goto('/staff')
+      await page.getByLabel(/Username|Usuario/).fill('e2e_admin')
+      await page.getByLabel(/Password|Contraseña/).fill(fx.staff_password)
+      if (lang === 'en') await page.screenshot({ path: join(dir, `login__en__${sizeName}.png`) })
+      await page.getByRole('button', { name: /Sign in|Iniciar sesión/ }).click()
+      await page.getByTestId('whoami').waitFor()
+      if (lang === 'es') await page.getByRole('button', { name: 'Español' }).click()
+      for (const [name, path] of STAFF) {
+        if (!pick(name)) continue
+        // In-app navigation keeps the session and the chosen language.
+        await page.evaluate((p) => {
+          window.history.pushState({}, '', p)
+          window.dispatchEvent(new PopStateEvent('popstate'))
+        }, path)
+        await page.waitForTimeout(700)
+        await page.screenshot({ path: join(dir, `${name}__${lang}__${sizeName}.png`), fullPage: true })
+      }
+      await ctx.close()
     }
-    await ctx.close()
   }
 }
 

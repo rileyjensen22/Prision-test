@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { EmptyState } from '../../ui/States'
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
+import { Notice } from '../../ui/Notice'
 import { useResident } from '../ResidentContext'
 import { errorCode } from './helpers'
 
@@ -60,13 +62,13 @@ export function Contacts() {
       <h1 className="text-h1 font-bold">{t('contacts.title')}</h1>
       <p>{t('contacts.explain')}</p>
       {message && (
-        <p
+        <Notice
+          tone={message.ok ? 'ok' : 'danger'}
           role={message.ok ? 'status' : 'alert'}
           data-testid="contact-message"
-          className="rounded-ctl border-2 border-notice bg-notice-soft p-3"
         >
           {message.text}
-        </p>
+        </Notice>
       )}
       <ul className="space-y-3">
         {(list ?? []).map((c) => (
@@ -81,7 +83,7 @@ export function Contacts() {
           </li>
         ))}
       </ul>
-      {list?.length === 0 && <p>{t('calls.none')}</p>}
+      {list?.length === 0 && <EmptyState title={t('calls.none')} />}
       <Card data-testid="contact-form">
         <h2 className="mb-3 text-h2 font-bold">{t('contacts.request')}</h2>
         <label className="block">

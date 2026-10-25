@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Notice } from '../../ui/Notice'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
 import { errorCode } from './helpers'
@@ -56,9 +57,9 @@ export function Rec() {
       <h1 className="text-h1 font-bold">{t('rec.title')}</h1>
       {day && <p data-testid="rec-baseline">{t('rec.baseline', { n: day.baseline_minutes })}</p>}
       {error && (
-        <p role="alert" data-testid="rec-error">
+        <Notice tone="danger" role="alert" data-testid="rec-error">
           {error}
-        </p>
+        </Notice>
       )}
       <ul className="space-y-3">
         {(day?.slots ?? []).map((s) => (

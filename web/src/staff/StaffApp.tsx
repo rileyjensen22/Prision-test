@@ -170,11 +170,11 @@ function Shell() {
         {t('staff.skip')}
       </a>
       <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r">
-        <div className="flex items-center gap-2 px-4 py-4 text-h3 font-bold">
+        <div className="flex items-center gap-2 px-4 py-3 text-h3 font-bold">
           <ShieldCheck aria-hidden="true" className="size-6 text-primary" />
           {t('staff.brand')}
         </div>
-        <nav aria-label={t('staff.mainNav')} className="space-y-4 px-2 pb-4">
+        <nav aria-label={t('staff.mainNav')} className="space-y-3 px-2 pb-4">
           {NAV_GROUPS.map((g) => {
             const items = g.items.filter((n) => !n.roles || n.roles.includes(user.role))
             if (!items.length) return null
@@ -192,7 +192,7 @@ function Shell() {
                           to={n.to}
                           end={n.to === '/staff'}
                           className={({ isActive }) =>
-                            `flex min-h-touch items-center gap-2 rounded-ctl px-3 py-1.5 font-medium ${
+                            `flex min-h-8 items-center gap-2 rounded-ctl px-3 py-1 font-medium ${
                               isActive
                                 ? 'bg-primary text-primary-ink'
                                 : 'text-ink hover:bg-surface-2'

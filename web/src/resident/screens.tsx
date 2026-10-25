@@ -47,13 +47,13 @@ export function Home() {
   const nextUnlocks = unlockedByNext(features, next)
 
   return (
-    <div className="mx-auto grid w-full gap-6 lg:grid-cols-[clamp(20rem,30vw,26rem)_1fr] lg:items-start">
-      <aside className="lg:sticky lg:top-6">
+    <div className="mx-auto grid w-full gap-6 min-[1180px]:grid-cols-[clamp(20rem,30vw,26rem)_1fr] min-[1180px]:items-start">
+      <aside className="min-[1180px]:sticky min-[1180px]:top-6">
         <section
           data-testid="tier-card"
           className="space-y-5 rounded-card bg-primary p-6 text-primary-ink"
         >
-          <div className="flex items-baseline justify-between gap-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3">
             <h1 className="text-h1 font-bold" data-testid="tier-label">
               {t('tier.label', { n: tier.effective })}
             </h1>

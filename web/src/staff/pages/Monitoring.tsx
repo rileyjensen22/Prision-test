@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
@@ -27,6 +28,8 @@ interface Opened {
 }
 
 export default function Monitoring() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const [flaggedOnly, setFlaggedOnly] = useState(true)
   const { data, error, reload } = useLoad<Row[]>(
@@ -63,12 +66,8 @@ export default function Monitoring() {
   }
 
   return (
-    <Page title="Message monitoring">
-      <p className="text-sm text-ink-soft">
-        This list shows who, when and which keyword rule matched, never the text. To read a message
-        you must state a reason, and every read is logged. A keyword match is only a prompt to look:
-        it never creates a sanction. Attorney messages are private and do not appear here.
-      </p>
+    <Page title={t('staff.pages.Monitoring.messageMonitoring')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.Monitoring.thisListShowsWho')}</p>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <Panel>
@@ -82,26 +81,28 @@ export default function Monitoring() {
             Only messages with open flags
           </label>
           <label className="text-sm">
-            Reason for reading
+            {t('staff.pages.Monitoring.reasonForReading')}
             <input
-              aria-label="Reason for reading"
+              aria-label={t('staff.pages.Monitoring.reasonForReading')}
               className="ml-2 w-72 rounded-ctl border px-2 py-1"
-              placeholder="Why do you need to read this?"
+              placeholder={t('staff.pages.Monitoring.whyDoYouNeed')}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </label>
         </div>
-        {data?.length === 0 && <p data-testid="no-monitored">Nothing to review.</p>}
+        {data?.length === 0 && (
+          <p data-testid="no-monitored">{t('staff.pages.Monitoring.nothingToReview')}</p>
+        )}
         {!!data?.length && (
           <Table data-testid="monitored-messages">
             <thead>
               <tr>
-                <Th>When</Th>
-                <Th>Resident</Th>
-                <Th>Direction</Th>
-                <Th>Contact</Th>
-                <Th>Flags</Th>
+                <Th>{t('staff.pages.Monitoring.when')}</Th>
+                <Th>{t('staff.pages.Monitoring.resident')}</Th>
+                <Th>{t('staff.pages.Monitoring.direction')}</Th>
+                <Th>{t('staff.pages.Monitoring.contact')}</Th>
+                <Th>{t('staff.pages.Monitoring.flags')}</Th>
                 <Th></Th>
               </tr>
             </thead>
@@ -122,7 +123,7 @@ export default function Monitoring() {
                   </Td>
                   <Td>
                     <Btn kind="plain" onClick={() => void read(r)}>
-                      Read
+                      {t('staff.pages.Monitoring.read')}
                     </Btn>
                   </Td>
                 </tr>
@@ -137,7 +138,7 @@ export default function Monitoring() {
             {opened.body}
           </p>
           <p className="mt-1 text-sm text-ink-soft">
-            This read was logged with your reason. Do not copy or share the text.
+            {t('staff.pages.Monitoring.thisReadWasLogged')}
           </p>
           {canReview &&
             data
@@ -147,15 +148,17 @@ export default function Monitoring() {
                 <div key={f.id} className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="text-sm">{f.label}:</span>
                   <input
-                    aria-label="Reason for outcome"
+                    aria-label={t('staff.pages.Monitoring.reasonForOutcome')}
                     className="w-64 rounded-ctl border px-2 py-1"
-                    placeholder="Reason for this outcome"
+                    placeholder={t('staff.pages.Monitoring.reasonForThisOutcome')}
                     value={outcomeReason}
                     onChange={(e) => setOutcomeReason(e.target.value)}
                   />
-                  <Btn onClick={() => void review(f, 'no_action')}>No action needed</Btn>
+                  <Btn onClick={() => void review(f, 'no_action')}>
+                    {t('staff.pages.Monitoring.noActionNeeded')}
+                  </Btn>
                   <Btn kind="plain" onClick={() => void review(f, 'referred')}>
-                    Refer to a supervisor
+                    {t('staff.pages.Monitoring.referToASupervisor')}
                   </Btn>
                 </div>
               ))}

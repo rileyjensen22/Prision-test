@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, put } from '../api'
 import { useAuth } from '../auth'
@@ -34,6 +35,8 @@ function RepeatReturn({
   setText: (t: string) => void
   editable: boolean
 }) {
+  const { t: tr } = useTranslation()
+
   let N = 12
   let p = 1.5
   try {
@@ -55,10 +58,10 @@ function RepeatReturn({
   }
 
   return (
-    <Panel title="Repeat-return ceiling" data-testid="curve-panel">
+    <Panel title={tr('staff.pages.ConfigEditor.repeatReturnCeiling')} data-testid="curve-panel">
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
-          N (returns that reach the lowest tier)
+          {tr('staff.pages.ConfigEditor.nReturnsThatReach')}
           <input
             aria-label="N"
             value={n}
@@ -67,7 +70,7 @@ function RepeatReturn({
           />
         </label>
         <label className="text-sm">
-          p (how fast the loss grows)
+          {tr('staff.pages.ConfigEditor.pHowFastThe')}
           <input
             aria-label="p"
             value={pp}
@@ -77,32 +80,36 @@ function RepeatReturn({
         </label>
         {editable && (
           <Btn kind="plain" onClick={apply}>
-            Use these values in the editor
+            {tr('staff.pages.ConfigEditor.useTheseValuesIn')}
           </Btn>
         )}
       </div>
       <ErrorLine error={preview.error} />
-      <Table data-testid="curve-preview">
-        <thead>
-          <tr>
-            <Th>Prior returns</Th>
-            <Th>Highest tier</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {(preview.data ?? []).map((r) => (
-            <tr key={r.returns}>
-              <Td>{r.returns}</Td>
-              <Td>{r.ceiling_tier}</Td>
+      <div className="mt-3 max-w-md">
+        <Table data-testid="curve-preview">
+          <thead>
+            <tr>
+              <Th>{tr('staff.pages.ConfigEditor.priorReturns')}</Th>
+              <Th>{tr('staff.pages.ConfigEditor.highestTier')}</Th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {(preview.data ?? []).map((r) => (
+              <tr key={r.returns}>
+                <Td>{r.returns}</Td>
+                <Td>{r.ceiling_tier}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     </Panel>
   )
 }
 
 export default function ConfigEditor() {
+  const { t: tr } = useTranslation()
+
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
   const canSeeHistory = user?.role === 'admin' || user?.role === 'auditor'
@@ -139,7 +146,7 @@ export default function ConfigEditor() {
   }
 
   return (
-    <Page title="Configuration">
+    <Page title={tr('staff.pages.ConfigEditor.configuration')}>
       <p className="text-sm text-ink-soft">
         Every change creates a new version and an audit entry.{' '}
         {isAdmin ? 'You can edit.' : 'You can view; only admins can edit.'}
@@ -164,7 +171,7 @@ export default function ConfigEditor() {
       {name === 'tiers' && <RepeatReturn text={text} setText={setText} editable={isAdmin} />}
       <Panel title={`${name}${current.data ? ` (version ${current.data.version})` : ''}`}>
         <textarea
-          aria-label="Config JSON"
+          aria-label={tr('staff.pages.ConfigEditor.configJson')}
           data-testid="config-json"
           value={text}
           readOnly={!isAdmin}
@@ -176,16 +183,16 @@ export default function ConfigEditor() {
         {isAdmin && (
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <label className="flex-1 text-sm">
-              Reason for change
+              {tr('staff.pages.ConfigEditor.reasonForChange')}
               <input
-                aria-label="Reason for change"
+                aria-label={tr('staff.pages.ConfigEditor.reasonForChange')}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="mt-1 block w-full rounded-ctl border px-2 py-2"
               />
             </label>
             <Btn onClick={() => void save()} disabled={reason.trim().length < 3}>
-              Save new version
+              {tr('staff.pages.ConfigEditor.saveNewVersion')}
             </Btn>
           </div>
         )}
@@ -196,13 +203,13 @@ export default function ConfigEditor() {
         )}
       </Panel>
       {canSeeHistory && (
-        <Panel title="Version history">
+        <Panel title={tr('staff.pages.ConfigEditor.versionHistory')}>
           <Table data-testid="versions">
             <thead>
               <tr>
-                <Th>Version</Th>
-                <Th>When</Th>
-                <Th>Reason</Th>
+                <Th>{tr('staff.pages.ConfigEditor.version')}</Th>
+                <Th>{tr('staff.pages.ConfigEditor.when')}</Th>
+                <Th>{tr('staff.pages.ConfigEditor.reason')}</Th>
               </tr>
             </thead>
             <tbody>
