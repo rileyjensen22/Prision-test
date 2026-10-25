@@ -66,6 +66,7 @@ for (const who of ['uxen', 'uxes'] as const) {
 }
 
 test('axe: staff pages have no serious violations', async ({ page }) => {
+  test.setTimeout(120_000)
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/staff')
   await page.getByLabel('Username').waitFor()

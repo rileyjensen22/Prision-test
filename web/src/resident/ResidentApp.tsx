@@ -145,11 +145,13 @@ function Shell() {
 }
 
 /** Day or night: ?mode= wins (for screenshots and tests), then the schedule, then the default. */
-function useNight(window: NightWindow | undefined, nowMs: number): boolean {
-  const forced = new URLSearchParams(useLocation().search).get('mode')
+function useNight(schedule: NightWindow | undefined, nowMs: number): boolean {
+  // Preview override for demos and screenshots; a real kiosk never sets either.
+  const forced =
+    new URLSearchParams(useLocation().search).get('mode') ?? window.localStorage.getItem('isd.mode')
   if (forced === 'night') return true
   if (forced === 'day') return false
-  return isNight(new Date(nowMs), window ?? DEFAULT_NIGHT)
+  return isNight(new Date(nowMs), schedule ?? DEFAULT_NIGHT)
 }
 
 export default function ResidentApp() {

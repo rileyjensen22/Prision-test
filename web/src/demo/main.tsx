@@ -29,14 +29,16 @@ function Demo() {
   const [scenario, setScenario] = useState<Scenario>('alice')
   const [language, setLanguage] = useState<'en' | 'es'>('en')
   const [run, setRun] = useState(0)
+  const [mode, setMode] = useState<'day' | 'night'>('day')
   // Installed during render so it is in place before the kiosk's first fetch after a switch.
   const state = useMemo<DemoState>(() => {
     window.localStorage.clear()
     window.localStorage.setItem('isd.deviceToken', 'demo-token')
+    window.localStorage.setItem('isd.mode', mode)
     const next: DemoState = { scenario, language, passed: false, balance: 2000 }
     installShim(next)
     return next
-  }, [scenario, language, run])
+  }, [scenario, language, run, mode])
   void state
   const info = SCENARIOS.find((s) => s.id === scenario)!
 
@@ -77,6 +79,18 @@ function Demo() {
             }}
           >
             {language === 'en' ? 'Español' : 'English'}
+          </button>
+          <button
+            onClick={() => setMode(mode === 'day' ? 'night' : 'day')}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #475569',
+              background: 'transparent',
+              color: '#fff',
+            }}
+          >
+            {mode === 'day' ? 'Night mode' : 'Day mode'}
           </button>
           <button
             onClick={() => setRun(run + 1)}
