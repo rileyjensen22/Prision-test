@@ -1,7 +1,6 @@
 import { Phone, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MemoryRouter } from 'react-router-dom'
 
 import { Banner } from '../../ui/Banner'
 import { Button } from '../../ui/Button'
@@ -156,43 +155,43 @@ export default function Styleguide() {
           <input type="checkbox" checked={night} onChange={(e) => setNight(e.target.checked)} />
           Night mode
         </label>
-        <MemoryRouter>
-          <div
-            className="theme-resident space-y-4 rounded-card bg-bg p-6 text-body text-ink"
-            data-mode={night ? 'night' : 'day'}
-            data-testid="sg-resident"
-          >
-            <div className="grid gap-4 md:grid-cols-[22rem_1fr]">
-              <div className="space-y-4 rounded-card bg-primary p-6 text-primary-ink">
-                <p className="text-h1 font-bold">Tier 4</p>
-                <TierStaircase tier={TIER} />
-                <ProgressMeter pct={74} label="Progress" />
-              </div>
-              <div className="grid gap-3">
-                <Tile name="calls" feature={OPEN} />
-                <Tile name="video" feature={LOCKED} />
-              </div>
+        <div
+          // Tiles are real links; in a style guide they must not navigate away.
+          onClickCapture={(e) => {
+            if ((e.target as HTMLElement).closest('a')) e.preventDefault()
+          }}
+          className="theme-resident space-y-4 rounded-card bg-bg p-6 text-body text-ink"
+          data-mode={night ? 'night' : 'day'}
+          data-testid="sg-resident"
+        >
+          <div className="grid gap-4 md:grid-cols-[22rem_1fr]">
+            <div className="space-y-4 rounded-card bg-primary p-6 text-primary-ink">
+              <p className="text-h1 font-bold">Tier 4</p>
+              <TierStaircase tier={TIER} />
+              <ProgressMeter pct={74} label="Progress" />
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button variant="primary" icon={Phone}>
-                Primary
-              </Button>
-              <Button icon={Plus}>Secondary</Button>
-              <Button variant="quiet">Quiet</Button>
-              <Button variant="danger">Danger</Button>
-              <StatusBadge tone="ok">Open</StatusBadge>
-              <StatusBadge tone="lock">Locked</StatusBadge>
-              <StatusBadge tone="notice">Soon</StatusBadge>
+            <div className="grid gap-3">
+              <Tile name="calls" feature={OPEN} />
+              <Tile name="video" feature={LOCKED} />
             </div>
-            <Banner tone="offline">
-              No connection. Your limits shown here are still in effect.
-            </Banner>
-            <InlineNotice tone="ok">Your request was sent.</InlineNotice>
-            <Card>
-              <p>A card.</p>
-            </Card>
           </div>
-        </MemoryRouter>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="primary" icon={Phone}>
+              Primary
+            </Button>
+            <Button icon={Plus}>Secondary</Button>
+            <Button variant="quiet">Quiet</Button>
+            <Button variant="danger">Danger</Button>
+            <StatusBadge tone="ok">Open</StatusBadge>
+            <StatusBadge tone="lock">Locked</StatusBadge>
+            <StatusBadge tone="notice">Soon</StatusBadge>
+          </div>
+          <Banner tone="offline">No connection. Your limits shown here are still in effect.</Banner>
+          <InlineNotice tone="ok">Your request was sent.</InlineNotice>
+          <Card>
+            <p>A card.</p>
+          </Card>
+        </div>
       </Panel>
 
       <Panel title={t('staff.styleguide.states')}>

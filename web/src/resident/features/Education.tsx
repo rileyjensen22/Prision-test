@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -207,6 +207,7 @@ export function Course() {
   const [pacing, setPacing] = useState<Pacing | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [offlineCopy, setOfflineCopy] = useState(false)
+  const started = useRef<string | null>(null)
 
   useEffect(() => {
     const local = loadCourse(code)
@@ -216,13 +217,17 @@ export function Course() {
         saveCourse(merged)
         setCourse(merged)
         setOfflineCopy(false)
-        setStep(resumeStep(merged))
+        // Only jump to the resume point on first load: this effect can run again (for example when
+        // the language object changes), and that must not send a resident back mid-lesson.
+        if (started.current !== code) setStep(resumeStep(merged))
+        started.current = code
       })
       .catch((e) => {
         if (e instanceof NetworkError && local) {
           setCourse(local)
           setOfflineCopy(true)
-          setStep(resumeStep(local))
+          if (started.current !== code) setStep(resumeStep(local))
+          started.current = code
         } else
           setMessage(
             e instanceof NetworkError ? t('calls.needsConnection') : t('education.lockedHint'),
