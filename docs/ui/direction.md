@@ -71,8 +71,8 @@ Switches on a window read from `view.ui.night_mode` (`{start, end}`) when the AP
 
 | | Before | After |
 |---|---|---|
-| JS (min / gzip) | 509.85 kB / 148.44 kB | 594.03 kB / 175.40 kB |
-| CSS (min / gzip) | 13.43 kB / 3.49 kB | 20.53 kB / 5.48 kB |
+| JS (min / gzip) | 509.85 kB / 148.44 kB | 628.19 kB / 184.25 kB |
+| CSS (min / gzip) | 13.43 kB / 3.49 kB | 20.69 kB / 5.51 kB |
 | Fonts | system | 34.7 kB (two woff2 files) |
 
 The JS growth is the icon set, the staff data table, the style guide page and the new staff strings (both languages). The app is still one chunk; splitting `/staff` from `/resident` is the obvious next step if low-end kiosks need a smaller download. I have not measured how much it would save.
