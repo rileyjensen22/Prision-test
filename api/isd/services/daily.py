@@ -9,8 +9,18 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from isd import ratelimit
 from isd.models import DeviceAssignment, MirrorSession, PointEvent, Resident
-from isd.services import calls, earnings, mirror, reconcile, schedule, welfare, work_tasks
+from isd.services import (
+    calls,
+    earnings,
+    mirror,
+    reconcile,
+    retention,
+    schedule,
+    welfare,
+    work_tasks,
+)
 from isd.services.audit import SYSTEM
 from isd.services.entitlement_service import load_engine_config
 from isd.services.points import add_point_event, evaluate_tier
@@ -56,7 +66,13 @@ def run_daily(session: Session, now: datetime, for_day: date | None = None) -> d
     day = for_day or (now - timedelta(days=1)).date()
     cfg = load_engine_config(session)
     awarded = skipped_infraction = 0
-    residents = session.execute(select(Resident.id).order_by(Resident.id)).scalars().all()
+    residents = (
+        session.execute(
+            select(Resident.id).where(Resident.released_at.is_(None)).order_by(Resident.id)
+        )
+        .scalars()
+        .all()
+    )
     for rid in residents:
         first = session.execute(
             select(func.min(DeviceAssignment.assigned_at)).where(
@@ -83,6 +99,8 @@ def run_daily(session: Session, now: datetime, for_day: date | None = None) -> d
         except mirror.MirrorError:
             closed += 1
     purged = calls.purge_expired_recordings(session, now)  # video recordings past retention
+    retained = retention.run(session, now)  # other records past their retention period
+    ratelimit.purge_old_hits(session)  # rate-limit hits no window can count any more
     paid = earnings.pay_out_all(session, now)  # work earnings into trust accounts
     topped_up = work_tasks.sync_all(session, now)  # keep tasks ready
     made = schedule.generate(session, now)  # the next week's schedule for every unit
@@ -94,6 +112,7 @@ def run_daily(session: Session, now: datetime, for_day: date | None = None) -> d
         "skipped_for_infraction": skipped_infraction,
         "mirror_sessions_closed": closed,
         "recordings_purged": purged,
+        "retention": retained,
         "work_payouts": paid,
         "tasks_added": topped_up,
         "schedule_blocks_made": made,

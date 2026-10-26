@@ -6,22 +6,27 @@ from collections.abc import Callable
 from fastapi import HTTPException, Request
 
 from isd import settings
-from isd.ratelimit import SlidingWindowLimiter
+from isd.ratelimit import SharedWindowLimiter, SlidingWindowLimiter
 
 
 def _env(name: str, default: int) -> int:
     return int(os.environ.get(name, default))
 
 
-LIMITERS: dict[str, SlidingWindowLimiter] = {}
+LIMITERS: dict[str, SlidingWindowLimiter | SharedWindowLimiter] = {}
 
 
 def configure(
     name: str, limit: int, window: float, clock: Callable[[], float] | None = None
-) -> SlidingWindowLimiter:
-    lim = (
-        SlidingWindowLimiter(limit, window, clock) if clock else SlidingWindowLimiter(limit, window)
-    )
+) -> SlidingWindowLimiter | SharedWindowLimiter:
+    if clock is None and settings.RATE_LIMIT_STORE == "postgres":
+        lim: SlidingWindowLimiter | SharedWindowLimiter = SharedWindowLimiter(name, limit, window)
+    else:  # in memory (development), or a test that supplies its own clock
+        lim = (
+            SlidingWindowLimiter(limit, window, clock)
+            if clock
+            else SlidingWindowLimiter(limit, window)
+        )
     LIMITERS[name] = lim
     return lim
 
@@ -44,7 +49,7 @@ def client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-def _too_many(lim: SlidingWindowLimiter, key: str) -> HTTPException:
+def _too_many(lim: SlidingWindowLimiter | SharedWindowLimiter, key: str) -> HTTPException:
     return HTTPException(
         429, "too many requests", headers={"Retry-After": str(lim.retry_after(key))}
     )

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
+import { MonitoredCalls } from './MonitoredCalls'
 import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
 
 interface Flag {
@@ -132,6 +133,7 @@ export default function Monitoring() {
           </Table>
         )}
       </Panel>
+      <MonitoredCalls />
       {opened && (
         <Panel title={`Message ${opened.message_id}`} data-testid="opened-message">
           <p className="rounded-ctl bg-surface-2 p-3" data-testid="opened-body">

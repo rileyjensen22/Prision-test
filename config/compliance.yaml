@@ -1,6 +1,14 @@
 # ALL ITEMS UNVERIFIED. Confirm with counsel before any deployment.
 call_rate_cap_per_minute: null
 recording_retention_days: null
+# Retention periods in days. null keeps everything. The audit log, ledgers and decision records are
+# never deleted whatever these say (see api/isd/services/retention.py).
+message_retention_days: null
+call_metadata_retention_days: null
+staff_request_retention_days: null
+reading_log_retention_days: null
+quiz_attempt_retention_days: null
+device_record_retention_days: null
 privileged_contact_types: [attorney]
 min_out_of_cell_minutes_per_day: 60
 appeal_review_hours: 72

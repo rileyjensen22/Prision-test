@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from isd.crypto import blind_index
 from isd.engine.contacts import ContactInvalid, can_review, clean_request
 from isd.models import Contact, VideoBooking
 from isd.providers import get_verifier
@@ -37,7 +38,7 @@ def request_contact(
     same = session.execute(
         select(Contact.id).where(
             Contact.resident_id == resident_id,
-            Contact.phone_ref == phone,
+            Contact.phone_hash == blind_index(phone),
             Contact.status != "rejected",
         )
     ).first()

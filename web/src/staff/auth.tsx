@@ -12,19 +12,33 @@ interface User {
   id: number
   username: string
   role: Role
+  mfa_enabled: boolean
+  must_change_password: boolean
 }
 interface AuthCtx {
   user: User | null
   loading: boolean
-  login: (username: string, password: string) => Promise<void>
+  /** Throws an ApiError with detail.code 'MFA_REQUIRED' when the second factor is still needed. */
+  login: (username: string, password: string, second?: Second) => Promise<void>
   logout: () => void
+  /** The sign-in only allows setting up two-step sign-in or changing the password. */
+  restricted: boolean
+  /** Replace the token (after a password change or MFA setup) and reload who is signed in. */
+  adopt: (token: string) => Promise<void>
 }
+export interface Second {
+  totp?: string
+  recovery?: string
+}
+
+const SCOPE_KEY = 'isd.staffScope'
 
 const Ctx = createContext<AuthCtx | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(!!getToken())
+  const [restricted, setRestricted] = useState(() => sessionStorage.getItem(SCOPE_KEY) === 'enroll')
 
   const loadMe = useCallback(async () => {
     try {
@@ -44,19 +58,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadMe])
 
   const login = useCallback(
-    async (username: string, password: string) => {
-      const r = await post<{ token: string }>('/auth/login', { username, password })
+    async (username: string, password: string, second?: Second) => {
+      const r = await post<{ token: string; mfa_enrollment_required?: boolean }>('/auth/login', {
+        username,
+        password,
+        ...second,
+      })
       setToken(r.token)
+      const enroll = Boolean(r.mfa_enrollment_required)
+      sessionStorage.setItem(SCOPE_KEY, enroll ? 'enroll' : '')
+      setRestricted(enroll)
+      await loadMe()
+    },
+    [loadMe],
+  )
+  const adopt = useCallback(
+    async (token: string) => {
+      setToken(token)
+      sessionStorage.setItem(SCOPE_KEY, '')
+      setRestricted(false)
       await loadMe()
     },
     [loadMe],
   )
   const logout = useCallback(() => {
     setToken(null)
+    sessionStorage.setItem(SCOPE_KEY, '')
+    setRestricted(false)
     setUser(null)
   }, [])
 
-  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout])
+  const value = useMemo(
+    () => ({ user, loading, login, logout, restricted, adopt }),
+    [user, loading, login, logout, restricted, adopt],
+  )
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
@@ -72,14 +107,22 @@ export function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [code, setCode] = useState('')
+  const [recovery, setRecovery] = useState('')
+  const [needSecond, setNeedSecond] = useState(false)
 
   async function submit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     try {
-      await login(username, password)
+      await login(username, password, {
+        totp: code.trim() || undefined,
+        recovery: recovery.trim() || undefined,
+      })
     } catch (err) {
-      setError(errorText(err))
+      const detail = (err as { detail?: { code?: string } }).detail
+      if (detail?.code === 'MFA_REQUIRED') setNeedSecond(true)
+      else setError(errorText(err))
     }
   }
 
@@ -111,6 +154,30 @@ export function LoginPage() {
               className={`${FIELD} mt-1 font-normal`}
             />
           </label>
+          {needSecond && (
+            <>
+              <label className="block font-bold">
+                {t('staff.mfaCode')}
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  autoFocus
+                  className={`${FIELD} mt-1 font-normal`}
+                />
+              </label>
+              <label className="block font-bold">
+                {t('staff.recoveryCode')}
+                <input
+                  value={recovery}
+                  onChange={(e) => setRecovery(e.target.value)}
+                  autoComplete="off"
+                  className={`${FIELD} mt-1 font-normal`}
+                />
+              </label>
+            </>
+          )}
           {error && <Notice kind="err">{error}</Notice>}
           <Btn type="submit" className="w-full">
             {t('staff.signIn')}

@@ -1,8 +1,10 @@
 # Bundled public-domain or original texts (nothing is fetched from outside).
 # catalog: general (tier 1) | expanded (tier 4) | legal | religious (the last two are protected baseline, never locked).
 # source: the approved_content_sources entry this text comes from. Blank lines in `text` start a new page.
+# `variants` hold other languages and the easy-reading (simple) level of the same text; the reader picks
+# the best match for the resident's language and reading level (staff set both).
 # The legal and religious texts here are PLACEHOLDERS: the customer supplies the real law library and faith texts.
-version: 2
+version: 3
 items:
   - id: tortoise-hare
     title: "The Tortoise and the Hare (retelling)"
@@ -11,6 +13,22 @@ items:
     source: Bundled public-domain texts
     language: en
     text: "A hare laughed at a tortoise for being slow, so the tortoise challenged him to a race. The hare sprinted ahead, then lay down for a nap, sure he could win whenever he liked. The tortoise kept walking, one steady step after another, and crossed the line while the hare was still asleep. Slow and steady can beat quick and careless."
+    variants:
+      - language: es
+        reading_level: standard
+        title: "La liebre y la tortuga (versión breve)"
+        author: "Fábula tradicional, versión breve"
+        text: "Una liebre se burló de una tortuga por ser lenta, así que la tortuga la retó a una carrera. La liebre salió corriendo, pero luego se echó a dormir, segura de que podía ganar cuando quisiera. La tortuga siguió caminando, un paso tras otro, y cruzó la meta mientras la liebre aún dormía. Lento y constante puede ganarle a rápido y descuidado."
+      - language: en
+        reading_level: simple
+        title: "The Tortoise and the Hare (easy reading)"
+        author: "Traditional fable, retold"
+        text: "A hare laughed at a tortoise because he was slow. The tortoise said, \"Let's race.\" The hare ran fast. Then he took a nap. The tortoise kept walking. He crossed the line first. Slow and steady can win."
+      - language: es
+        reading_level: simple
+        title: "La liebre y la tortuga (lectura fácil)"
+        author: "Fábula tradicional, versión breve"
+        text: "Una liebre se rió de una tortuga porque era lenta. La tortuga dijo: «Hagamos una carrera». La liebre corrió rápido y luego se echó a dormir. La tortuga siguió caminando. Llegó primero a la meta. Despacio y con constancia se puede ganar."
   - id: lion-mouse
     title: "The Lion and the Mouse (retelling)"
     author: "Traditional fable, retold"
@@ -18,6 +36,22 @@ items:
     source: Bundled public-domain texts
     language: en
     text: "A lion caught a small mouse and was about to eat her. The mouse begged to be set free and promised to repay the kindness one day. The lion laughed, but let her go. Later the lion was trapped in a hunter's net. The mouse heard him roar, gnawed through the ropes, and freed him. Even the smallest friend may be a great help."
+    variants:
+      - language: es
+        reading_level: standard
+        title: "El león y el ratón (versión breve)"
+        author: "Fábula tradicional, versión breve"
+        text: "Un león atrapó a una ratoncita y estaba a punto de comérsela. La ratoncita le rogó que la dejara libre y le prometió devolverle el favor algún día. El león se rió, pero la soltó. Más tarde el león quedó atrapado en la red de un cazador. La ratoncita lo oyó rugir, royó las cuerdas y lo liberó. Hasta el amigo más pequeño puede ser de gran ayuda."
+      - language: en
+        reading_level: simple
+        title: "The Lion and the Mouse (easy reading)"
+        author: "Traditional fable, retold"
+        text: "A lion caught a little mouse. The mouse said, \"Please let me go. I will help you one day.\" The lion laughed, but he let her go. Later, a net trapped the lion. The mouse chewed the ropes and set him free. Even a small friend can help a lot."
+      - language: es
+        reading_level: simple
+        title: "El león y el ratón (lectura fácil)"
+        author: "Fábula tradicional, versión breve"
+        text: "Un león atrapó a una ratoncita. Ella dijo: «Suéltame, por favor. Un día te ayudaré». El león se rió, pero la soltó. Más tarde una red atrapó al león. La ratoncita mordió las cuerdas y lo liberó. Hasta un amigo pequeño puede ayudar mucho."
   - id: preamble
     title: "Preamble to the Constitution of the United States"
     author: "United States, 1787 (public domain)"
@@ -25,6 +59,12 @@ items:
     source: Bundled public-domain texts
     language: en
     text: "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
+    variants:
+      - language: es
+        reading_level: standard
+        title: "Preámbulo de la Constitución de los Estados Unidos"
+        author: "Estados Unidos, 1787 (dominio público). Traducción no oficial: el texto en inglés es el que vale"
+        text: "Nosotros, el Pueblo de los Estados Unidos, a fin de formar una Unión más perfecta, establecer la Justicia, asegurar la tranquilidad interior, proveer a la defensa común, promover el bienestar general y asegurar para nosotros mismos y para nuestra posteridad los beneficios de la Libertad, ordenamos y establecemos esta Constitución para los Estados Unidos de América."
   - id: gettysburg
     title: "The Gettysburg Address (opening)"
     author: "Abraham Lincoln, 1863 (public domain)"
@@ -32,6 +72,12 @@ items:
     source: Bundled public-domain texts
     language: en
     text: "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."
+    variants:
+      - language: es
+        reading_level: standard
+        title: "El Discurso de Gettysburg (comienzo)"
+        author: "Abraham Lincoln, 1863 (dominio público). Traducción no oficial"
+        text: "Hace ochenta y siete años nuestros padres crearon en este continente una nueva nación, concebida en la Libertad y consagrada al principio de que todos los hombres son creados iguales."
   - id: bill-of-rights-selected
     title: "Bill of Rights: selected amendments (placeholder law library)"
     author: "United States, 1791 (public domain)"
@@ -44,6 +90,17 @@ items:
       Sixth Amendment: In all criminal prosecutions, the accused shall enjoy the right to a speedy and public trial, by an impartial jury of the State and district wherein the crime shall have been committed, which district shall have been previously ascertained by law, and to be informed of the nature and accusation; to be confronted with the witnesses against him; to have compulsory process for obtaining witnesses in his favor, and to have the Assistance of Counsel for his defence.
 
       Eighth Amendment: Excessive bail shall not be required, nor excessive fines imposed, nor cruel and unusual punishments inflicted.
+    variants:
+      - language: es
+        reading_level: standard
+        title: "Declaración de Derechos: enmiendas seleccionadas (biblioteca jurídica de ejemplo)"
+        author: "Estados Unidos, 1791 (dominio público). Traducción no oficial para consulta; el texto en inglés es el que vale. Un abogado o el personal puede ayudarle"
+        text: |
+          Cuarta Enmienda: No se violará el derecho de las personas a la seguridad en sus personas, domicilios, papeles y efectos frente a registros y confiscaciones irrazonables, y no se expedirá ninguna orden de registro o detención sino por causa probable, apoyada en juramento o promesa, y que describa en particular el lugar que ha de registrarse y las personas o cosas que han de ser detenidas o confiscadas.
+
+          Sexta Enmienda: En todos los procesos penales, el acusado gozará del derecho a ser juzgado rápida y públicamente por un jurado imparcial del Estado y distrito en que el delito se haya cometido, distrito que habrá sido determinado previamente por la ley; a ser informado de la naturaleza y causa de la acusación; a que se le caree con los testigos en su contra; a que se obligue a comparecer a los testigos que cite a su favor; y a contar con la asistencia de un abogado para su defensa.
+
+          Octava Enmienda: No se exigirán fianzas excesivas, ni se impondrán multas excesivas, ni se infligirán penas crueles e inusitadas.
   - id: psalm-23
     title: "Psalm 23 (King James Version)"
     author: "Traditional, 1611 (public domain)"
@@ -56,6 +113,17 @@ items:
       Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.
 
       Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.
+    variants:
+      - language: es
+        reading_level: standard
+        title: "Salmo 23 (Reina-Valera 1909)"
+        author: "Tradicional, 1909 (dominio público)"
+        text: |
+          Jehová es mi pastor; nada me faltará. En lugares de delicados pastos me hará descansar; junto a aguas de reposo me pastoreará. Confortará mi alma; me guiará por sendas de justicia por amor de su nombre.
+
+          Aunque ande en valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo; tu vara y tu cayado me infundirán aliento.
+
+          Aderezas mesa delante de mí en presencia de mis angustiadores; unges mi cabeza con aceite; mi copa está rebosando. Ciertamente el bien y la misericordia me seguirán todos los días de mi vida, y en la casa de Jehová moraré por largos días.
   - id: dhammapada-twin-verses
     title: "The Dhammapada: the twin verses (opening)"
     author: "Translated by F. Max Müller, 1881 (public domain)"
@@ -66,3 +134,12 @@ items:
       All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with an evil thought, pain follows him, as the wheel follows the foot of the ox that draws the carriage.
 
       All that we are is the result of what we have thought: it is founded on our thoughts, it is made up of our thoughts. If a man speaks or acts with a pure thought, happiness follows him, like a shadow that never leaves him.
+    variants:
+      - language: es
+        reading_level: standard
+        title: "El Dhammapada: los versos gemelos (comienzo)"
+        author: "Traducción al inglés de F. Max Müller, 1881 (dominio público). Traducción al español no oficial"
+        text: |
+          Todo lo que somos es el resultado de lo que hemos pensado: está fundado en nuestros pensamientos, está hecho de nuestros pensamientos. Si un hombre habla o actúa con un pensamiento malo, el dolor lo sigue, como la rueda sigue la pata del buey que tira del carro.
+
+          Todo lo que somos es el resultado de lo que hemos pensado: está fundado en nuestros pensamientos, está hecho de nuestros pensamientos. Si un hombre habla o actúa con un pensamiento puro, la felicidad lo sigue, como una sombra que nunca lo abandona.

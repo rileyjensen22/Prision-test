@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -54,6 +54,9 @@ courses-check: $(VENV)/.installed  ## validate every course folder under content
 
 secrets-check:  ## fail if the repository contains anything that looks like a secret
 	$(PY) scripts/check-secrets.py
+
+load-test: $(VENV)/.installed  ## 500 simulated kiosks plus staff screens against a real API; exit 1 if a budget is missed
+	$(PY) scripts/load-test.py
 
 simulate-week: $(VENV)/.installed
 	$(PY) scripts/simulate-week.py

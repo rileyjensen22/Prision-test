@@ -194,3 +194,13 @@ def validate_reading(payload: dict) -> None:
         ids.add(it["id"])
         if not it.get("source", "").strip() or not it["text"].strip():
             raise ValueError(f"{it['id']}: needs a source and some text")
+        seen = {(it["language"], "standard")}
+        for v in it.get("variants", []):
+            key = (v.get("language"), v.get("reading_level"))
+            if key[0] not in ("en", "es") or key[1] not in ("standard", "simple"):
+                raise ValueError(
+                    f"{it['id']}: a variant needs language en or es and a reading level"
+                )
+            if key in seen or not str(v.get("text", "")).strip():
+                raise ValueError(f"{it['id']}: duplicate variant {key} or empty text")
+            seen.add(key)

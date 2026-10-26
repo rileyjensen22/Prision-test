@@ -31,7 +31,6 @@ from isd.models import (
 )
 from isd.services.audit import SYSTEM, Actor, append_audit
 from isd.services.config_store import get_current
-from isd.services.out_of_cell import window
 
 FLAG_TEXT = {
     "no_contact": "No contact with anyone outside",
@@ -253,9 +252,10 @@ def _tracked_many(session: Session, now: datetime) -> dict[int, int]:
     return {
         rid: (now.date() - first.date()).days
         for rid, first in session.execute(
-            select(DeviceAssignment.resident_id, func.min(DeviceAssignment.assigned_at)).group_by(
-                DeviceAssignment.resident_id
-            )
+            select(DeviceAssignment.resident_id, func.min(DeviceAssignment.assigned_at))
+            .join(Resident, Resident.id == DeviceAssignment.resident_id)
+            .where(Resident.released_at.is_(None))
+            .group_by(DeviceAssignment.resident_id)
         )
     }
 

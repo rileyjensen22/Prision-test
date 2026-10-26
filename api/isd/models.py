@@ -15,11 +15,14 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from isd.crypto import EncryptedText, blind_index
 
 ROLES = ("officer", "supervisor", "admin", "auditor")
 CONTACT_TYPES = ("family", "friend", "attorney")
@@ -44,6 +47,18 @@ class Staff(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = _now()
+    # Sign-in security (Phase 18). The TOTP secret is stored encrypted; recovery codes are stored
+    # only as hashes and each works once.
+    mfa_secret: Mapped[str | None] = mapped_column(EncryptedText("staff.mfa_secret"), nullable=True)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    mfa_recovery_hashes: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    mfa_last_step: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    must_change_password: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    password_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class ConfigVersion(Base):
@@ -73,6 +88,9 @@ class Resident(Base):
     prior_returns_source: Mapped[str | None] = mapped_column(String(128), nullable=True)
     release_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = _now()
+    # Set when staff vacate the resident (released or moved out). The record stays: history,
+    # ledgers and the audit log are never deleted.
+    released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class Cell(Base):
@@ -122,7 +140,11 @@ class Contact(Base):
     status: Mapped[str] = mapped_column(String(10), default="approved", server_default="approved")
     requested_by: Mapped[str] = mapped_column(String(8), default="staff", server_default="staff")
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)  # no-contact order
-    phone_ref: Mapped[str | None] = mapped_column(String(32), nullable=True)  # synthetic number
+    # Synthetic number, stored encrypted; `phone_hash` is a keyed hash for duplicate checks.
+    phone_ref: Mapped[str | None] = mapped_column(
+        EncryptedText("contacts.phone_ref"), nullable=True
+    )
+    phone_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     verification: Mapped[str | None] = mapped_column(String(32), nullable=True)
     requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
@@ -265,8 +287,10 @@ class CallRecord(Base):
     contact_type: Mapped[str] = mapped_column(String(16))
     privileged: Mapped[bool] = mapped_column(Boolean)
     monitored: Mapped[bool] = mapped_column(Boolean)
-    monitor_ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    provider_ref: Mapped[str] = mapped_column(String(64))
+    monitor_ref: Mapped[str | None] = mapped_column(
+        EncryptedText("call_records.monitor_ref"), nullable=True
+    )
+    provider_ref: Mapped[str] = mapped_column(EncryptedText("call_records.provider_ref"))
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     max_seconds: Mapped[int] = mapped_column(Integer)
@@ -441,7 +465,7 @@ class Message(Base):
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
     contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
     direction: Mapped[str] = mapped_column(String(3))
-    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    body: Mapped[str | None] = mapped_column(EncryptedText("messages.body"), nullable=True)
     privileged: Mapped[bool] = mapped_column(Boolean)
     monitored: Mapped[bool] = mapped_column(Boolean)
     delivery: Mapped[str] = mapped_column(
@@ -906,3 +930,10 @@ class SweepState(Base):
     __tablename__ = "sweep_state"
     name: Mapped[str] = mapped_column(String(32), primary_key=True)
     last_run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+@event.listens_for(Contact, "before_insert")
+@event.listens_for(Contact, "before_update")
+def _contact_blind_index(mapper, connection, target: Contact) -> None:
+    """Keeps the searchable keyed hash of the number in step with the (encrypted) number."""
+    target.phone_hash = blind_index(target.phone_ref) if target.phone_ref else None

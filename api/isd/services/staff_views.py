@@ -69,7 +69,13 @@ def roster(session: Session, now: datetime) -> list[dict]:
     offline_after = timedelta(
         minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
     )
-    residents = session.execute(select(Resident).order_by(Resident.code)).scalars().all()
+    residents = (
+        session.execute(
+            select(Resident).where(Resident.released_at.is_(None)).order_by(Resident.code)
+        )
+        .scalars()
+        .all()
+    )
     ids = [r.id for r in residents]
     placed = {
         rid: (device, cell)
@@ -166,6 +172,7 @@ def resident_detail(session: Session, resident_id: int, now: datetime) -> dict |
             "captions": r.captions,
         },
         "prior_returns": r.prior_returns,
+        "released_at": r.released_at.isoformat() if r.released_at else None,
         "device": asg[0] if asg else None,
         "cell": asg[1] if asg else None,
         "tier": {

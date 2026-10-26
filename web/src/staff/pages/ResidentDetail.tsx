@@ -18,6 +18,7 @@ import {
   Th,
   useLoad,
 } from '../ui'
+import { LifecyclePanel } from './LifecyclePanel'
 import ReentryPanel from './ReentryPanel'
 
 interface Detail {
@@ -26,6 +27,7 @@ interface Detail {
   display_name: string
   settings: { language: string; text_size: string; reading_level: string; captions: boolean }
   prior_returns: number
+  released_at: string | null
   device: string | null
   cell: string | null
   tier: { earned: number; ceiling: number; effective: number }
@@ -563,6 +565,13 @@ export default function ResidentDetail() {
       <OutOfCell residentId={d.resident_id} canEdit={!!canEdit} />
       {user && ['supervisor', 'admin', 'auditor'].includes(user.role) && (
         <Activity residentId={d.resident_id} />
+      )}
+      {user && ['supervisor', 'admin'].includes(user.role) && (
+        <LifecyclePanel
+          residentId={d.resident_id}
+          released={Boolean(d.released_at)}
+          onDone={() => void reload()}
+        />
       )}
       {canEdit && <SettingsForm d={d} onDone={() => void reload()} />}
     </Page>

@@ -21,6 +21,9 @@ import {
   Settings,
   ShieldCheck,
   Tablet,
+  KeyRound,
+  UserCog,
+  UserX,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -47,10 +50,13 @@ import Outliers from './pages/Outliers'
 import ResidentDetail from './pages/ResidentDetail'
 import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
+import Security from './pages/Security'
 import ViewAs from './pages/ViewAs'
 import Certificates from './pages/Certificates'
 import Devices from './pages/Devices'
+import Accounts from './pages/Accounts'
 import Intake from './pages/Intake'
+import KeepSeparate from './pages/KeepSeparate'
 import Outcomes from './pages/Outcomes'
 import Welfare from './pages/Welfare'
 import Styleguide from './pages/Styleguide'
@@ -101,6 +107,7 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
         roles: ['officer', 'supervisor', 'admin'],
       },
       { to: '/staff/monitoring', key: 'monitoring', icon: Eye, roles: SUPERVISION },
+      { to: '/staff/keep-separate', key: 'keepSeparate', icon: UserX, roles: SUPERVISION },
     ],
   },
   {
@@ -117,8 +124,10 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
     items: [
       { to: '/staff/finance', key: 'finance', icon: Landmark, roles: SUPERVISION },
       { to: '/staff/outcomes', key: 'outcomes', icon: LineChart, roles: SUPERVISION },
+      { to: '/staff/accounts', key: 'accounts', icon: UserCog, roles: ['admin'] },
       { to: '/staff/config', key: 'config', icon: Settings },
       { to: '/staff/audit', key: 'audit', icon: ScrollText, roles: ['admin', 'auditor'] },
+      { to: '/staff/security', key: 'security', icon: KeyRound },
       { to: '/staff/styleguide', key: 'styleguide', icon: Palette },
     ],
   },
@@ -156,8 +165,9 @@ function Guard({ roles, children }: { roles?: Role[]; children: React.ReactNode 
 
 function Shell() {
   const { t, i18n } = useTranslation()
-  const { user, loading, logout } = useAuth()
-  const counts = useCounts(Boolean(user))
+  const { user, loading, logout, restricted } = useAuth()
+  const forced = Boolean(user && (restricted || user.must_change_password))
+  const counts = useCounts(Boolean(user) && !forced)
   if (loading) return null
   if (!user) return <LoginPage />
   const other = i18n.language === 'es' ? 'en' : 'es'
@@ -176,7 +186,9 @@ function Shell() {
         </div>
         <nav aria-label={t('staff.mainNav')} className="space-y-3 px-2 pb-4">
           {NAV_GROUPS.map((g) => {
-            const items = g.items.filter((n) => !n.roles || n.roles.includes(user.role))
+            const items = forced
+              ? []
+              : g.items.filter((n) => !n.roles || n.roles.includes(user.role))
             if (!items.length) return null
             return (
               <div key={g.key}>
@@ -242,101 +254,122 @@ function Shell() {
           </button>
         </header>
         <main id="staff-main" className="space-y-4 p-6">
-          <Routes>
-            <Route index element={<Dashboard />} />
-            <Route path="roster" element={<Roster />} />
-            <Route path="devices" element={<Devices />} />
-            <Route
-              path="intake"
-              element={
-                <Guard roles={['supervisor', 'admin']}>
-                  <Intake />
-                </Guard>
-              }
-            />
-            <Route
-              path="outcomes"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Outcomes />
-                </Guard>
-              }
-            />
-            <Route path="residents/:id" element={<ResidentDetail />} />
-            <Route path="residents/:id/certificates" element={<Certificates />} />
-            <Route
-              path="confirmations"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Confirmations />
-                </Guard>
-              }
-            />
-            <Route
-              path="appeals"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Appeals />
-                </Guard>
-              }
-            />
-            <Route
-              path="outliers"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Outliers />
-                </Guard>
-              }
-            />
-            <Route path="view-as" element={<ViewAs />} />
-            <Route
-              path="mirror"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Mirror />
-                </Guard>
-              }
-            />
-            <Route path="out-of-cell" element={<OutOfCell />} />
-            <Route path="schedule" element={<Schedule />} />
-            <Route path="welfare" element={<Welfare />} />
-            <Route
-              path="contacts"
-              element={
-                <Guard roles={['officer', 'supervisor', 'admin']}>
-                  <ContactRequests />
-                </Guard>
-              }
-            />
-            <Route
-              path="monitoring"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Monitoring />
-                </Guard>
-              }
-            />
-            <Route path="content" element={<ContentJobs />} />
-            <Route
-              path="finance"
-              element={
-                <Guard roles={SUPERVISION}>
-                  <Finance />
-                </Guard>
-              }
-            />
-            <Route path="config" element={<ConfigEditor />} />
-            <Route
-              path="audit"
-              element={
-                <Guard roles={['admin', 'auditor']}>
-                  <AuditLog />
-                </Guard>
-              }
-            />
-            <Route path="styleguide" element={<Styleguide />} />
-            <Route path="*" element={<Navigate to="/staff" replace />} />
-          </Routes>
+          {forced ? (
+            <Security />
+          ) : (
+            <Routes>
+              <Route index element={<Dashboard />} />
+              <Route path="roster" element={<Roster />} />
+              <Route path="devices" element={<Devices />} />
+              <Route
+                path="intake"
+                element={
+                  <Guard roles={['supervisor', 'admin']}>
+                    <Intake />
+                  </Guard>
+                }
+              />
+              <Route
+                path="outcomes"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Outcomes />
+                  </Guard>
+                }
+              />
+              <Route path="residents/:id" element={<ResidentDetail />} />
+              <Route path="residents/:id/certificates" element={<Certificates />} />
+              <Route
+                path="confirmations"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Confirmations />
+                  </Guard>
+                }
+              />
+              <Route
+                path="appeals"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Appeals />
+                  </Guard>
+                }
+              />
+              <Route
+                path="outliers"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Outliers />
+                  </Guard>
+                }
+              />
+              <Route path="view-as" element={<ViewAs />} />
+              <Route
+                path="mirror"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Mirror />
+                  </Guard>
+                }
+              />
+              <Route path="out-of-cell" element={<OutOfCell />} />
+              <Route path="schedule" element={<Schedule />} />
+              <Route path="welfare" element={<Welfare />} />
+              <Route
+                path="contacts"
+                element={
+                  <Guard roles={['officer', 'supervisor', 'admin']}>
+                    <ContactRequests />
+                  </Guard>
+                }
+              />
+              <Route
+                path="monitoring"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Monitoring />
+                  </Guard>
+                }
+              />
+              <Route
+                path="keep-separate"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <KeepSeparate />
+                  </Guard>
+                }
+              />
+              <Route path="content" element={<ContentJobs />} />
+              <Route
+                path="finance"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <Finance />
+                  </Guard>
+                }
+              />
+              <Route path="config" element={<ConfigEditor />} />
+              <Route
+                path="audit"
+                element={
+                  <Guard roles={['admin', 'auditor']}>
+                    <AuditLog />
+                  </Guard>
+                }
+              />
+              <Route path="security" element={<Security />} />
+              <Route
+                path="accounts"
+                element={
+                  <Guard roles={['admin']}>
+                    <Accounts />
+                  </Guard>
+                }
+              />
+              <Route path="styleguide" element={<Styleguide />} />
+              <Route path="*" element={<Navigate to="/staff" replace />} />
+            </Routes>
+          )}
         </main>
       </div>
     </div>

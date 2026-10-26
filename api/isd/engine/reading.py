@@ -59,3 +59,35 @@ def clamp_page(page: int, total: int) -> int:
 
 def is_complete(page: int, total: int) -> bool:
     return total > 0 and page >= total - 1
+
+
+LEVELS = ("standard", "simple")
+
+
+def pick_variant(item: dict, language: str, level: str) -> dict:
+    """The text of `item` that best fits a resident's language and reading level.
+
+    Order: same language and level, same language at the standard level, English at the same level,
+    then the item's own text. Returns title, author, text, language and the level actually used, so
+    the screen can show what the resident really got. Pure; no database."""
+    level = level if level in LEVELS else "standard"
+    base = {
+        "title": item["title"],
+        "author": item["author"],
+        "text": item["text"],
+        "language": item["language"],
+        "reading_level": "standard",
+    }
+    options = {(item["language"], "standard"): base}
+    for v in item.get("variants", []):
+        options[(v["language"], v["reading_level"])] = {
+            "title": v.get("title", item["title"]),
+            "author": v.get("author", item["author"]),
+            "text": v["text"],
+            "language": v["language"],
+            "reading_level": v["reading_level"],
+        }
+    for key in ((language, level), (language, "standard"), ("en", level), ("en", "standard")):
+        if key in options:
+            return options[key]
+    return base

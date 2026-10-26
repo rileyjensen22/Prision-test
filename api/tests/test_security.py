@@ -241,6 +241,10 @@ GOOD = dict(
     migration_url="postgresql+psycopg://owner:y8@db/isd",
     sso_mock=False,
     research_salt="r" * 20,
+    encryption_keys="k1:" + "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU=",
+    blind_index_key="b" * 40,
+    mfa_required=True,
+    rate_limit_store="postgres",
 )
 
 
@@ -253,6 +257,10 @@ def test_production_refuses_development_defaults():
         "database_url": "postgresql+psycopg://isd_app:isd_app_dev_only@db/isd",
         "migration_url": "postgresql+psycopg://isd:isd_dev_only@db/isd",
         "sso_mock": True,
+        "encryption_keys": "",
+        "blind_index_key": "dev-only-blind-index-key-change-me",
+        "mfa_required": False,
+        "rate_limit_store": "memory",
     }
     for key, bad in cases.items():
         problems = settings.validate_for_env("production", **{**GOOD, key: bad})
