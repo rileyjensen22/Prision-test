@@ -17,7 +17,7 @@
 
 Generate secrets with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Never commit them: `make secrets-check` fails the build if something that looks like a secret is committed. The API refuses to start in production with development values.
 
-Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. Run **one** API process (or move the rate-limit counters to a shared store).
+Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. Rate-limit counters are in memory, so until Phase 18 moves them to Postgres a second API process gives every client a second allowance; run several processes only for load tests.
 
 ## First deployment
 
@@ -57,3 +57,51 @@ Back up the whole database; encrypt backups and restrict access (operator respon
 - `make simulate-week`: the full simulated week (24 residents, 7 days, about 30 seconds). Exit code 0 only if every invariant holds; the report is in `var/simulate-week-report.json`.
 - `make secrets-check`: no secrets in the repository.
 - `make lint`.
+
+## Performance budget and load test
+
+Budgets (what a person waits for, 95th and 99th percentile, with the stated number of kiosks polling at
+the real intervals: view every 30 s, heartbeat every 60 s):
+
+| Request | p95 | p99 |
+|---|---|---|
+| Kiosk requests (`/device/*`) | 250 ms | 1,000 ms |
+| Staff pages (`/staff/*`) | 1,000 ms | 2,500 ms |
+| Errors | none | |
+
+`make load-test` (`python scripts/load-test.py`) builds a throwaway database of synthetic residents,
+starts the API with four worker processes and drives one asyncio task per device plus five staff
+screens, then exits non-zero if any budget is missed. `--speed N` shortens the intervals N times, so
+`--devices 500 --speed 3` is the load of 1,500 kiosks.
+
+### Result: 500 devices (2026-10-26, 4 cores, 16 GB, API, Postgres and the load generator on one machine)
+
+`--devices 500 --seconds 60 --speed 1 --workers 4`: **passed**, 1,737 requests, no errors.
+
+| Endpoint | count | p50 | p95 | p99 | max (ms) |
+|---|---|---|---|---|---|
+| device view | 1,005 | 23 | 33 | 126 | 449 |
+| heartbeat | 500 | 8 | 12 | 78 | 213 |
+| courses | 111 | 29 | 39 | 62 | 86 |
+| staff request | 31 | 9 | 15 | 50 | 50 |
+| staff devices | 30 | 45 | 117 | 129 | 129 |
+| staff roster | 30 | 140 | 540 | 567 | 567 |
+| staff summary | 30 | 141 | 346 | 420 | 420 |
+
+Headroom: at `--speed 3` (the load of 1,500 kiosks on the same machine) the run missed the kiosk
+budget slightly (device view p95 351 ms, heartbeat p95 401 ms; no errors, staff pages within budget).
+Treat about 1,000 kiosks per 4-core API host as the comfortable limit until the facility-scale
+numbers in Phase 20 are recorded.
+
+### What the first run found and what changed
+
+The first run (one worker, speed 5) collapsed: nearly every request timed out. At real speed with one
+worker the staff summary took 16 seconds at p95. The cause was the welfare check, which ran several
+queries per resident (about 4 seconds for 500 residents, growing linearly). It now loads everything in
+a fixed number of queries (`welfare.detect_many`): about 0.1 s cold and 0.04 s warm for the same 500
+residents. Same flags, same tests. Running four worker processes removed the
+single-process (GIL) ceiling.
+
+Known limits: the staff roster still computes every resident's entitlements on each request (about
+150 ms for 500 residents); Phase 20 makes the dashboard summary come from aggregate queries so it does
+not grow with the number of residents.

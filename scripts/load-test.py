@@ -1,6 +1,6 @@
 """Load test: many simulated kiosks and a few staff screens against a real API process.
 
-    python scripts/load-test.py [--devices 500] [--seconds 60] [--speed 5] [--workers 1]
+    python scripts/load-test.py [--devices 500] [--seconds 60] [--speed 5] [--workers 4]
 
 Builds a throwaway database (isd_load) with synthetic residents, starts uvicorn on port 8002, then
 runs one asyncio task per device: every poll interval it fetches its resident view, and on the
@@ -192,9 +192,12 @@ def main() -> int:
     ap.add_argument("--devices", type=int, default=500)
     ap.add_argument("--seconds", type=int, default=60)
     ap.add_argument("--speed", type=float, default=5.0)
-    ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--p95-ms", type=float, default=500.0)
-    ap.add_argument("--p99-ms", type=float, default=1500.0)
+    ap.add_argument("--workers", type=int, default=4)
+    # Budgets (docs/operations.md): what a kiosk waits for, and what a staff screen waits for.
+    ap.add_argument("--device-p95-ms", type=float, default=250.0)
+    ap.add_argument("--device-p99-ms", type=float, default=1000.0)
+    ap.add_argument("--staff-p95-ms", type=float, default=1000.0)
+    ap.add_argument("--staff-p99-ms", type=float, default=2500.0)
     ap.add_argument(
         "--report", type=Path, default=ROOT / "var" / "load-test-report.json"
     )
@@ -240,10 +243,13 @@ def main() -> int:
         )
         if row["errors"]:
             problems.append(f"{name}: {row['errors']} errors")
-        if row["p95"] > args.p95_ms:
-            problems.append(f"{name}: p95 {row['p95']:.0f} ms over {args.p95_ms:.0f}")
-        if row["p99"] > args.p99_ms:
-            problems.append(f"{name}: p99 {row['p99']:.0f} ms over {args.p99_ms:.0f}")
+        staff_side = name.startswith("staff ")
+        p95_limit = args.staff_p95_ms if staff_side else args.device_p95_ms
+        p99_limit = args.staff_p99_ms if staff_side else args.device_p99_ms
+        if row["p95"] > p95_limit:
+            problems.append(f"{name}: p95 {row['p95']:.0f} ms over {p95_limit:.0f}")
+        if row["p99"] > p99_limit:
+            problems.append(f"{name}: p99 {row['p99']:.0f} ms over {p99_limit:.0f}")
     print(
         f"\n{total} requests in {elapsed:.0f}s ({total / elapsed:.0f}/s); statuses {dict(sorted(stats.statuses.items()))}"
     )

@@ -98,29 +98,131 @@ def last_contact_day(session: Session, rid: int) -> date | None:
     return latest.date() if latest else None
 
 
-def detect(session: Session, rid: int, tracked_days: int, now: datetime) -> list[dict]:
-    """What is true about this resident right now, compared with their own history. The usual
-    levels (their baseline) are part of each flag's detail."""
+def _day_counts(session: Session, column, resident_col, since: datetime, *where) -> dict:
+    """{resident_id: {day: count}} for rows of one source since `since`, in one query. Days are
+    UTC dates, the same days `datetime.date()` gives for the UTC timestamps we store."""
+    day = func.date(func.timezone("UTC", column))
+    out: dict[int, dict[date, int]] = {}
+    for rid, d, n in session.execute(
+        select(resident_col, day, func.count())
+        .where(column >= since, *where)
+        .group_by(resident_col, day)
+    ):
+        out.setdefault(rid, {})[d] = out.get(rid, {}).get(d, 0) + n
+    return out
+
+
+def _merge(into: dict, other: dict) -> None:
+    for rid, days in other.items():
+        mine = into.setdefault(rid, {})
+        for d, n in days.items():
+            mine[d] = mine.get(d, 0) + n
+
+
+def _series_from(days: dict[date, int], today: date, length: int) -> list[int]:
+    return [days.get(today - timedelta(days=length - 1 - i), 0) for i in range(length)]
+
+
+def detect_many(session: Session, now: datetime, tracked: dict[int, int]) -> dict[int, list[dict]]:
+    """`detect` for many residents at once: a fixed number of queries however many residents.
+
+    `tracked` maps resident id to days on the unit. Same flags, same details as one at a time."""
+    from isd.models import OutOfCellLog
+
+    if not tracked:
+        return {}
     cfg = _config(session)
     rules = WelfareRules.from_config(cfg)
     today = now.date()
     since = datetime.combine(
         today - timedelta(days=rules.history_needed - 1), datetime.min.time(), tzinfo=now.tzinfo
     )
-    usage = _series(_usage_times(session, rid, since), today, rules.history_needed)
-    contact = _series(_contact_times(session, rid, since), today, rules.history_needed)
-    last = last_contact_day(session, rid)
-    since_contact = None if last is None else (today - last).days
-    flags = activity_flags(usage, contact, since_contact, tracked_days, rules)
-
+    contact: dict[int, dict[date, int]] = {}
+    _merge(contact, _day_counts(session, CallRecord.started_at, CallRecord.resident_id, since))
+    _merge(
+        contact,
+        _day_counts(
+            session, Message.created_at, Message.resident_id, since, Message.direction == "out"
+        ),
+    )
+    usage: dict[int, dict[date, int]] = {}
+    _merge(usage, contact)
+    for col, rcol in (
+        (CommissaryOrder.created_at, CommissaryOrder.resident_id),
+        (QuizAttempt.at, QuizAttempt.resident_id),
+        (StaffRequest.created_at, StaffRequest.resident_id),
+        (ReadingLog.at, ReadingLog.resident_id),
+    ):
+        _merge(usage, _day_counts(session, col, rcol, since))
+    _merge(
+        usage,
+        _day_counts(
+            session,
+            ChessMove.at,
+            ChessGame.resident_id,
+            since,
+            ChessGame.id == ChessMove.game_id,
+            ChessMove.by == "resident",
+        ),
+    )
+    last_call = dict(
+        session.execute(
+            select(CallRecord.resident_id, func.max(CallRecord.started_at)).group_by(
+                CallRecord.resident_id
+            )
+        ).all()
+    )
+    last_text = dict(
+        session.execute(
+            select(Message.resident_id, func.max(Message.created_at))
+            .where(Message.direction == "out")
+            .group_by(Message.resident_id)
+        ).all()
+    )
     minimum = int(get_current(session, "compliance").payload["min_out_of_cell_minutes_per_day"])
-    # Only count days the resident has actually been on the unit.
-    days = window(session, rid, today, min(rules.recent_days, max(1, tracked_days + 1)))
-    flags += out_of_cell_flags(days, minimum, rules.out_of_cell_unrecorded_days)
-    return [
-        {"type": f.type, "severity": f.severity, "message": FLAG_TEXT[f.type], "detail": f.detail}
-        for f in flags
-    ]
+    first = today - timedelta(days=max(1, rules.recent_days) - 1)
+    logged: dict[int, dict[date, int]] = {}
+    for rid, d, minutes in session.execute(
+        select(OutOfCellLog.resident_id, OutOfCellLog.day, OutOfCellLog.minutes)
+        .where(OutOfCellLog.day >= first, OutOfCellLog.day <= today)
+        .order_by(OutOfCellLog.id)
+    ):
+        logged.setdefault(rid, {})[d] = minutes  # the latest entry for a day wins
+
+    out: dict[int, list[dict]] = {}
+    for rid, tracked_days in tracked.items():
+        latest = max((x for x in (last_call.get(rid), last_text.get(rid)) if x), default=None)
+        since_contact = None if latest is None else (today - latest.date()).days
+        flags = activity_flags(
+            _series_from(usage.get(rid, {}), today, rules.history_needed),
+            _series_from(contact.get(rid, {}), today, rules.history_needed),
+            since_contact,
+            tracked_days,
+            rules,
+        )
+        length = min(rules.recent_days, max(1, tracked_days + 1))
+        start = today - timedelta(days=length - 1)
+        got = logged.get(rid, {})
+        window_days = [
+            (start + timedelta(days=i), got.get(start + timedelta(days=i))) for i in range(length)
+        ]
+        flags += out_of_cell_flags(window_days, minimum, rules.out_of_cell_unrecorded_days)
+        out[rid] = [
+            {
+                "type": f.type,
+                "severity": f.severity,
+                "message": FLAG_TEXT[f.type],
+                "detail": f.detail,
+            }
+            for f in flags
+        ]
+    return out
+
+
+def detect(session: Session, rid: int, tracked_days: int, now: datetime) -> list[dict]:
+    """What is true about this resident right now, compared with their own history. The usual
+    levels (their baseline) are part of each flag's detail."""
+    return detect_many(session, now, {rid: tracked_days}).get(rid, [])
 
 
 def resident_flags(session: Session, rid: int, tracked_days: int, now: datetime) -> list[dict]:
@@ -146,6 +248,18 @@ def _tracked(session: Session, rid: int, now: datetime) -> int | None:
     return None if first is None else (now.date() - first.date()).days
 
 
+def _tracked_many(session: Session, now: datetime) -> dict[int, int]:
+    """Days on the unit for every resident who has ever had a device (others are not watched)."""
+    return {
+        rid: (now.date() - first.date()).days
+        for rid, first in session.execute(
+            select(DeviceAssignment.resident_id, func.min(DeviceAssignment.assigned_at)).group_by(
+                DeviceAssignment.resident_id
+            )
+        )
+    }
+
+
 _SYNC_NAME = "welfare_sync"
 _SYNC_LOCK_KEY = 7_160_001
 
@@ -163,16 +277,21 @@ def sync_flags(session: Session, now: datetime) -> dict:
     has acknowledged in time, and clears the ones that no longer apply. Safe to repeat."""
     cfg = _config(session)
     raised = escalated = cleared = 0
+    tracked_all = _tracked_many(session, now)
+    detected = detect_many(session, now, tracked_all)
+    # Only the latest flag of each kind matters to the plan, so load just those.
+    latest_rows: dict[int, list[WelfareFlag]] = {}
+    for row in session.execute(
+        select(WelfareFlag)
+        .distinct(WelfareFlag.resident_id, WelfareFlag.flag_type)
+        .order_by(WelfareFlag.resident_id, WelfareFlag.flag_type, WelfareFlag.id.desc())
+    ).scalars():
+        latest_rows.setdefault(row.resident_id, []).append(row)
     for r in session.execute(select(Resident).order_by(Resident.id)).scalars().all():
-        tracked = _tracked(session, r.id, now)
-        if tracked is None:
+        if r.id not in tracked_all:
             continue  # no device, nothing to watch
-        found = {f["type"]: f for f in detect(session, r.id, tracked, now)}
-        rows = (
-            session.execute(select(WelfareFlag).where(WelfareFlag.resident_id == r.id))
-            .scalars()
-            .all()
-        )
+        found = {f["type"]: f for f in detected.get(r.id, [])}
+        rows = latest_rows.get(r.id, [])
         by_id = {x.id: x for x in rows}
         rules = [
             FlagRow(x.id, x.flag_type, x.status, x.raised_at, x.acknowledged_at, x.escalated_at)
