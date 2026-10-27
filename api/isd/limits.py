@@ -73,8 +73,15 @@ def _too_many(lim: SlidingWindowLimiter | SharedWindowLimiter, key: str) -> HTTP
     )
 
 
+BASELINE_PATHS = frozenset({"/device/requests", "/device/appeals"})
+
+
 def ip_limit(request: Request) -> None:
-    """Applied to every route (FastAPI app dependency), public ones included."""
+    """Applied to every route (FastAPI app dependency), public ones included, except the
+    protected baseline: behind a proxy every kiosk shares one address, and one noisy device must
+    not be able to stop another asking staff for help or filing an appeal."""
+    if request.url.path in BASELINE_PATHS:
+        return
     enforce("ip", client_ip(request))
 
 

@@ -11,7 +11,7 @@ from isd.db import get_db
 from isd.engine.commissary import OrderError
 from isd.models import Staff
 from isd.services import commissary
-from isd.services.audit import Actor
+from isd.services.audit import Actor, append_audit
 
 router = APIRouter(prefix="/mock", tags=["mock"])
 
@@ -62,6 +62,16 @@ def simulate_facility_event(
     from isd.interfaces.facility import FacilityEventIn
     from isd.services import facility
 
+    # The sanction that may follow is the system's, so say who injected the event.
+    append_audit(
+        db,
+        Actor(staff.id, staff.role),
+        "mock_event_injected",
+        "facility_event",
+        body.event_id,
+        "MOCK_EVENT",
+        payload={"type": body.type},
+    )
     result = facility.ingest(
         db, FacilityEventIn(body.event_id, body.type, body.payload), datetime.now(UTC)
     )

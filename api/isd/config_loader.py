@@ -8,6 +8,7 @@ from isd.courses_loader import COURSES_DIR, assemble, load_courses
 from isd.engine.config import (
     validate_chess,
     validate_commissary,
+    validate_compliance,
     validate_courses,
     validate_facility,
     validate_offenses,
@@ -85,6 +86,8 @@ def validate_section(name: str, payload: dict) -> None:
         validate_reentry(payload)
     elif name == "chess":
         validate_chess(payload)
+    elif name == "compliance":
+        validate_compliance(payload)
     elif name == "facility":
         validate_facility(payload)
     elif name not in CONFIG_FILES:
@@ -102,3 +105,11 @@ def _validate_tiers(tiers: dict) -> None:
         raise ValueError("tiers must define T1..T10")
     if not 0 <= tiers["demotion_hysteresis"] < 1:
         raise ValueError("demotion_hysteresis must be in [0, 1)")
+    minutes = tiers.get("baseline_out_of_cell_minutes")
+    if not isinstance(minutes, int) or minutes < 1:
+        raise ValueError(
+            "baseline_out_of_cell_minutes must be a positive whole number (invariant 1)"
+        )
+    curve = tiers.get("repeat_return", {})
+    if not (curve.get("N", 0) > 0 and curve.get("p", 0) > 0):
+        raise ValueError("repeat_return N and p must be above zero")

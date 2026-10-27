@@ -70,7 +70,14 @@ def test_configure_logging_is_idempotent():
 def test_every_route_is_limited_per_address(client, rate_limits_on):
     """The limiter runs before auth and validation, so any request shows it. Hit each route twice
     with a limit of one: the second must be refused with 429, whatever the route is."""
-    routes = [(m, r.path) for r in iter_api_routes(app) for m in r.methods if m != "HEAD"]
+    # The protected-baseline routes are limited per device instead, so one noisy address cannot
+    # stop another kiosk from asking staff for help (see limits.BASELINE_PATHS).
+    routes = [
+        (m, r.path)
+        for r in iter_api_routes(app)
+        for m in r.methods
+        if m != "HEAD" and r.path not in limits.BASELINE_PATHS
+    ]
     assert len(routes) > 100
     not_limited = []
     for method, path in routes:

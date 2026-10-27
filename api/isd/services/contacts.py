@@ -137,7 +137,7 @@ def set_blocked(
         raise ContactReviewError("NOT_FOUND", "contact not found")
     if len(reason.strip()) < 5:
         raise ContactReviewError("REASON_REQUIRED", "give a reason")
-    if c.type == "attorney":
+    if c.type in get_current(session, "compliance").payload["privileged_contact_types"]:
         raise ContactReviewError("PROTECTED", "attorney contacts cannot be blocked")
     c.blocked = blocked
     if blocked:  # scheduled video calls with a blocked contact are cancelled

@@ -96,6 +96,17 @@ def start_call(
         raise CallDenied("CONTACT_UNAVAILABLE", "contact not available")
 
     settle_open_calls(session, resident_id, now, tel, vid)
+    if privileged:  # attorney access is baseline: it ends a stale family call rather than wait
+        for stale in session.execute(
+            select(CallRecord)
+            .where(
+                CallRecord.resident_id == resident_id,
+                CallRecord.status == "active",
+                CallRecord.privileged.is_(False),
+            )
+            .with_for_update()
+        ).scalars():
+            _finish(stale, now, "completed", tel, vid)
     if session.execute(
         select(CallRecord.id).where(
             CallRecord.resident_id == resident_id, CallRecord.status == "active"

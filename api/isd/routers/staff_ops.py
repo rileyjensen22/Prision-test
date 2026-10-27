@@ -133,6 +133,11 @@ def issue(
     staff: Staff = Depends(require_roles("officer", "supervisor")),
     db: Session = Depends(get_db),
 ) -> dict:
+    if body.evidence and body.evidence.type == "system_event":
+        # Only the system (facility ingest, device tamper) can report a system-detected event.
+        raise HTTPException(
+            422, {"code": "EVIDENCE_REQUIRED", "message": "staff cannot file a system event"}
+        )
     ev = Evidence(**body.evidence.model_dump()) if body.evidence else None
     try:
         s = sanctions.issue_sanction(

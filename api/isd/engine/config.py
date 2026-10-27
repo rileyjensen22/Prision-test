@@ -137,6 +137,8 @@ def validate_courses(payload: dict) -> None:
     quiz = payload["quiz_defaults"]
     if any(not isinstance(quiz[k], int) or quiz[k] < 1 for k in quiz):
         raise ValueError("quiz_defaults must be positive whole numbers")
+    if "basic" not in payload.get("uncapped_attempt_levels", []):
+        raise ValueError("basic education has no attempt cap (invariant 1)")
     if not set(payload.get("uncapped_attempt_levels", [])) <= {"basic", "advanced", "program"}:
         raise ValueError("uncapped_attempt_levels must be course levels")
     for c in payload["courses"]:
@@ -206,6 +208,20 @@ def validate_reading(payload: dict) -> None:
             if key in seen or not str(v.get("text", "")).strip():
                 raise ValueError(f"{it['id']}: duplicate variant {key} or empty text")
             seen.add(key)
+
+
+def validate_compliance(payload: dict) -> None:
+    """The few compliance values that protect invariants 1 and 6 cannot be configured away."""
+    if "attorney" not in (payload.get("privileged_contact_types") or []):
+        raise ValueError("privileged_contact_types must include attorney (invariant 6)")
+    for key in (
+        "min_out_of_cell_minutes_per_day",
+        "appeal_review_hours",
+        "officer_weekly_immediate_sanction_cap",
+        "offline_alert_minutes",
+    ):
+        if not isinstance(payload.get(key), int) or payload[key] < 1:
+            raise ValueError(f"{key} must be a positive whole number")
 
 
 def validate_chess(payload: dict) -> None:

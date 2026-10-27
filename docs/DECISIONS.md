@@ -287,3 +287,19 @@ Visual and UX pass only. No engine, API, entitlement or invariant code changed. 
 - **A browser smoke test** (`web/smoke/demo-smoke.mjs`) rather than reusing the Playwright suite: the suite owns its own database and fixtures.
 - **Kiosk checks are split by what they can prove.** Files and validation run in every test run; a Debian container (`make kiosk-check`, CI) checks packages, shellcheck, the firewall ruleset, the unit files and that Chromium applies the policy; real hardware is still needed for the rest. `docs/kiosk.md` keeps the honest table. Not done: running Chromium's policy test on the build machine, because that machine's own browser policies (its proxy certificate) live in the same directory and a block-everything test policy could break them.
 - **CI**: the existing lint, test, secrets, audit and simulate-week steps stay; added the course validator, a `demo` job and a `kiosk` job. The load test is not in CI: hosted runners are smaller than the budgets assume.
+
+## Phase 23 (final verification and the independent review)
+
+A separate agent that had not seen the work checked all 17 invariants against the code and tests. Result: no invariant was found violated; 9 hold outright or nearly so, the rest hold with gaps. Fixed here:
+
+- **A refused attorney-call recording lost its audit entry over HTTP** (the request rolled back). The route now commits the `monitoring_denied` entry before answering 403; an HTTP-level test proves it. (Invariants 3, 16.)
+- **Staff could file "system-detected" evidence.** Only the system (facility ingest, device tamper) can now; staff evidence is a second staff member's report. (Invariants 4, 12.)
+- **One admin edit could break invariants.** New validators refuse a compliance config without `attorney` as a privileged contact type, a zero out-of-cell minimum, a zero repeat-return curve, and a courses config that caps basic education. (Invariants 1, 6, 8, 9.)
+- **An attorney call waited behind a stale family call.** It now ends the stale call. (Invariant 1.)
+- **The per-address rate limit could stop Request staff and appeals** for every kiosk behind one proxy address. Those two routes are exempt from the address limit and keep the per-device limit.
+- **Facility events injected through the demo route were attributed to the system only.** The injecting admin is now audited, and the demo-only `/mock` routes are not mounted in production.
+- `contacts.set_blocked` uses the configurable privileged types; the baseline list is pinned in a test instead of compared with itself.
+
+Not fixed, recorded as known limits in `docs/STATUS.md`: pending sanctions do not expire; the weekly immediate-sanction count can race under concurrent issues; the trust ledger has no hash chain and there is no staff path for correcting ledger entries; reconcile does not check order lines against order totals; a kept-apart pair added after a chess match started does not end that match; `tier_history` and `point_events` are not protected at the database level; the open-assignment index is not unique; concurrent daily runs could double-award clean-day points; the staff-only reason for ending a keep-separate record is in the audit payload (audit readers are staff roles only).
+
+CI found two environment problems that local runs hid, both fixed: the firewall syntax test needs root, and two end-to-end tests assumed a fast machine (one reloaded the page every few seconds while a queue was draining; many sign-ins from one address hit the default login limit).

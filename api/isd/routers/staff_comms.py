@@ -103,6 +103,8 @@ def read_monitored_message(
             db, Actor(staff.id, staff.role), message_id, body.reason, _now()
         )
     except monitoring.MonitoringDenied as e:
+        if e.code == "PRIVILEGED_DENIED":
+            db.commit()  # keep the "monitoring_denied" audit entry: get_db rolls back on errors
         raise HTTPException(_status(e.code), {"code": e.code, "message": str(e)}) from e
 
 
@@ -146,4 +148,6 @@ def review_monitored_call(
     try:
         return monitoring.review_call(db, Actor(staff.id, staff.role), call_id, body.reason)
     except monitoring.MonitoringDenied as e:
+        if e.code == "PRIVILEGED_DENIED":
+            db.commit()  # keep the "monitoring_denied" audit entry: get_db rolls back on errors
         raise HTTPException(_status(e.code), {"code": e.code, "message": str(e)}) from e
