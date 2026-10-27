@@ -1,14 +1,14 @@
 # Status
 
-Last updated: Phase 15 (intake, reentry, outcomes). Everything below was checked by running the code, not from memory.
+Last updated: Phase 18 (close the "Not done" list). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
 | Check | Result |
 |---|---|
-| `pytest` (API, engine, security, simulation) | 487 passed |
-| `vitest` | 59 passed |
-| Playwright e2e | 61 passed |
+| `pytest` (API, engine, security, simulation) | 600 passed |
+| `vitest` | 67 passed |
+| Playwright e2e | 85 passed |
 | `make lint` (ruff, tsc, eslint, prettier) | clean (after fixing an unused import and formatting in the phone-demo files) |
 | `make secrets-check` | no secrets found |
 | `make simulate-week` | 26 of 26 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
@@ -26,6 +26,7 @@ Last updated: Phase 15 (intake, reentry, outcomes). Everything below was checked
 | 14 Education depth | **Built** | Course folders with validator CLI, prerequisites, resume, offline lesson progress, certificates (device list, staff print page), 8 sample courses (5 with Spanish, 2 with a simple level), random question draw with shuffled choices, attempt limit and cooldown, points mapped by level through config. |
 | 15 Intake, reentry, outcomes | **Built** | One audited intake step (settings, prior returns with source, offense categories, contacts, keep-separate, cell and device), release countdown on the device, reentry checklist and resources directory from config, cohort outcomes dashboard with outcome entry, pseudonymized researcher export (off by default), import-boundary tests for invariant 17. |
 | 16 | **Built** | Device pairing with one-time codes, heartbeats, staff pause/restart, kiosk provisioning script (tested as files only), structured logs, per-address rate limits, backup and restore drill, load test. Threat model, OTA design, admin guide and compliance gap report written in Phase 17. |
+| 18 | **Built** | Resident vacate and transfer, keep-separate screen, monitored-call review (role and reason; attorney calls never listed), retention jobs from compliance config, staff TOTP MFA with recovery codes and admin password reset, shared Postgres rate limits, AES-GCM encryption at rest with key rotation, reading levels change wording in courses and the reader, demo captions in the video call, Spanish legal and religious placeholder texts, outcomes CSV import (preview, all-or-nothing, append-only), reentry offline from the saved copy, reentry as a named baseline feature, no daily quiz cap on basic courses. |
 | 17 | **Built** | Owner questions answered (`docs/owner-questions.md`); `docs/threat-model.md`, `docs/ota-design.md`, `docs/admin-guide.md`, `docs/compliance-gap-report.md`; load test passes at 500 devices (`docs/operations.md`); welfare detection made set-based after the first run exposed a 4 second cost. |
 
 ## Phases 0 to 8
@@ -54,21 +55,17 @@ All hold. Each has a test, and the simulated week re-checks 1, 2, 3, 4, 5, 6, 7,
 | 13 | Resident play: no free text, names, wagering, friends | **Partial** | The chess stub has no chat column, method or route (tested). Human play is a mock; the `keep_separate` table now exists (Phase 15, filled at intake) but no matchmaking reads it, no anonymous handles, no match log. Phase 10. |
 | 14 | Camera frames never stored; tamper on-device, only during a call | **Holds (fake camera only)** | Detection runs in the kiosk page on brightness numbers, only during an active call; the server accepts only `{signal, covered_ms}` for an active call; no binary column exists in the database. Tested in a browser with a fake camera; real kiosk cameras are untested. Earlier:  The tamper endpoint accepted a report for a call that had already ended and still raised a sanction. It now refuses (`NOT_ACTIVE`, tested). There is no real camera in v1, so on-device detection on a derived signal does not exist yet. Phase 11. |
 | 15 | Money paths append-only, nightly reconciliation | **Holds** | The trust ledger and the new earnings ledger are append-only (trigger plus revoked grants plus database checks); the daily job reconciles both every night and a mismatch raises an audit alert, a dashboard banner and a non-zero exit. |
-| 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Holds, one gap** | Messages, call-recording fetch (reason added in Phase 11), the activity timeline and mirroring all need a reason and are logged without content. There is still no screen for reviewing monitored calls. Earlier: | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |
+| 16 | Reason required and audit-logged for monitored reads, call review, mirroring | **Holds** | Messages, call-recording fetch (reason added in Phase 11), the activity timeline and mirroring all need a reason and are logged without content. The call-review screen (Phase 18) is gated by role and reason and never lists attorney calls. Earlier: | Mirroring and the activity timeline already require a reason and are audit-logged. Staff cannot read monitored message text or review monitored calls at all today (metadata only), so there is no review UI to gate. Phase 11. |
 | 17 | Analytics never feed decisions, no risk scores | **Holds** | No analytics tables exist. The welfare check compares a resident's activity with their own recent baseline and shows staff a flag; it feeds no tier, sanction or restriction. (The owner closed the earlier question: no change needed.) |
 
 ## Known gaps and TODOs
 
 No `TODO` or `FIXME` markers are in the code. The gaps are the "not done" items in `docs/DECISIONS.md` and `docs/security.md`:
 
-- Rate limits are per process (in memory); a shared store is needed for more than one API process.
-- No MFA or password reset for staff.
-- Retention: video recordings are purged after `recording_retention_days` (unset keeps them). Messages, call metadata and other records have no retention or deletion job.
-- No encryption at rest; backups and restore were never drilled.
+- Retention periods are unset in the real config (counsel decides); the jobs exist and are tested. Disk and backup encryption are the operator's.
 - Kiosk lockdown (systemd, TTY, firewall) is documented but untested on a real device.
-- Reading level is stored but does not yet change wording (also true of the reader); captions are stored but the demo video call has no captions.
 - Chess moves are format-checked only; the engine is a scripted mock. Deferred by the owner: engine licence decision, human matches, `keep_separate`, `games` sanction scope.
-- The legal and religious texts are placeholders; there are no Spanish versions yet.
+- The legal and religious texts are placeholders. Spanish versions exist and are labelled unofficial translations (Reina-Valera 1909 for the Psalm); counsel must verify them.
 - Docker Compose and `deploy/nginx.conf.example` are untested.
 - Seven build-time advisories in the Tailwind 3 chain are accepted until a Tailwind 4 upgrade.
 - Compliance items in `docs/ASSUMPTIONS.md` are all unverified and need counsel.

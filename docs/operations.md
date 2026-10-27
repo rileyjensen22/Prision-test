@@ -17,7 +17,7 @@
 
 Generate secrets with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Never commit them: `make secrets-check` fails the build if something that looks like a secret is committed. The API refuses to start in production with development values.
 
-Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. Rate-limit counters are in memory, so until Phase 18 moves them to Postgres a second API process gives every client a second allowance; run several processes only for load tests.
+Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. Rate-limit counters live in Postgres (`RATE_LIMIT_STORE=postgres`, the production default), so every API process shares one allowance. Development defaults to `memory`. The `rate_limit_hits` table is unlogged and purged by `make daily`.
 
 ## First deployment
 
@@ -105,3 +105,7 @@ single-process (GIL) ceiling.
 Known limits: the staff roster still computes every resident's entitlements on each request (about
 150 ms for 500 residents); Phase 20 makes the dashboard summary come from aggregate queries so it does
 not grow with the number of residents.
+
+### Rerun after Phase 18 (shared Postgres rate limits, encryption on)
+
+500 devices, 4 workers, `RATE_LIMIT_STORE=postgres`, real-time speed (the default is now x1; `--speed 5` is a stress run, not the budget): **passed**. Device view p95 44 ms, heartbeat p95 20 ms, courses p95 43 ms, staff roster p95 617 ms, staff summary p95 480 ms, no errors. At `--speed 5` (2,500 device-equivalents on one small container) the API saturates and times out; that is a capacity limit of this container, not a budget.

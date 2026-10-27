@@ -78,8 +78,19 @@ religious texts, basic education, attorney calls and the minimum out-of-cell tim
 ## Releases and transfers
 
 Set the release date on the resident's page (supervisors and admins). The resident sees a countdown
-and a reentry checklist you update as items are done. The release/vacate and cell-transfer steps are
-added in the next release of the system (Phase 18) and will appear on the resident page.
+and a reentry checklist you update as items are done.
+
+On the resident's page, **Move or release** (supervisors and admins) records a release, court,
+hospital or other departure (**vacate**) or a move to another cell (**transfer**). The cell and the
+device become free, nothing about the resident is deleted, and each step needs a reason and is
+logged. A transfer is refused if a resident the person must be kept separate from is on the new
+unit. Released residents leave the roster, welfare checks and the daily job.
+
+## Keep separate
+
+**Keep separate** (supervisors and admins) lists the pairs of residents who must never be matched in
+a game, scheduled together or, where staff can help it, housed on the same unit. Add a pair with a
+reason, or end one with a reason; the list shows both and is audited.
 
 ## Live mirror and "View as resident"
 
@@ -96,6 +107,36 @@ Monitoring pages list who, when and which keyword rule matched, never the text. 
 must state a reason, and every read is logged. A keyword match only prompts you to look; it never
 creates a sanction on its own. **Attorney calls and messages are private: they are never recorded,
 shown or listed in any content.** Only that a call happened and how long it lasted is kept.
+
+## Reviewing monitored calls
+
+**Monitoring > Monitored phone calls** (supervisors, admins; auditors can see the list) shows who,
+when and how long. To open a recording you must state a reason; the access is logged. Attorney calls
+are never listed and can never be opened.
+
+## Accounts and sign-in security
+
+Every staff member signs in with a password and, in production, a code from an authenticator app
+(two-step). At first sign-in you set up the app and receive 10 recovery codes: each works once, keep
+them somewhere safe. **Security** lets you change your password. Administrators use **Accounts** to
+create staff (they get a temporary password and must change it at first sign-in), turn accounts off,
+reset a password or reset someone's two-step setup. Each of these needs a reason and is logged.
+There is no reset by email.
+
+## Retention and encryption
+
+Retention periods are in `config/compliance.yaml` and are unset until counsel decides, so nothing is
+deleted. When set, the daily job removes only the kinds of data they name (messages, call metadata,
+recordings) and never audit or money records. Message text, contact numbers, call recording
+references and two-step secrets are encrypted in the database. To change the encryption key, see
+`docs/security.md` and run `scripts/rotate-encryption-key.py`.
+
+## Outcomes import
+
+**Outcomes > Import outcomes from a file** (admins) takes a CSV with `resident_code`,
+`window_months` (6, 12, 24) and `outcome`. It shows a preview first; nothing is saved until you apply,
+and a file with any bad line is not applied. A changed answer is added as a correction and the old
+entry stays.
 
 ## Money
 

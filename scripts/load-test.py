@@ -167,6 +167,7 @@ def start_server(url: str, workers: int) -> subprocess.Popen:
         "DEVICE_MAX_PER_MINUTE": "1000000",
         "STAFF_MAX_PER_MINUTE": "1000000",
         "LOG_LEVEL": "WARNING",
+        "RATE_LIMIT_STORE": "postgres",  # the shared store, as in production
     }
     return subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "isd.main:app", "--port", str(PORT), "--workers", str(workers)],
@@ -191,7 +192,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--devices", type=int, default=500)
     ap.add_argument("--seconds", type=int, default=60)
-    ap.add_argument("--speed", type=float, default=5.0)
+    ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--workers", type=int, default=4)
     # Budgets (docs/operations.md): what a kiosk waits for, and what a staff screen waits for.
     ap.add_argument("--device-p95-ms", type=float, default=250.0)

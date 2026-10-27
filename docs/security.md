@@ -16,7 +16,8 @@ demo, and every compliance item is unverified).
 | Mock SSO behind an interface; refused in production | Done | `test_mock_sso`, `test_production_refuses_development_defaults` |
 | Kiosk identity: random per-device token, only its hash stored; provisioned in the URL fragment so it never reaches server logs; admin can rotate it (old token dies at once) | Done | `resident/api.test.ts`, `test_device_tokens.py` |
 | Staff tokens live in `sessionStorage`, not cookies, so there is no CSRF surface | Done | design; `staff/api.ts` |
-| Multi-factor authentication, password change/reset, account administration UI | **Open** | real SSO is expected to supply MFA |
+| Staff two-step sign-in (TOTP, RFC 6238, replay-protected) with 10 single-use recovery codes; required in production (`STAFF_MFA_REQUIRED`) | Done | `test_staff_security.py` |
+| Password change, admin-only password and MFA reset (reason required, audited, temporary password forces a change at next sign-in; old tokens die at once) | Done | `test_staff_security.py`; the accounts screen |
 
 ## Access control
 
@@ -39,7 +40,10 @@ demo, and every compliance item is unverified).
 | Public log: field allow-list, salted pseudonyms, week-level dates, small-count suppression, off by default | Done | `test_public_log_jobs.py`, simulation |
 | App database user cannot change schema or rewrite append-only tables; migrations use a separate owner user | Done | `test_app_role_has_no_update_delete_grants`; production guard requires different users |
 | Sandbox "view as" cannot write (read-only transaction) | Done | `test_the_database_refuses_writes_inside_the_sandbox_transaction` |
-| Encryption at rest, backup encryption, retention and deletion jobs | **Open** | operator responsibility; see `docs/operations.md` |
+| Encryption at rest: AES-256-GCM on message bodies, contact numbers, call recording references and the MFA secret; key id stored with each value; keys from the environment; `scripts/rotate-encryption-key.py` re-encrypts in batches (rotation steps in `isd/services/key_rotation.py`). Contact numbers keep a keyed hash for duplicate checks | Done | `test_crypto.py` |
+| Retention jobs driven by `config/compliance.yaml` (periods unset in the real config, so nothing is deleted until counsel sets them); audit, ledger and other protected tables are never touched | Done | `test_retention.py` |
+| Disk and backup encryption | **Open** | operator responsibility; see `docs/operations.md` |
+| Rate limits in a store shared by every API process (Postgres, sliding window, fails open if the store is down); default in production | Done | `test_shared_ratelimit.py` |
 
 ## Application hardening
 
@@ -69,11 +73,11 @@ The kiosk is only as locked down as its operating system. `docs/kiosk.md` lists 
 
 ## Open items and known limits
 
-1. No MFA, password reset, or staff-account administration screens (SSO would normally provide these).
-2. Rate-limit state is in memory; run one API process or move the counters to a shared store.
+1. Keys for encryption at rest live in the environment. A cloud KMS or HSM is the production upgrade and is not built.
+2. The shared rate limiter fails open when Postgres is unreachable (the API is down then anyway); the in-memory limiter is still used in development.
 3. Device tokens are long-lived until rotated; no automatic expiry or hardware attestation.
-4. No retention or deletion jobs; `recording_retention_days` is unset pending counsel.
-5. No encryption of data at rest or in backups (operator's database and disk configuration).
+4. Retention periods are unset pending counsel, so the jobs delete nothing in the real config.
+5. Disks and backups must be encrypted by the operator; application-level encryption covers only the columns listed above.
 6. The mock providers are not hardened; real telephony, messaging, payment and chess integrations need their own review, especially the attorney-privilege guards.
 7. No penetration test, formal threat model, or fuzzing has been done. The simulation and property tests are strong evidence for the rules, not for the network edge.
 8. Upgrade Tailwind to clear the build-time advisories.

@@ -242,6 +242,7 @@ Work one phase at a time. Don't start the next until the current phase's tests p
 ```
 make db-local # (no Docker) create dev DB roles on a local Postgres
 make migrate  # alembic upgrade head
+make load-test  # 500 simulated kiosks plus staff screens against a real API (exit 1 if a budget is missed)
 make daily    # daily job: clean-day points, tier checks (delayed drops), cleanup
 make reconcile  # nightly check: balances match their ledgers (exit 2 on mismatch)
 make welfare-sweep  # raise/escalate/clear welfare flags (run every 15 min)
