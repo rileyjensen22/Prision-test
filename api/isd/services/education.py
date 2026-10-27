@@ -51,7 +51,11 @@ def _course(session: Session, code: str) -> dict[str, Any]:
 
 
 def quiz_settings(session: Session, course: dict) -> dict:
-    return {**_config(session)["quiz_defaults"], **course["quiz"]}
+    config = _config(session)
+    merged = {**config["quiz_defaults"], **course["quiz"]}
+    if course["level"] in config.get("uncapped_attempt_levels", []):
+        merged["max_attempts"] = None  # baseline education: pacing by cooldown only
+    return merged
 
 
 def points_kind(session: Session, course: dict) -> str:

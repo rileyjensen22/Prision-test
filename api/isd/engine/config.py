@@ -137,6 +137,8 @@ def validate_courses(payload: dict) -> None:
     quiz = payload["quiz_defaults"]
     if any(not isinstance(quiz[k], int) or quiz[k] < 1 for k in quiz):
         raise ValueError("quiz_defaults must be positive whole numbers")
+    if not set(payload.get("uncapped_attempt_levels", [])) <= {"basic", "advanced", "program"}:
+        raise ValueError("uncapped_attempt_levels must be course levels")
     for c in payload["courses"]:
         bank = c["quiz"]["bank"]
         if not c["lessons"] or not bank:

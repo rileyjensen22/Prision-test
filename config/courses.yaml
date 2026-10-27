@@ -7,6 +7,9 @@ points_by_level: {basic: basic_course, advanced: advanced_course, program: progr
 # Quiz integrity. Questions are drawn at random from each course's bank and the choices shuffled.
 # These limits only pace the quiz; they never close the lessons. A course can override
 # draw, max_attempts and cooldown_minutes in its course.json.
+# Basic education is protected baseline, so basic courses have no attempt cap (the cooldown still
+# applies). Levels listed here ignore max_attempts; advanced and program courses keep it.
+uncapped_attempt_levels: [basic]
 quiz_defaults:
   draw: 5               # questions per attempt (never more than the bank has)
   max_attempts: 5       # attempts allowed in window_hours

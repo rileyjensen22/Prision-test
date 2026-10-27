@@ -38,6 +38,7 @@ PROTECTED = frozenset(
         "out_of_cell_events",
         "reentry_events",
         "outcome_records",
+        "outcome_import_batches",
         "point_events",
         "tier_history",
         "sanctions",

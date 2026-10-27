@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { api, errorText, post } from '../api'
 import { useAuth } from '../auth'
+import { OutcomeImport } from './OutcomeImport'
 import { Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
 
 type Cell = number | string
@@ -180,6 +181,7 @@ export default function Outcomes() {
           </div>
         </Panel>
       )}
+      {canEnter && <OutcomeImport onImported={() => void reload()} />}
       {canExport && (
         <Panel title={tr('staff.pages.Outcomes.researcherExport')}>
           <p className="mb-2 text-sm">{tr('staff.pages.Outcomes.pseudonymizedRowsWithBands')}</p>

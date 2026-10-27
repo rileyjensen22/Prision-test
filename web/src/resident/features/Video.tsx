@@ -173,7 +173,7 @@ export function Video() {
 
 function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) => void }) {
   const { t } = useTranslation()
-  const { request, now } = useResident()
+  const { request, now, view } = useResident()
   const localRef = useRef<HTMLVideoElement>(null)
   const remoteRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -303,6 +303,7 @@ function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) 
           className="absolute bottom-3 right-3 w-1/4 rounded-lg border-2 border-surface bg-black"
         />
       </div>
+      {view?.settings.captions && <DemoCaptions />}
       <p>{t('video.keepCameraClear')}</p>
       <button
         onClick={() => void finish('end')}
@@ -310,6 +311,27 @@ function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) 
       >
         {t('calls.end')}
       </button>
+    </div>
+  )
+}
+
+/**
+ * Demo captions. The demo link has no remote speaker, so these are fixed sample lines that rotate.
+ * They are never made from the call's audio: nothing is transcribed (invariant 6). A real
+ * deployment gets live captions from the video provider's own caption feed.
+ */
+function DemoCaptions() {
+  const { t } = useTranslation()
+  const lines = t('video.demoCaptions', { returnObjects: true }) as unknown as string[]
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setI((n) => n + 1), 4000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div data-testid="video-captions" className="rounded-card border border-line bg-surface p-4">
+      <p className="text-sm text-ink-soft">{t('video.captionsLabel')}</p>
+      <p className="mt-1 text-h3 font-bold">{lines[i % lines.length]}</p>
     </div>
   )
 }

@@ -65,6 +65,35 @@ def enter(
     return {"id": row.id, "corrects": row.corrects_id}
 
 
+class ImportIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    csv_text: str = Field(max_length=2_000_000)
+    source: str = Field(max_length=80)
+    label: str = Field(default="", max_length=80)
+    dry_run: bool = True
+
+
+@router.post("/import")
+def import_csv(
+    body: ImportIn,
+    staff: Staff = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    """Preview (dry_run, the default) or apply a CSV of outcomes. See service.import_outcomes."""
+    try:
+        return service.import_outcomes(
+            db,
+            Actor(staff.id, staff.role),
+            body.csv_text,
+            body.source,
+            body.label,
+            _now(),
+            dry_run=body.dry_run,
+        )
+    except service.OutcomeError as e:
+        raise _fail(e) from e
+
+
 @router.get("/export")
 def export(
     reason: str,

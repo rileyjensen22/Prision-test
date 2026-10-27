@@ -115,6 +115,7 @@ const es: Dict = {
     attorney_calls: 'Llamadas con su abogado',
     contact_requests: 'Sus contactos',
     out_of_cell_minimum: 'Tiempo fuera de la celda',
+    reentry: 'Prepararse para la salida',
   },
   reentry: {
     title: 'Prepararse para la salida',
@@ -122,6 +123,7 @@ const es: Dict = {
     daysLeft_one: '{{count}} día',
     daysLeft_other: '{{count}} días',
     noDate: 'El personal aún no ha fijado una fecha de salida. Aun así puede avanzar con la lista.',
+    savedCopy: 'Sin conexión. Esta es la copia guardada en este dispositivo el {{when}}.',
     checklist: 'Su lista',
     progress: '{{done}} de {{total}} listos',
     status: {
@@ -368,6 +370,14 @@ const es: Dict = {
     inCall: 'Videollamada en curso',
     monitored: 'Esta llamada puede ser monitoreada y grabada.',
     privileged: 'Llamada con su abogado. Es privada y no se graba ni se escucha.',
+    captionsLabel:
+      'Subtítulos (demostración): líneas de ejemplo, no una transcripción de esta llamada',
+    demoCaptions: [
+      'Hola, qué bueno verle.',
+      '¿Cómo está hoy?',
+      'La conexión se oye clara de mi lado.',
+      'Cuénteme lo que ha estado aprendiendo.',
+    ],
     keepCameraClear:
       'Mantenga la cámara descubierta. La cámara solo está encendida durante la llamada.',
     ended: 'La videollamada terminó.',
@@ -999,6 +1009,28 @@ const es: Dict = {
         'Trasladado a {{cell}}. Debe estar separado de alguien de esa unidad: {{codes}}.',
       vacated: 'Liberado. La celda {{cell}} y el dispositivo {{device}} están libres.',
       released: 'Este residente fue liberado de su celda.',
+    },
+    outcomeImport: {
+      title: 'Importar resultados desde un archivo',
+      help: 'Un CSV con las columnas resident_code, window_months (6, 12 o 24) y outcome (no_return, returned o unknown). Primero ve una vista previa. No se guarda nada hasta que lo aplique, y un archivo con algún problema no se aplica. Una respuesta distinta se agrega como corrección; la anterior se conserva.',
+      file: 'Archivo CSV',
+      source: 'Registro de origen',
+      preview: 'Vista previa',
+      apply: 'Aplicar importación',
+      done: 'Se agregaron {{n}} resultados.',
+      counts:
+        '{{rows}} filas: {{added}} nuevas, {{corrections}} correcciones, {{unchanged}} sin cambios.',
+      problems: 'Corrija estas líneas y elija el archivo de nuevo:',
+      line: 'Línea',
+      resident: 'Residente',
+      window: 'Meses',
+      outcome: 'Resultado',
+      action: 'Qué ocurre',
+      actions: {
+        new: 'Agregar',
+        correction: 'Agregar como corrección',
+        unchanged: 'Omitir (misma respuesta)',
+      },
     },
     keepSeparate: {
       title: 'Mantener separados',

@@ -75,7 +75,7 @@ class AttemptDecision:
     allowed: bool
     code: str | None  # COOLDOWN | ATTEMPTS_EXHAUSTED
     retry_at: datetime | None
-    attempts_left: int
+    attempts_left: int | None  # None when attempts are not capped
 
 
 def attempt_decision(
@@ -83,7 +83,7 @@ def attempt_decision(
     last_failed_at: datetime | None,
     now: datetime,
     *,
-    max_attempts: int,
+    max_attempts: int | None,
     window_hours: int,
     cooldown_minutes: int,
 ) -> AttemptDecision:
@@ -91,7 +91,7 @@ def attempt_decision(
     only: they never close the lessons, and every one ends at a stated time."""
     window = timedelta(hours=window_hours)
     recent = sorted(t for t in starts if now - window < t <= now)
-    left = max(0, max_attempts - len(recent))
+    left = None if max_attempts is None else max(0, max_attempts - len(recent))
     if left == 0:
         return AttemptDecision(False, "ATTEMPTS_EXHAUSTED", recent[0] + window, 0)
     if last_failed_at is not None:

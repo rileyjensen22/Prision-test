@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
 import '../../i18n'
@@ -44,7 +44,7 @@ const data = (countdown: object | null) => ({
   ],
 })
 
-function show(payload: ReturnType<typeof data>) {
+function show(payload: ReturnType<typeof data>, fail = false) {
   const view = makeView()
   const value: Ctx = {
     status: 'ready',
@@ -55,7 +55,10 @@ function show(payload: ReturnType<typeof data>) {
     now: Date.now(),
     pending: 0,
     refresh: async () => {},
-    request: (async () => payload) as Ctx['request'],
+    request: (async () => {
+      if (fail) throw new Error('offline')
+      return payload
+    }) as Ctx['request'],
     submit: async () => 'sent',
   }
   return render(
@@ -89,4 +92,23 @@ test('with no release date the page still works', async () => {
   show(data(null))
   expect(await screen.findByText(/have not set a release date/)).toBeInTheDocument()
   expect(screen.getByTestId('reentry-item-HOUSING')).toBeInTheDocument()
+})
+
+test('offline, the last saved copy opens with the countdown recomputed from the device clock', async () => {
+  localStorage.clear()
+  const future = new Date(Date.now() + 10 * 86_400_000)
+  const date = `${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, '0')}-${String(future.getDate()).padStart(2, '0')}`
+  show(data({ release_date: date, days_left: 99, weeks_left: 14 })) // online: saves a copy
+  expect(await screen.findByText('99 days')).toBeInTheDocument()
+  cleanup()
+  show(data(null), true) // offline: the request fails
+  expect(await screen.findByTestId('reentry-saved')).toBeInTheDocument()
+  expect(screen.getByText('10 days')).toBeInTheDocument()
+  expect(screen.getByTestId('reentry-item-HOUSING')).toBeInTheDocument()
+})
+
+test('offline with nothing saved says it needs a connection', async () => {
+  localStorage.clear()
+  show(data(null), true)
+  expect(await screen.findByText(/connection|conexión/i)).toBeInTheDocument()
 })

@@ -389,7 +389,7 @@ def rec_cancel(
     return {"cancelled": rec.cancel(db, ctx.resident_id, body.day, body.slot, body.block_id)}
 
 
-# ---------------- reentry (information only, so not an entitlement feature) ----------------
+# ---------------- reentry (a named baseline feature: information, never lockable) ----------------
 @router.get("/reentry")
 def reentry_view(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
     return reentry.resident_view(db, ctx.resident_id, _now())

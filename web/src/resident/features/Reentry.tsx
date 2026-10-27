@@ -7,6 +7,7 @@ import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
 import { L } from './helpers'
 import type { Bi } from './helpers'
+import { countdownFrom, loadReentry, saveReentry } from './reentryCache'
 
 interface Data {
   countdown: { release_date: string; days_left: number; weeks_left: number } | null
@@ -21,12 +22,27 @@ export function Reentry() {
   const { request, online } = useResident()
   const [data, setData] = useState<Data | null>(null)
   const [error, setError] = useState(false)
+  const [savedAt, setSavedAt] = useState<string | null>(null)
   const lang = i18n.language
 
   useEffect(() => {
     request<Data>('/device/reentry')
-      .then(setData)
-      .catch(() => setError(true))
+      .then((d) => {
+        setData(d)
+        setSavedAt(null)
+        saveReentry(d)
+      })
+      .catch(() => {
+        // Offline: show the last copy saved on this device, with the countdown recomputed.
+        const saved = loadReentry<Data>()
+        if (!saved) return setError(true)
+        const d = saved.data
+        setData({
+          ...d,
+          countdown: d.countdown ? countdownFrom(d.countdown.release_date) : null,
+        })
+        setSavedAt(saved.saved_at)
+      })
   }, [request, online])
 
   return (
@@ -37,6 +53,11 @@ export function Reentry() {
       {!data && !error && <LoadingState />}
       {data && (
         <>
+          {savedAt && (
+            <p data-testid="reentry-saved" role="status" className="text-ink-soft">
+              {t('reentry.savedCopy', { when: new Date(savedAt).toLocaleString(lang) })}
+            </p>
+          )}
           <Card data-testid="reentry-countdown">
             {data.countdown ? (
               <>

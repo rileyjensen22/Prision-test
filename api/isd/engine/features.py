@@ -13,6 +13,7 @@ BASELINE_FEATURES = frozenset(
         "attorney_calls",
         "contact_requests",  # asking staff to approve a contact; attorney access depends on it
         "out_of_cell_minimum",
+        "reentry",  # release countdown, checklist and resources: information, never lockable
     }
 )
 

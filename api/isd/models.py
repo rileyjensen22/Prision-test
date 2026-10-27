@@ -891,6 +891,24 @@ class OutcomeRecord(Base):
     corrects_id: Mapped[int | None] = mapped_column(ForeignKey("outcome_records.id"), nullable=True)
     entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     entered_at: Mapped[datetime] = _now()
+    batch_id: Mapped[int | None] = mapped_column(
+        ForeignKey("outcome_import_batches.id"), nullable=True, index=True
+    )
+
+
+class OutcomeImportBatch(Base):
+    """One CSV import of outcomes. Append-only, like the rows it created."""
+
+    __tablename__ = "outcome_import_batches"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    label: Mapped[str] = mapped_column(String(80))
+    source: Mapped[str] = mapped_column(String(80))
+    rows_total: Mapped[int] = mapped_column(Integer)
+    rows_new: Mapped[int] = mapped_column(Integer)
+    rows_correcting: Mapped[int] = mapped_column(Integer)
+    rows_unchanged: Mapped[int] = mapped_column(Integer)
+    entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    entered_at: Mapped[datetime] = _now()
 
 
 class DevicePairing(Base):

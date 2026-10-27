@@ -165,7 +165,9 @@ test('video: the camera is on only during the call, loops back on the device, an
   await fakeCamera(page)
   const sent: string[] = []
   page.on('request', (r) => {
-    if (r.url().includes('/api/') && r.method() !== 'GET') sent.push(r.postData() ?? '')
+    // The health heartbeat (device status, no picture or resident data) is not call traffic.
+    if (r.url().includes('/api/') && r.method() !== 'GET' && !r.url().includes('/device/heartbeat'))
+      sent.push(r.postData() ?? '')
   })
   await openKiosk(page, 'rae', '/resident/feature/video')
   expect(await trackStates(page)).toEqual([]) // nothing has opened the camera yet
