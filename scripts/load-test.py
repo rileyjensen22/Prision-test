@@ -182,7 +182,8 @@ async def run(tokens, admin_headers, seconds, speed, base, grouped=0, warmup=0.0
             device_loop(client, stats, t, stop_at, speed, rng) for t in tokens.values()
         ]
         tasks += [
-            staff_loop(client, stats, admin_headers, stop_at, speed, rng, grouped) for _ in range(5)
+            staff_loop(client, stats, admin_headers, stop_at, speed, rng, grouped)
+            for _ in range(5)
         ]
         await asyncio.gather(*tasks)
     return stats
@@ -205,9 +206,14 @@ def start_server(url: str, workers: int) -> subprocess.Popen:
         # Postgres allows 100 connections by default: 4 workers x (15 + 5 + 4 for the limiter).
         "DB_POOL_SIZE": os.environ.get("LOAD_POOL", "15"),
         "DB_POOL_OVERFLOW": "5",
-        "RATE_LIMIT_STORE": os.environ.get("LOAD_RATE_STORE", "postgres"),  # shared, as in production
+        "RATE_LIMIT_STORE": os.environ.get(
+            "LOAD_RATE_STORE", "postgres"
+        ),  # shared, as in production
     }
-    log_out = open(os.environ["LOAD_SERVER_LOG"], "w") if os.environ.get("LOAD_SERVER_LOG") else subprocess.DEVNULL
+    log_path = os.environ.get(
+        "LOAD_SERVER_LOG"
+    )  # keep the server's log, for finding a slow request
+    log_out = open(log_path, "w") if log_path else subprocess.DEVNULL  # noqa: SIM115
     return subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "isd.main:app", "--port", str(PORT), "--workers", str(workers)],
         cwd=ROOT / "api", env=env,
@@ -231,10 +237,16 @@ def wait_for_server() -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--devices", type=int, default=500)
-    ap.add_argument("--scale", default=None, help="facility scale from config/facility.yaml (full)")
+    ap.add_argument(
+        "--scale", default=None, help="facility scale from config/facility.yaml (full)"
+    )
     ap.add_argument("--occupancy", type=float, default=0.9)
-    ap.add_argument("--seconds", type=int, default=60, help="measured time, after the warm-up")
-    ap.add_argument("--warmup", type=int, default=15, help="seconds before counting starts")
+    ap.add_argument(
+        "--seconds", type=int, default=60, help="measured time, after the warm-up"
+    )
+    ap.add_argument(
+        "--warmup", type=int, default=15, help="seconds before counting starts"
+    )
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--workers", type=int, default=4)
     # Budgets (docs/operations.md): what a kiosk waits for, and what a staff screen waits for.
@@ -248,13 +260,17 @@ def main() -> int:
     args = ap.parse_args()
 
     print(f"building {args.scale or args.devices} synthetic devices...")
-    url, tokens, admin_headers = build_database(args.devices, args.scale, args.occupancy)
+    url, tokens, admin_headers = build_database(
+        args.devices, args.scale, args.occupancy
+    )
     args.devices = len(tokens)
     grouped = 0
     if args.scale:
         from isd.services import facility_model  # noqa: F401  (only to name the hubs below)
 
-        grouped = len({t.split("-")[2] for t in tokens})  # hubs: H1..Hn from the cell codes
+        grouped = len(
+            {t.split("-")[2] for t in tokens}
+        )  # hubs: H1..Hn from the cell codes
     server = start_server(url, args.workers)
     try:
         wait_for_server()

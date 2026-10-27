@@ -11,3 +11,5 @@ __pycache__
 web/test-results
 web/playwright-report
 *.tsbuildinfo
+*.egg-info
+deploy/build-ca/*.pem

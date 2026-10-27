@@ -215,7 +215,9 @@ def main() -> None:
         resident("wren")  # tier 1: voluntary work, earnings
         resident("uma", unit="B")  # unit B: schedule and out-of-cell tests
         resident("val", unit="B")
-        resident("cha", start_points=700)  # chess e2e: tier 5, human play, line L1 or L2
+        resident(
+            "cha", start_points=700
+        )  # chess e2e: tier 5, human play, line L1 or L2
         resident("chb", start_points=700)  # chess e2e: the other line
         resident(
             "ola", start_points=450, contacts=("family", "attorney")
@@ -290,11 +292,14 @@ def main() -> None:
         from isd.services import facility_model
 
         facility_model.build(
-            s, {"hubs": 1, "lines_per_hub": 2, "floors_per_line": 2, "cells_per_floor": 2}
+            s,
+            {"hubs": 1, "lines_per_hub": 2, "floors_per_line": 2, "cells_per_floor": 2},
         )
         for key, line_code in (("cha", "H1-L1"), ("chb", "H1-L2")):
             floor = s.execute(
-                select(Floor).join(Line, Line.id == Floor.line_id).where(Line.code == line_code, Floor.level == 1)
+                select(Floor)
+                .join(Line, Line.id == Floor.line_id)
+                .where(Line.code == line_code, Floor.level == 1)
             ).scalar()
             cell = s.execute(select(_Cell).where(_Cell.code == f"E2E-{key}")).scalar()
             cell.floor_id, cell.unit, cell.line_code = floor.id, line_code, line_code

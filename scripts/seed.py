@@ -1,6 +1,7 @@
 """Generate synthetic seed data (no real names/IDs); write var/seed.json and load Postgres."""
 
 import json
+import os
 import random
 from pathlib import Path
 
@@ -67,7 +68,7 @@ def build_seed(seed: int = 1) -> dict:
 
 
 def main() -> None:
-    out = ROOT / "var" / "seed.json"
+    out = Path(os.environ.get("ISD_VAR_DIR", ROOT / "var")) / "seed.json"
     out.parent.mkdir(exist_ok=True)
     data = build_seed()
     out.write_text(json.dumps(data, indent=2, sort_keys=True))

@@ -62,3 +62,21 @@ The device caches its last `ResidentView` with a `valid_until` time: the next sa
 ## Screen reporting (for the staff live mirror)
 
 On every screen change the kiosk sends only the route (for example `/resident/tier`) to `POST /device/screen`, best effort and silent if offline. The server never stores the route of private services (law library, grievances, medical, mental health); it stores `/resident/redacted` instead. No screen content, keystrokes, or images are sent.
+
+## What has and has not been checked (Phase 22)
+
+The provisioning script (`deploy/kiosk/provision-kiosk.sh`) has **never been run on a real kiosk**. What exists:
+
+| Check | Where it runs | Result |
+|---|---|---|
+| Staged files, modes, validation of every argument (`api/tests/test_provision.py`) | every test run | passes |
+| Firewall ruleset accepted by `nft -c` | run once by hand on the build machine (Debian `nft`) | accepted |
+| Unit files accepted by `systemd-analyze verify` | run once by hand on the build machine | accepted; its only complaints were that the kiosk's own binaries (xinit, our scripts) are not installed on that machine |
+| Policy file is valid JSON | run once by hand | valid |
+| **All of the above plus**: the package names install on Debian, `shellcheck` on the shell scripts, Chromium applies the policy and blocks a page outside the allow-list | `make kiosk-check` in a Debian container, and the `kiosk` job in CI (`.github/workflows/ci.yml`) | **not run in the sandbox this was built in**: its network policy refuses the Debian mirrors, so the container could not install packages. It is expected to run on GitHub; its result is recorded in `docs/STATUS.md` once seen. |
+
+What a container can never show, and what the first real device must be checked for (the list in this file
+above still applies): Xorg on the real display and touch screen, camera and microphone permissions, the
+service starting, restarting and being watched under a real systemd boot, the nightly restart, the firewall
+filtering a real network card, the read-only root and power loss, and Chromium's behaviour on the exact
+browser version installed.

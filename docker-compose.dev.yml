@@ -1,0 +1,14 @@
+# Development overrides: `make dev` adds these to docker-compose.yml. The API reloads when its code
+# changes and the web app runs the Vite dev server (hot reload) on port 5173.
+services:
+  api:
+    command: ["uvicorn", "isd.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
+    volumes: ["./api/isd:/app/isd", "./config:/config"]
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile.dev
+    environment:
+      E2E_API: http://api:8000
+    ports: ["5173:5173"]
+    volumes: ["./web/src:/app/src"]

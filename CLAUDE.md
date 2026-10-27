@@ -44,7 +44,7 @@ Customers: other correctional facilities, and facilities we run ourselves. Initi
 /config         seed YAML: tiers, points, sanctions, offenses, compliance
 /content        course folders (docs/courses.md)
 /docs           ASSUMPTIONS.md, DECISIONS.md, kiosk.md, architecture.md
-/scripts        seed, simulate-week, export-public-log, daily-job, check-secrets, rotate-device-token
+/scripts        seed, seed-full, simulate-week, load-test, demo, demo-scenario, export-public-log, daily-job, check-secrets, rotate-device-token
 /deploy         example reverse-proxy config (untested example)
 ```
 
@@ -249,7 +249,12 @@ make reconcile  # nightly check: balances match their ledgers (exit 2 on mismatc
 make welfare-sweep  # raise/escalate/clear welfare flags (run every 15 min)
 make courses-check  # validate course folders under content/courses
 make secrets-check  # fail if anything that looks like a secret is committed
-make dev      # run api + web + postgres
+make demo     # Docker: postgres + api + web with demo data; prints URLs and logins
+make demo-scenario  # play the demo story over the API (education -> tier, a lock, an appeal, the audit chain)
+make demo-smoke     # open the running demo in a real browser and check the main screens
+make demo-down      # stop the demo (demo-reset also deletes its data)
+make kiosk-check    # check the kiosk provisioning in a Debian container
+make dev      # the Docker stack with hot reload
 make test     # pytest + vitest + playwright
 make seed     # synthetic residents, staff, config
 make lint
