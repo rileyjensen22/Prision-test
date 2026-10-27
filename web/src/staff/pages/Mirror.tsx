@@ -145,7 +145,7 @@ export default function Mirror() {
           >
             <strong>{t('staff.pages.Mirror.liveMirrorReadOnly')}</strong>
             <span data-testid="mirror-target">{frame?.resident_code ?? '…'}</span>
-            {frame && <span>until {fmt(frame.expires_at)}</span>}
+            {frame && <span>{t('staff.msg.until', { at: fmt(frame.expires_at) })}</span>}
             <span className="ml-auto">
               <Btn kind="danger" onClick={() => void stop()}>
                 {t('staff.pages.Mirror.endMirror')}
@@ -157,17 +157,18 @@ export default function Mirror() {
               <p className="font-medium">{t('staff.pages.Mirror.privateScreen')}</p>
               <p className="text-sm text-ink-soft">
                 {frame.redacted === 'PRIVILEGED_CALL'
-                  ? 'A private attorney call is in progress.'
-                  : 'The resident is on a private service (legal, grievance or health).'}{' '}
-                Its contents are never shown.
+                  ? t('staff.msg.mirrorAttorney')
+                  : t('staff.msg.mirrorPrivate')}{' '}
+                {t('staff.msg.neverShown')}
               </p>
             </Panel>
           )}
           {frame?.view && (
             <div className="max-w-xl">
               <p className="mb-1 text-sm text-ink-soft" data-testid="mirror-screen">
-                Screen: {frame.screen?.path ?? 'unknown'}
-                {frame.screen?.age_seconds != null && ` (updated ${frame.screen.age_seconds}s ago)`}
+                {t('staff.msg.screen', { path: frame.screen?.path ?? t('staff.msg.unknown') })}
+                {frame.screen?.age_seconds != null &&
+                  ` ${t('staff.msg.updatedAgo', { n: frame.screen.age_seconds })}`}
               </p>
               <SimulatedResident
                 view={{ ...frame.view, simulation: false }}

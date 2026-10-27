@@ -79,8 +79,7 @@ export default function Outcomes() {
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <p className="text-sm text-ink-soft" data-testid="outcomes-note">
-        {data?.note} Groups smaller than {data?.minimum_group_size ?? 5} are not shown. There are no
-        individual scores.
+        {data?.note} {tr('staff.msg.outcomesNote', { n: data?.minimum_group_size ?? 5 })}
       </p>
       <Panel title={tr('staff.pages.Outcomes.cohortsByQuarterAdmitted')}>
         <Table data-testid="cohort-table">

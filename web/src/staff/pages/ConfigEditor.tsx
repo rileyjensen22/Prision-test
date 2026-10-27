@@ -5,6 +5,10 @@ import { errorText, fmt, put } from '../api'
 import { useAuth } from '../auth'
 import { Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
 
+// The curve's two parameters keep the symbols the formula uses, in every language.
+const N_SYMBOL = 'N'
+const P_SYMBOL = 'p'
+
 interface Section {
   name: string
   version: number | null
@@ -63,7 +67,7 @@ function RepeatReturn({
         <label className="text-sm">
           {tr('staff.pages.ConfigEditor.nReturnsThatReach')}
           <input
-            aria-label="N"
+            aria-label={N_SYMBOL}
             value={n}
             onChange={(e) => setN(e.target.value)}
             className="mt-1 block w-24 rounded-ctl border px-2 py-1"
@@ -72,7 +76,7 @@ function RepeatReturn({
         <label className="text-sm">
           {tr('staff.pages.ConfigEditor.pHowFastThe')}
           <input
-            aria-label="p"
+            aria-label={P_SYMBOL}
             value={pp}
             onChange={(e) => setP(e.target.value)}
             className="mt-1 block w-24 rounded-ctl border px-2 py-1"
@@ -148,8 +152,7 @@ export default function ConfigEditor() {
   return (
     <Page title={tr('staff.pages.ConfigEditor.configuration')}>
       <p className="text-sm text-ink-soft">
-        Every change creates a new version and an audit entry.{' '}
-        {isAdmin ? 'You can edit.' : 'You can view; only admins can edit.'}
+        {tr('staff.msg.configIntro')} {isAdmin ? tr('staff.msg.canEdit') : tr('staff.msg.viewOnly')}
       </p>
       <div className="flex flex-wrap gap-2" role="tablist">
         {(sections.data ?? []).map((s) => (

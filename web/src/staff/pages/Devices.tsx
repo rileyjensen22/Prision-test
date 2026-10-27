@@ -72,10 +72,7 @@ export default function Devices() {
           <p className="font-mono text-h1" data-testid="pairing-code">
             {pairing.code}
           </p>
-          <p className="text-sm">
-            Type it on the device. It works once and expires at {fmt(pairing.expires_at)}. It is not
-            shown again.
-          </p>
+          <p className="text-sm">{t('staff.msg.pairingHelp', { at: fmt(pairing.expires_at) })}</p>
         </Panel>
       )}
       <div className="flex flex-wrap items-end gap-3" data-testid="device-filters">
@@ -200,14 +197,22 @@ export default function Devices() {
               <Td>
                 {d.health ? (
                   <span className="text-sm">
-                    storage {mb(d.health.storage_used_mb)} of {mb(d.health.storage_quota_mb)} ·
-                    camera {d.health.camera} · mic {d.health.microphone} · queue{' '}
-                    {d.health.queue_pending ?? 0}
+                    {t('staff.msg.health', {
+                      used: mb(d.health.storage_used_mb),
+                      quota: mb(d.health.storage_quota_mb),
+                      camera: d.health.camera,
+                      mic: d.health.microphone,
+                      queue: d.health.queue_pending ?? 0,
+                    })}
                   </span>
                 ) : (
                   '—'
                 )}
-                {d.locked_until && <Badge tone="amber">paused until {fmt(d.locked_until)}</Badge>}
+                {d.locked_until && (
+                  <Badge tone="amber">
+                    {t('staff.msg.pausedUntil', { at: fmt(d.locked_until) })}
+                  </Badge>
+                )}
               </Td>
               <Td>
                 <div className="flex flex-wrap gap-1">

@@ -126,7 +126,7 @@ export default function Schedule() {
                     <Badge tone="red">{t('staff.pages.Schedule.cancelled')}</Badge>
                   )}
                 </Td>
-                <Td>{b.minutes} min</Td>
+                <Td>{t('staff.msg.minutes', { n: b.minutes })}</Td>
                 <Td>
                   {b.booked} / {b.capacity}
                 </Td>

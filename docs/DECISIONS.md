@@ -271,3 +271,9 @@ Visual and UX pass only. No engine, API, entitlement or invariant code changed. 
 - **Rate limiting split in two** (found by the full-size load test, details in `docs/operations.md`): security limits are shared through Postgres, per-request flood guards count per process unless `RATE_LIMIT_SHARE_ALL=true`. The Postgres limiter became a sliding-window counter (one row per key and window) on its own small connection pool. This changes the Phase 18 limiter; its tests were updated and a test pins which limiters are shared.
 - **Per-request config cache** for the six hot sections, on request sessions only. A `set_config` in the same session clears it. A change made by another process shows on the next request.
 - **Load test** now builds the facility, discards a 15 second warm-up, and `--scale full` is what `make load-test` runs. Result and limits are in `docs/operations.md`.
+
+## Phase 21 (UI overhaul, finished)
+
+- **Sentence-level staff strings** moved into `staff.msg` in both languages (with plurals and interpolation, no string concatenation), so word order can differ in Spanish. `ui-audit/count-hardcoded.mjs` counts what is left: 26, all on the style-guide page (a developer reference), deliberately in English. The curve parameters `N` and `p` keep their symbols in every language.
+- **The flaky `phase13` schedule test** was a test bug: it opened a second kiosk in the same browser context, and kiosks keep their device token in storage, so the second overwrote the first. It now uses its own context.
+- **Not re-shot:** the before/after screenshots and gallery artifact were made earlier in this work and were not regenerated for the later screens (chess, facility dashboard, call review); the visual-regression snapshots cover the screens they covered before.

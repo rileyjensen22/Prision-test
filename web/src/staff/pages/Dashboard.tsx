@@ -71,7 +71,7 @@ export default function Dashboard() {
           data-testid="ledger-alert"
           className="rounded-ctl border border-danger bg-danger-soft px-3 py-2 text-ink"
         >
-          The last nightly reconciliation found a mismatch between a balance and its ledger.{' '}
+          {t('staff.msg.reconcileMismatch')}{' '}
           <Link className="underline" to="/staff/finance">
             {t('staff.pages.Dashboard.openFinance')}
           </Link>
@@ -133,7 +133,7 @@ export default function Dashboard() {
       )}
       {s && s.overdue_appeals > 0 && (
         <p role="alert" className="rounded-ctl bg-danger-soft px-3 py-2 text-ink">
-          {s.overdue_appeals} appeal(s) are past their review deadline.
+          {t('staff.msg.overdueAppeals', { count: s.overdue_appeals })}
         </p>
       )}
       <FacilityOverview />

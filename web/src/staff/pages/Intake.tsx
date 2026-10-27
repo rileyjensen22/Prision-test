@@ -102,7 +102,7 @@ export default function Intake() {
                 <option value="">{tr('staff.pages.Intake.choose')}</option>
                 {options?.vacant_cells.map((c) => (
                   <option key={c.code} value={c.code}>
-                    {c.code} (unit {c.unit})
+                    {tr('staff.msg.vacantCell', { code: c.code, unit: c.unit })}
                   </option>
                 ))}
               </select>
@@ -165,7 +165,7 @@ export default function Intake() {
                 checked={captions}
                 onChange={(e) => setCaptions(e.target.checked)}
               />{' '}
-              Captions
+              {tr('staff.msg.captions')}
             </label>
           </div>
         </Panel>

@@ -138,7 +138,7 @@ export default function ViewAs() {
                 <option value="">{t('staff.pages.ViewAs.realTier')}</option>
                 {Array.from({ length: 10 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
-                    Tier {i + 1}
+                    {t('staff.msg.tierN', { n: i + 1 })}
                   </option>
                 ))}
               </select>
@@ -193,7 +193,7 @@ export default function ViewAs() {
                   checked={overrideOffenses}
                   onChange={(e) => setOverrideOffenses(e.target.checked)}
                 />{' '}
-                Replace the real ones
+                {t('staff.msg.replaceReal')}
               </label>
               {overrideOffenses &&
                 (offenses.data?.payload.offense_restrictions ?? []).map((o) => (
@@ -221,7 +221,7 @@ export default function ViewAs() {
                   checked={clearReal}
                   onChange={(e) => setClearReal(e.target.checked)}
                 />{' '}
-                Ignore the real ones
+                {t('staff.msg.ignoreReal')}
               </label>
               <div className="mt-2 flex gap-2">
                 <select

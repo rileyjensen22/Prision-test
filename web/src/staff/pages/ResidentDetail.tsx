@@ -125,10 +125,11 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
         </label>
         {inf && (
           <p className="text-sm text-ink-soft" data-testid="infraction-help">
-            Locks {inf.scope.replace(/_/g, ' ')} for {inf.duration_hours} hours.{' '}
-            {needsSupervisor(inf)
-              ? 'Needs evidence and a supervisor’s confirmation.'
-              : 'Applies immediately (weekly cap applies).'}
+            {tr('staff.msg.locks', {
+              scope: inf.scope.replace(/_/g, ' '),
+              hours: inf.duration_hours,
+            })}{' '}
+            {needsSupervisor(inf) ? tr('staff.msg.needsSupervisor') : tr('staff.msg.appliesNow')}
           </p>
         )}
         {inf && needsSupervisor(inf) && (
@@ -142,7 +143,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
                 checked={evType === 'second_staff_report'}
                 onChange={() => setEvType('second_staff_report')}
               />{' '}
-              Report from a second staff member
+              {tr('staff.msg.secondReport')}
             </label>
             <label className="text-sm">
               <input
@@ -150,7 +151,7 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
                 checked={evType === 'system_event'}
                 onChange={() => setEvType('system_event')}
               />{' '}
-              System-detected event
+              {tr('staff.msg.systemEvent')}
             </label>
             {evType === 'second_staff_report' ? (
               <label className="block text-sm">
@@ -251,7 +252,7 @@ function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
             checked={s.captions}
             onChange={(e) => setS({ ...s, captions: e.target.checked })}
           />{' '}
-          Captions
+          {tr('staff.msg.captions')}
         </label>
         <label className="block text-sm md:col-span-2">
           {tr('staff.pages.ResidentDetail.reasonForChange')}

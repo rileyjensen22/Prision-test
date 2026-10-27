@@ -38,10 +38,12 @@ export default function Outliers() {
       {data && (
         <>
           <p className="text-sm text-ink-soft" data-testid="outlier-settings">
-            Last {data.settings.window_days} days, compared with others in the same role. A person
-            is flagged when a number is at least {data.settings.z_threshold} standard deviations
-            above their peers (needs {data.settings.min_peers}+ peers and {data.settings.min_count}+
-            cases). A flag is a prompt to look, not a finding.
+            {t('staff.msg.outlierSettings', {
+              days: data.settings.window_days,
+              z: data.settings.z_threshold,
+              peers: data.settings.min_peers,
+              cases: data.settings.min_count,
+            })}
           </p>
           {Object.entries(data.groups).map(([role, rows]) => (
             <Panel key={role} title={`${role[0].toUpperCase()}${role.slice(1)}s`}>
@@ -67,7 +69,11 @@ export default function Outliers() {
                       <Td>
                         {r.flags.map((f) => (
                           <Badge key={f.metric} tone="red">
-                            {LABEL[f.metric]}: {f.value} vs peers {f.peer_mean}
+                            {t('staff.msg.vsPeers', {
+                              label: LABEL[f.metric],
+                              value: f.value,
+                              mean: f.peer_mean,
+                            })}
                           </Badge>
                         ))}
                       </Td>

@@ -42,7 +42,7 @@ export default function Certificates() {
               <h2 className="mt-3 text-h1 font-bold">{c.title.en}</h2>
               {c.title.es !== c.title.en && <p className="text-h3 italic">{c.title.es}</p>}
               <p className="mt-3 text-h2">{c.resident}</p>
-              <p className="mt-1">Score {c.score}</p>
+              <p className="mt-1">{t('staff.msg.score', { score: c.score })}</p>
               <p>{new Date(c.issued_at).toLocaleDateString()}</p>
               <p className="mt-3 font-mono text-sm">{c.serial}</p>
             </div>

@@ -79,7 +79,7 @@ export default function Monitoring() {
               checked={flaggedOnly}
               onChange={(e) => setFlaggedOnly(e.target.checked)}
             />{' '}
-            Only messages with open flags
+            {t('staff.msg.flaggedOnly')}
           </label>
           <label className="text-sm">
             {t('staff.pages.Monitoring.reasonForReading')}

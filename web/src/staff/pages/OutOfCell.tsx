@@ -186,7 +186,7 @@ export default function OutOfCell() {
               </select>
             </label>
             <Btn disabled={picked.length === 0} onClick={() => void move('out', picked)}>
-              Tap out {picked.length || ''} selected
+              {t('staff.msg.tapOut', { n: picked.length || '' })}
             </Btn>
           </div>
           <ul className="grid grid-cols-2 gap-1 text-sm md:grid-cols-4" data-testid="pick-list">

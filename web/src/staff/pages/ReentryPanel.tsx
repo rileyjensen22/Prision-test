@@ -63,7 +63,9 @@ export default function ReentryPanel({
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {data && (
         <>
-          <p data-testid="release-date">Release date: {data.release_date ?? 'not set'}</p>
+          <p data-testid="release-date">
+            {t('staff.msg.releaseDate', { date: data.release_date ?? t('staff.msg.notSet') })}
+          </p>
           {canSetDate && (
             <div className="my-2 flex flex-wrap items-center gap-2">
               <input
@@ -89,7 +91,10 @@ export default function ReentryPanel({
             </div>
           )}
           <p className="text-sm">
-            Checklist: {data.progress.resolved} of {data.progress.total} resolved
+            {t('staff.msg.checklistProgress', {
+              done: data.progress.resolved,
+              total: data.progress.total,
+            })}
           </p>
           <Table>
             <thead>

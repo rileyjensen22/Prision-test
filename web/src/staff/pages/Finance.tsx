@@ -86,14 +86,21 @@ export default function Finance() {
                   <Badge tone={r.ok ? 'green' : 'red'}>{r.ok ? 'ok' : 'mismatch'}</Badge>
                 </Td>
                 <Td>
-                  {r.checked.trust_entries} trust, {r.checked.earnings_entries} earnings
+                  {t('staff.msg.financeCounts', {
+                    trust: r.checked.trust_entries,
+                    earnings: r.checked.earnings_entries,
+                  })}
                 </Td>
                 <Td>
                   {r.problems.length === 0
                     ? '—'
                     : r.problems.map((p, i) => (
                         <div key={i}>
-                          {p.check} (resident #{p.resident_id}, entry {p.ref})
+                          {t('staff.msg.financeProblem', {
+                            check: p.check,
+                            resident: p.resident_id,
+                            ref: p.ref,
+                          })}
                         </div>
                       ))}
                 </Td>
