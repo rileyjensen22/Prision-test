@@ -88,6 +88,8 @@ def test_firewall_allows_only_the_named_addresses(staged):
         check = subprocess.run(
             ["nft", "-c", "-f", str(staged / "etc/nftables.conf")], capture_output=True, text=True
         )
+        if "Operation not permitted" in check.stderr:
+            pytest.skip("nft needs root to check a ruleset here (the kiosk check runs it as root)")
         assert check.returncode == 0, check.stderr
 
 
