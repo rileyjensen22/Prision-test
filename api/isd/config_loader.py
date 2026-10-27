@@ -6,6 +6,7 @@ import yaml
 
 from isd.courses_loader import COURSES_DIR, assemble, load_courses
 from isd.engine.config import (
+    validate_chess,
     validate_commissary,
     validate_courses,
     validate_offenses,
@@ -33,6 +34,7 @@ CONFIG_FILES = (
     "reading",
     "monitoring",
     "reentry",
+    "chess",
 )
 
 
@@ -79,6 +81,8 @@ def validate_section(name: str, payload: dict) -> None:
         validate_monitoring(payload)
     elif name == "reentry":
         validate_reentry(payload)
+    elif name == "chess":
+        validate_chess(payload)
     elif name not in CONFIG_FILES:
         raise ValueError(f"unknown config section: {name}")
 

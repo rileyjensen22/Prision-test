@@ -206,3 +206,23 @@ def validate_reading(payload: dict) -> None:
             if key in seen or not str(v.get("text", "")).strip():
                 raise ValueError(f"{it['id']}: duplicate variant {key} or empty text")
             seen.add(key)
+
+
+def validate_chess(payload: dict) -> None:
+    for key in ("queue_minutes", "moves_per_minute", "max_open_matches"):
+        if not isinstance(payload.get(key), int) or payload[key] < 1:
+            raise ValueError(f"chess: {key} must be a positive whole number")
+    if not isinstance(payload.get("human_enabled"), bool):
+        raise ValueError("chess: human_enabled must be true or false")
+    if not isinstance(payload.get("disabled_units"), list):
+        raise ValueError("chess: disabled_units must be a list")
+    levels = payload.get("engine_levels") or []
+    if [lv.get("level") for lv in levels] != list(range(1, len(levels) + 1)) or not levels:
+        raise ValueError("chess: engine_levels must be numbered 1, 2, 3 ... in order")
+    for lv in levels:
+        if not 1 <= lv.get("depth", 0) <= 5 or not 0 <= lv.get("mistake_rate", -1) <= 1:
+            raise ValueError("chess: a level needs depth 1 to 5 and mistake_rate 0 to 1")
+    for key in ("handle_adjectives", "handle_nouns"):
+        words = payload.get(key) or []
+        if len(words) < 6 or any(not str(w).isalpha() for w in words):
+            raise ValueError(f"chess: {key} needs at least six plain words")

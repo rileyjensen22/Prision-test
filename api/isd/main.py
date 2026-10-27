@@ -14,6 +14,7 @@ from isd.routers import (
     device_features,
     mock,
     staff_accounts,
+    staff_chess,
     staff_comms,
     staff_extras,
     staff_fleet,
@@ -57,6 +58,7 @@ app.include_router(view_as.router)
 app.include_router(staff_fleet.router)
 app.include_router(staff_intake.router)
 app.include_router(staff_accounts.router)
+app.include_router(staff_chess.router)
 app.include_router(staff_lifecycle.router)
 app.include_router(staff_outcomes.router)
 

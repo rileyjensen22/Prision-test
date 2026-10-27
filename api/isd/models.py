@@ -91,6 +91,8 @@ class Resident(Base):
     # Set when staff vacate the resident (released or moved out). The record stays: history,
     # ledgers and the audit log are never deleted.
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Staff switch for human chess: None follows the unit and facility setting.
+    chess_human: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
 
 class Cell(Base):
@@ -98,6 +100,9 @@ class Cell(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True)
     unit: Mapped[str] = mapped_column(String(16), default="A", server_default="A")
+    # The line the cell is on. Chess never pairs two residents on the same line. Phase 20 derives
+    # it from the facility model; until then staff set it at intake.
+    line_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
 
 class Device(Base):
@@ -526,28 +531,48 @@ class FacilityEvent(Base):
 
 
 class ChessGame(Base):
-    """Chess stub. There is deliberately no chat or message column on games or moves."""
+    """A chess game or match. There is deliberately no chat, message, stake or item column here.
+
+    Engine games are played on the device and only logged (level and result). Human matches have
+    two residents, a random handle for each, the position, and how the match ended.
+    """
 
     __tablename__ = "chess_games"
     __table_args__ = (
         CheckConstraint("opponent_kind IN ('engine', 'human')", name="ck_chess_opponent"),
         CheckConstraint("status IN ('waiting', 'active', 'finished')", name="ck_chess_status"),
+        CheckConstraint("result IN ('white', 'black', 'draw')", name="ck_chess_result"),
+        CheckConstraint("draw_offer_by IN ('white', 'black')", name="ck_chess_draw_offer"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
-    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)  # white
+    black_resident_id: Mapped[int | None] = mapped_column(
+        ForeignKey("residents.id"), nullable=True, index=True
+    )
     opponent_kind: Mapped[str] = mapped_column(String(8))
     status: Mapped[str] = mapped_column(String(10), default="active")
     provider_ref: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    level: Mapped[int | None] = mapped_column(Integer, nullable=True)  # engine games
+    white_handle: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    black_handle: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    fen: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    result: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    result_reason: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    draw_offer_by: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    wait_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class ChessMove(Base):
+    """One move. Append-only: a played move is never changed."""
+
     __tablename__ = "chess_moves"
     id: Mapped[int] = mapped_column(primary_key=True)
     game_id: Mapped[int] = mapped_column(ForeignKey("chess_games.id"), index=True)
     ply: Mapped[int] = mapped_column(Integer)
     move: Mapped[str] = mapped_column(String(16))
-    by: Mapped[str] = mapped_column(String(8))  # resident | opponent
+    by: Mapped[str] = mapped_column(String(8))  # white | black (older rows: resident | opponent)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 

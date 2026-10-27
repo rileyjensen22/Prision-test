@@ -39,6 +39,7 @@ SCOPES: dict[str, frozenset[str]] = {
     "communication": frozenset({"calls", "texting", "video"}),
     "commissary": frozenset({"commissary"}),
     "video": frozenset({"video"}),
+    "games": frozenset({"chess_human"}),  # blocks human play only; the engine stays open
     "all_non_baseline": NON_BASELINE_FEATURES,
 }
 

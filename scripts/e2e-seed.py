@@ -104,7 +104,7 @@ def main() -> None:
                 prior_returns=prior,
             )
             cell, dev = (
-                Cell(code=f"E2E-{key}", unit=unit),
+                Cell(code=f"E2E-{key}", unit=unit, line_code=f"L{len(tokens) % 2 + 1}"),
                 Device(code=f"E2E-DEV-{key}"),
             )
             tokens[key] = f"e2e-token-{key}"
@@ -215,6 +215,8 @@ def main() -> None:
         resident("wren")  # tier 1: voluntary work, earnings
         resident("uma", unit="B")  # unit B: schedule and out-of-cell tests
         resident("val", unit="B")
+        resident("cha", start_points=700)  # chess e2e: tier 5, human play, line L1 or L2
+        resident("chb", start_points=700)  # chess e2e: the other line
         resident(
             "ola", start_points=450, contacts=("family", "attorney")
         )  # tier 4: monitored texting and the keyword-flag review

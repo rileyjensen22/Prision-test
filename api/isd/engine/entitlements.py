@@ -70,6 +70,7 @@ class ResidentFacts:
     sanctions: tuple[SanctionFact, ...] = ()
     blocked_contact_ids: tuple[int, ...] = ()
     device_locks: tuple[DeviceLockFact, ...] = ()
+    chess_human_off: bool = False  # staff switch (facility, unit or resident)
 
 
 @dataclass(frozen=True)
@@ -171,6 +172,9 @@ def compute_entitlements(
                     detail=rule.reason_text,
                 )
             )
+
+    if facts.chess_human_off:  # step 3b: staff turned human chess off for this resident
+        reasons["chess_human"].append(Reason("CHESS_OFF", "setting", ASK_STAFF))
 
     for s in facts.sanctions:  # step 4: active sanctions
         if not s.starts_at <= at_time < s.ends_at:

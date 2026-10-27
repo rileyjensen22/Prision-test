@@ -14,6 +14,7 @@ import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
 import { Video } from './features/Video'
 import { Pairing } from './Pairing'
+import { Chess } from './features/Chess'
 import { Reentry } from './features/Reentry'
 import { CertificateView, Certificates, Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
@@ -106,6 +107,8 @@ function Shell() {
             <Route path="feature/basic_education" element={<Education />} />
             <Route path="feature/advanced_education" element={<Education />} />
             <Route path="feature/texting" element={<Texting />} />
+            <Route path="feature/chess_engine" element={<Chess />} />
+            <Route path="feature/chess_human" element={<Chess />} />
             <Route path="feature/video" element={<Video />} />
             <Route path="feature/contact_requests" element={<Contacts />} />
             <Route path="feature/reading_general" element={<Reading />} />

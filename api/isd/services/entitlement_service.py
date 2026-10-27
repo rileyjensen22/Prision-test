@@ -15,7 +15,15 @@ from isd.engine.entitlements import (
     compute_entitlements,
 )
 from isd.engine.sandbox import SandboxOverrides, apply_to_facts
-from isd.models import Contact, OffenseFlag, Resident, Sanction, TierHistory
+from isd.models import (
+    Cell,
+    Contact,
+    DeviceAssignment,
+    OffenseFlag,
+    Resident,
+    Sanction,
+    TierHistory,
+)
 from isd.services.config_store import get_current
 from isd.services.device_locks import locks_for_residents
 
@@ -45,6 +53,33 @@ def earned_tiers(session: Session, resident_ids: list[int], at_time: datetime) -
     ).all()
     found = {rid: tier for rid, tier in rows}
     return {rid: found.get(rid) or 1 for rid in resident_ids}
+
+
+def _chess_off(session: Session, ids: list[int]) -> set[int]:
+    """Residents for whom staff have turned human chess off: facility-wide, by unit, or by name
+    (a resident switched on by name stays on when only their unit is off)."""
+    row = get_current(session, "chess")
+    settings = row.payload if row else {"human_enabled": True, "disabled_units": []}
+    if not settings.get("human_enabled", True):
+        return set(ids)
+    own = dict(
+        session.execute(select(Resident.id, Resident.chess_human).where(Resident.id.in_(ids))).all()
+    )
+    units = settings.get("disabled_units") or []
+    unit_of = {}
+    if units:
+        unit_of = dict(
+            session.execute(
+                select(DeviceAssignment.resident_id, Cell.unit)
+                .join(Cell, Cell.id == DeviceAssignment.cell_id)
+                .where(DeviceAssignment.resident_id.in_(ids), DeviceAssignment.ended_at.is_(None))
+            ).all()
+        )
+    off = set()
+    for rid in ids:
+        if own.get(rid) is False or (own.get(rid) is None and unit_of.get(rid) in units):
+            off.add(rid)
+    return off
 
 
 def load_facts_many(
@@ -88,6 +123,7 @@ def load_facts_many(
     ):
         blocked.setdefault(rid, []).append(cid)
     locks = locks_for_residents(session, ids)
+    chess_off = _chess_off(session, ids)
     return {
         rid: ResidentFacts(
             earned_tier=tiers[rid],
@@ -96,6 +132,7 @@ def load_facts_many(
             sanctions=tuple(sanctions.get(rid, ())),
             blocked_contact_ids=tuple(blocked.get(rid, ())),
             device_locks=tuple(DeviceLockFact(i, a, b) for i, a, b in locks.get(rid, ())),
+            chess_human_off=rid in chess_off,
         )
         for rid in ids
     }

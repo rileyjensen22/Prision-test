@@ -136,17 +136,10 @@ def test_chess_reading_rec_over_http(client, kiosk, boost):
         client.post("/device/chess", json={"opponent": "human"}, headers=dh(token)).status_code
         == 409
     )
-    g = client.post("/device/chess", json={"opponent": "engine"}, headers=dh(token)).json()
-    moved = client.post(
-        f"/device/chess/{g['id']}/moves", json={"move": "e2e4"}, headers=dh(token)
+    g = client.post(
+        "/device/chess", json={"opponent": "engine", "level": 2}, headers=dh(token)
     ).json()
-    assert [m["by"] for m in moved["moves"]] == ["resident", "opponent"]
-    assert (
-        client.post(
-            f"/device/chess/{g['id']}/moves", json={"move": "nonsense"}, headers=dh(token)
-        ).status_code
-        == 409
-    )
+    assert g["opponent"] == "engine" and g["level"] == 2
     assert len(client.get("/device/chess", headers=dh(token)).json()) == 1
 
     items = {i["id"]: i for i in client.get("/device/reading", headers=dh(token)).json()}

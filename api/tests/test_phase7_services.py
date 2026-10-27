@@ -25,7 +25,6 @@ from isd.models import (
 )
 from isd.services import (
     calls,
-    chess,
     facility,
     out_of_cell,
     points,
@@ -525,40 +524,6 @@ def test_blocked_contacts_cannot_be_texted(owner, seeded, make_resident, add_con
 
 
 # ======================= chess =======================
-def test_chess_engine_from_tier_2_human_from_tier_5(owner, seeded, make_resident):
-    rid = make_resident()
-    with pytest.raises(chess.ChessDenied) as e:
-        chess.new_game(owner, rid, "engine", NOW)
-    assert e.value.code == "FEATURE_LOCKED"
-    give(owner, rid, 100)
-    g = chess.new_game(owner, rid, "engine", NOW)
-    assert g.status == "active"
-    with pytest.raises(chess.ChessDenied):
-        chess.new_game(owner, rid, "human", NOW)
-    give(owner, rid, 600)  # 700 points in all: tier 5
-    h = chess.new_game(owner, rid, "human", NOW)
-    assert h.status == "waiting"
-    with pytest.raises(chess.ChessDenied) as e:
-        chess.play(owner, rid, h.id, "e2e4", NOW)
-    assert e.value.code == "NOT_ACTIVE"
-
-
-def test_chess_moves_are_relayed_and_validated(owner, seeded, make_resident):
-    rid = make_resident()
-    give(owner, rid, 100)
-    g = chess.new_game(owner, rid, "engine", NOW)
-    moves = chess.play(owner, rid, g.id, "e2e4", NOW)
-    assert [(m.by, m.move) for m in moves] == [("resident", "e2e4"), ("opponent", "e7e5")]
-    assert [m.ply for m in chess.play(owner, rid, g.id, "g1f3", NOW)] == [1, 2, 3, 4]
-    for bad in ("hello", "e9e4", "e2", "e2e4e5"):
-        with pytest.raises(chess.ChessDenied) as e:
-            chess.play(owner, rid, g.id, bad, NOW)
-        assert e.value.code == "BAD_MOVE"
-    other = make_resident()
-    with pytest.raises(chess.ChessDenied):
-        chess.play(owner, other, g.id, "e2e4", NOW)
-
-
 def test_there_is_no_chat_anywhere_in_chess():
     from isd.interfaces.chess import ChessProvider
 

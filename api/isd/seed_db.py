@@ -137,7 +137,7 @@ def seed_database(session: Session, data: dict) -> bool:
         )
         session.add(res)
         codes[r["id"]] = res
-        cell = Cell(code=r["cell"])
+        cell = Cell(code=r["cell"], line_code=f"L{len(codes) % 3 + 1}")
         device = Device(
             code=f"DEV-{r['cell']}", token_hash=hash_device_token(dev_device_token(r["cell"]))
         )

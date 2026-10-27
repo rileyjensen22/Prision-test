@@ -1,0 +1,22 @@
+# Chess. Engine games run on the device against the bundled engine and need no network. Human
+# games are pairings of two residents through the server: only moves, a draw offer and resigning.
+# There is no chat, no spectator view, no stake of any kind, and residents are shown only a
+# random per-match handle. Pairing never matches two residents who are on a keep-separate record
+# or who live on the same line (a resident whose line is not set is not paired at all).
+# Who may play humans also depends on the tier matrix (chess: human from tier 5), the `games`
+# sanction scope, `disabled_units` here, and a per-resident staff switch.
+version: 1
+human_enabled: true        # facility-wide switch
+disabled_units: []         # unit codes where human play is off
+queue_minutes: 20          # how long a resident can wait for an opponent
+moves_per_minute: 12       # per resident, across all matches
+max_open_matches: 1        # waiting or active human matches per resident
+# Difficulty: search depth and the share of moves played at random so lower levels can be beaten.
+engine_levels:
+  - {level: 1, depth: 1, mistake_rate: 0.40}
+  - {level: 2, depth: 2, mistake_rate: 0.20}
+  - {level: 3, depth: 2, mistake_rate: 0.05}
+  - {level: 4, depth: 3, mistake_rate: 0.00}
+  - {level: 5, depth: 4, mistake_rate: 0.00}
+handle_adjectives: [Quiet, Steady, Bright, Patient, Calm, Keen, Gentle, Bold, Careful, Swift, Warm, Clever]
+handle_nouns: [Heron, Maple, Otter, Cedar, Falcon, Willow, Badger, Aspen, Finch, Marten, Birch, Wren]

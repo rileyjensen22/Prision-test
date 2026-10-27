@@ -1,4 +1,5 @@
 import {
+  Crown,
   BarChart3,
   BookOpen,
   CalendarDays,
@@ -56,6 +57,7 @@ import Certificates from './pages/Certificates'
 import Devices from './pages/Devices'
 import Accounts from './pages/Accounts'
 import Intake from './pages/Intake'
+import ChessAdmin from './pages/ChessAdmin'
 import KeepSeparate from './pages/KeepSeparate'
 import Outcomes from './pages/Outcomes'
 import Welfare from './pages/Welfare'
@@ -108,6 +110,7 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
       },
       { to: '/staff/monitoring', key: 'monitoring', icon: Eye, roles: SUPERVISION },
       { to: '/staff/keep-separate', key: 'keepSeparate', icon: UserX, roles: SUPERVISION },
+      { to: '/staff/chess', key: 'chess', icon: Crown, roles: SUPERVISION },
     ],
   },
   {
@@ -328,6 +331,14 @@ function Shell() {
                 element={
                   <Guard roles={SUPERVISION}>
                     <Monitoring />
+                  </Guard>
+                }
+              />
+              <Route
+                path="chess"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <ChessAdmin />
                   </Guard>
                 }
               />

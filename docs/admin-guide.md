@@ -108,6 +108,17 @@ must state a reason, and every read is logged. A keyword match only prompts you 
 creates a sanction on its own. **Attorney calls and messages are private: they are never recorded,
 shown or listed in any content.** Only that a call happened and how long it lasted is kept.
 
+## Chess
+
+Residents can play the computer (works offline, five levels) and, from tier 5, other residents.
+**Chess** (supervisors, admins; auditors read) shows the match log: who played whom, the random name
+each had for that match, and the result. Matches never pair two residents on the same line or on a
+keep-separate record, so **every cell needs a line** (set it on the same page; a cell with no line
+is never matched). To stop one resident from playing others, set their chess setting to Off with a
+reason; to stop a whole unit, add it to `disabled_units` in the Chess configuration; a `games`
+sanction does the same for a set time. Playing the computer is never affected, and a resident can
+always leave a game without penalty.
+
 ## Reviewing monitored calls
 
 **Monitoring > Monitored phone calls** (supervisors, admins; auditors can see the list) shows who,
