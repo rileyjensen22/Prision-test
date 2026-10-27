@@ -9,7 +9,6 @@ from isd import settings
 from isd.auth import hash_device_token, hash_password
 from isd.models import (
     ApprovedContentSource,
-    Cell,
     ConfigVersion,
     Contact,
     Device,
@@ -19,7 +18,7 @@ from isd.models import (
     Resident,
     Staff,
 )
-from isd.services import commissary, points
+from isd.services import commissary, facility_model, points
 from isd.services.audit import SYSTEM, append_audit
 from isd.services.config_store import get_current
 
@@ -127,7 +126,13 @@ def seed_database(session: Session, data: dict) -> bool:
     session.flush()
     now = datetime.now(UTC)
     codes: dict[str, Resident] = {}
-    for r in data["residents"]:
+    # The facility at the default (demo) scale; the first cells take the seed residents' names.
+    cells = facility_model.build(
+        session,
+        facility_model.scale_named(session, data.get("scale")),
+        cell_codes=[r["cell"] for r in data["residents"]],
+    )
+    for r, cell in zip(data["residents"], cells, strict=False):
         res = Resident(
             code=r["id"],
             display_name=r["display_name"],
@@ -137,11 +142,10 @@ def seed_database(session: Session, data: dict) -> bool:
         )
         session.add(res)
         codes[r["id"]] = res
-        cell = Cell(code=r["cell"], line_code=f"L{len(codes) % 3 + 1}")
         device = Device(
             code=f"DEV-{r['cell']}", token_hash=hash_device_token(dev_device_token(r["cell"]))
         )
-        session.add_all([cell, device])
+        session.add(device)
         session.flush()
         session.add(DeviceAssignment(device_id=device.id, cell_id=cell.id, resident_id=res.id))
         append_audit(

@@ -1098,6 +1098,19 @@ const en = {
       line: 'Line for',
       lineReason: 'Line set from the chess page',
     },
+    facility: {
+      title: 'Facility by hub, line and floor',
+      hub: 'Hub {{code}}',
+      line: 'Line {{code}}',
+      floor: 'Floor {{n}}',
+      occupied: '{{n}} of {{cells}} cells in use',
+      offline: '{{n}} offline',
+      locked: '{{n}} with a lock',
+    },
+    devicesPage: {
+      offlineOnly: 'Offline only',
+      capped: 'Showing the first {{n}}. Narrow by hub or line to see the rest.',
+    },
     keepSeparate: {
       title: 'Keep separate',
       intro:
@@ -1193,6 +1206,16 @@ const en = {
     },
     roster: {
       title: 'Roster',
+      where: 'Line and floor',
+      hub: 'Hub',
+      line: 'Line',
+      floor: 'Floor',
+      all: 'All',
+      search: 'Search',
+      searchHint: 'Code or cell, then Enter',
+      previous: 'Previous',
+      next: 'Next',
+      showing: 'Showing {{from}} to {{to}} of {{total}}',
       resident: 'Resident',
       cell: 'Cell',
       tier: 'Tier',

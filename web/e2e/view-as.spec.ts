@@ -21,7 +21,7 @@ test('sandbox: override tier, sanctions and language; nothing is written anywher
   const staff = await context.newPage()
   await staffLogin(staff, 'e2e_officer', '/staff/view-as')
   await expect(staff.getByTestId('sandbox-note')).toContainText('SIMULATION')
-  await staff.getByLabel('Resident').selectOption({ label: 'E2E-FAY (tier 1)' })
+  await staff.getByLabel('Resident').selectOption({ label: 'E2E-FAY (E2E-fay)' })
   await expect(sim(staff).getByTestId('tier-label')).toHaveText('Tier 1')
   await expect(sim(staff)).toContainText('SIMULATION')
 
@@ -59,7 +59,7 @@ test('sandbox: override tier, sanctions and language; nothing is written anywher
 
 test('sandbox: time travel and the repeat-return ceiling', async ({ page }) => {
   await staffLogin(page, 'e2e_officer', '/staff/view-as')
-  await page.getByLabel('Resident').selectOption({ label: 'E2E-ALICE (tier 3)' })
+  await page.getByLabel('Resident').selectOption({ label: 'E2E-ALICE (E2E-alice)' })
   await expect(sim(page).getByTestId('lock-title')).toHaveText('Disruptive behavior') // real lock, ~22h left
 
   const inTwoDays = new Date(Date.now() + 2 * 24 * 3600 * 1000)

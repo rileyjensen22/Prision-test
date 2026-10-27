@@ -226,3 +226,28 @@ def validate_chess(payload: dict) -> None:
         words = payload.get(key) or []
         if len(words) < 6 or any(not str(w).isalpha() for w in words):
             raise ValueError(f"chess: {key} needs at least six plain words")
+
+
+def validate_facility(payload: dict) -> None:
+    scales = payload.get("scales") or {}
+    if payload.get("default_scale") not in scales:
+        raise ValueError("facility: default_scale must name one of the scales")
+    for name, sc in scales.items():
+        for key in ("hubs", "lines_per_hub", "floors_per_line", "cells_per_floor"):
+            if not isinstance(sc.get(key), int) or not 1 <= sc[key] <= 99:
+                raise ValueError(f"facility: scale {name} needs {key} from 1 to 99")
+    rec = payload.get("rec") or {}
+    for key in (
+        "rooms_per_line",
+        "outdoor_rooms_per_line",
+        "room_capacity",
+        "max_concurrent_out_per_line",
+        "stagger_minutes",
+    ):
+        if not isinstance(rec.get(key), int) or rec[key] < 1:
+            raise ValueError(f"facility: rec.{key} must be a positive whole number")
+    if rec["max_concurrent_out_per_line"] > rec["outdoor_rooms_per_line"]:
+        raise ValueError("facility: max_concurrent_out_per_line cannot exceed the yards in a line")
+    site = payload.get("site") or {}
+    if not str(site.get("code", "")).strip() or not str(site.get("name", "")).strip():
+        raise ValueError("facility: the site needs a code and a name")

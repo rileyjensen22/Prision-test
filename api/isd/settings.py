@@ -15,6 +15,10 @@ PUBLIC_LOG_SALT = os.environ.get("PUBLIC_LOG_SALT", "dev-only-public-log-salt-ch
 RESEARCH_SALT = os.environ.get("RESEARCH_SALT", "dev-only-research-salt-change-me")
 DB_POOL_SIZE = int(os.environ.get("DB_POOL_SIZE", "20"))  # per API process
 DB_POOL_OVERFLOW = int(os.environ.get("DB_POOL_OVERFLOW", "20"))
+# Rate-limit checks use their own small pool so they never wait on a request that holds the
+# main one. Postgres `max_connections` must cover (DB_POOL_SIZE + DB_POOL_OVERFLOW +
+# 2 * LIMITER_POOL_SIZE) for every API process.
+LIMITER_POOL_SIZE = int(os.environ.get("LIMITER_POOL_SIZE", "2"))
 TOKEN_TTL_SECONDS = int(os.environ.get("TOKEN_TTL_SECONDS", "1800"))  # staff idle timeout
 MAX_BODY_BYTES = int(os.environ.get("MAX_BODY_BYTES", str(1024 * 1024)))
 SSO_MOCK_ENABLED = (
@@ -25,6 +29,9 @@ RATE_LIMIT_ENABLED = os.environ.get("RATE_LIMIT_ENABLED", "true") == "true"
 RATE_LIMIT_STORE = os.environ.get(
     "RATE_LIMIT_STORE", "postgres" if ENV == "production" else "memory"
 )
+# Also share the per-request flood guards (ip, device, staff) between processes. Off by default:
+# it costs a database round trip on every request. See isd/limits.py.
+RATE_LIMIT_SHARE_ALL = os.environ.get("RATE_LIMIT_SHARE_ALL", "false") == "true"
 # Staff must have an authenticator app (TOTP) set up. On by default in production, off in
 # development so the demo and tests can sign in with a password alone.
 STAFF_MFA_REQUIRED = (

@@ -8,13 +8,15 @@ import pytest
 from sqlalchemy import create_engine
 
 from isd import db, limits, settings
-from isd.ratelimit import SharedWindowLimiter
+from isd.ratelimit import SharedWindowLimiter, SlidingWindowLimiter
 
 
 @pytest.fixture(autouse=True)
 def use_test_database(app_engine, monkeypatch):
     """The limiter reaches the database through isd.db.engine; point it at the test database."""
-    monkeypatch.setattr(db, "engine", app_engine)
+    monkeypatch.setattr(
+        db, "limiter_engine", app_engine.execution_options(isolation_level="AUTOCOMMIT")
+    )
 
 
 def name() -> str:
@@ -54,13 +56,33 @@ def test_concurrent_requests_cannot_slip_past_the_limit():
 
 
 def test_an_unreachable_store_lets_requests_through(monkeypatch):
-    monkeypatch.setattr(db, "engine", create_engine("postgresql+psycopg://x:y@127.0.0.1:1/none"))
+    monkeypatch.setattr(
+        db, "limiter_engine", create_engine("postgresql+psycopg://x:y@127.0.0.1:1/none")
+    )
     lim = SharedWindowLimiter(name(), 1, 60)
     assert lim.hit("k") is True and lim.hit("k") is True and lim.count("k") == 0
 
 
+def test_security_limiters_are_shared_and_flood_guards_stay_local_unless_asked(monkeypatch):
+    monkeypatch.setattr(settings, "RATE_LIMIT_STORE", "postgres")
+    monkeypatch.setattr(settings, "RATE_LIMIT_SHARE_ALL", False)
+    try:
+        limits.reset_defaults()
+        for shared in ("login_failures", "login_attempts_ip", "pairing"):
+            assert isinstance(limits.LIMITERS[shared], SharedWindowLimiter)
+        for local in ("ip", "device", "staff"):
+            assert isinstance(limits.LIMITERS[local], SlidingWindowLimiter)
+        monkeypatch.setattr(settings, "RATE_LIMIT_SHARE_ALL", True)
+        limits.reset_defaults()
+        assert all(isinstance(lim, SharedWindowLimiter) for lim in limits.LIMITERS.values())
+    finally:
+        monkeypatch.undo()
+        limits.reset_defaults()
+
+
 def test_the_app_uses_the_shared_store_when_configured(client, monkeypatch):
     monkeypatch.setattr(settings, "RATE_LIMIT_STORE", "postgres")
+    monkeypatch.setattr(settings, "RATE_LIMIT_SHARE_ALL", True)
     monkeypatch.setattr(settings, "RATE_LIMIT_ENABLED", True)
     try:
         lim = limits.configure("ip", 2, 60)

@@ -9,7 +9,7 @@ import { Btn, ErrorLine, Page, Panel, SimulationBanner, useLoad } from '../ui'
 interface RosterRow {
   resident_id: number
   code: string
-  tier: { effective: number }
+  cell: string | null
 }
 interface Infraction {
   code: string
@@ -29,7 +29,7 @@ const sel = 'mt-1 block w-full rounded-ctl border px-2 py-1.5'
 export default function ViewAs() {
   const { t } = useTranslation()
 
-  const roster = useLoad<RosterRow[]>('/staff/roster')
+  const roster = useLoad<RosterRow[]>('/staff/residents/lookup?limit=500')
   const infractions = useLoad<Infraction[]>('/staff/infractions')
   const offenses = useLoad<Offenses>('/config/offenses')
   const [residentId, setResidentId] = useState('')
@@ -121,7 +121,8 @@ export default function ViewAs() {
                 <option value="">{t('staff.pages.ViewAs.choose')}</option>
                 {(roster.data ?? []).map((r) => (
                   <option key={r.resident_id} value={r.resident_id}>
-                    {r.code} (tier {r.tier.effective})
+                    {r.code}
+                    {r.cell ? ` (${r.cell})` : ''}
                   </option>
                 ))}
               </select>

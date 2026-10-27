@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from isd.models import RecBooking, ScheduleBlock
+from isd.services import facility_model as facility
 from isd.services import schedule
 from isd.services.entitlement_service import get_entitlements
 
@@ -25,7 +26,8 @@ def _allowed(block: dict, ent) -> bool:
 def day_view(session: Session, resident_id: int, day: date, now: datetime) -> dict:
     unit = schedule.unit_of(session, resident_id)
     ent = get_entitlements(session, resident_id, now)
-    blocks = schedule.blocks_for(session, unit, day)
+    floor = facility.floor_of_resident(session, resident_id)
+    blocks = schedule.blocks_for(session, unit, day, floor)
     counts = schedule.booked_counts(session, unit, day)
     mine = {
         b.block_id
@@ -55,8 +57,14 @@ def day_view(session: Session, resident_id: int, day: date, now: datetime) -> di
     }
 
 
-def _find_block(session: Session, unit: str, day: date, slot: str, block_id: int | None):
-    q = select(ScheduleBlock).where(ScheduleBlock.unit == unit, ScheduleBlock.day == day)
+def _find_block(
+    session: Session, unit: str, day: date, slot: str, block_id: int | None, floor: int
+):
+    q = select(ScheduleBlock).where(
+        ScheduleBlock.unit == unit,
+        ScheduleBlock.day == day,
+        ScheduleBlock.floor.in_((0, floor)),  # only this floor's blocks and the shared ones
+    )
     if block_id is not None:
         q = q.where(ScheduleBlock.id == block_id)
     else:
@@ -76,7 +84,9 @@ def book(
         raise RecDenied("BAD_DAY", "book today or up to a week ahead")
     unit = schedule.unit_of(session, resident_id)
     schedule.ensure_day(session, unit, day, now)  # a template day becomes real when first used
-    block = _find_block(session, unit, day, slot, block_id)
+    block = _find_block(
+        session, unit, day, slot, block_id, facility.floor_of_resident(session, resident_id)
+    )
     if block is None:
         raise RecDenied("BAD_SLOT", "no such slot")
     if block.status != "scheduled":

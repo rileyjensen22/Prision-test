@@ -26,10 +26,26 @@ def _fail(e: device_fleet.FleetError) -> HTTPException:
 
 @router.get("")
 def fleet(
+    hub: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    offline_only: bool = False,
+    limit: int | None = None,
+    offset: int = 0,
     staff: Staff = Depends(require_roles("officer", "supervisor", "admin", "auditor")),
     db: Session = Depends(get_db),
 ):
-    return device_fleet.fleet(db, _now())
+    """Every screen, or those on one hub, line or floor; `limit` and `offset` page through them."""
+    return device_fleet.fleet(
+        db,
+        _now(),
+        hub=hub,
+        line=line,
+        floor=floor,
+        offline_only=offline_only,
+        limit=None if limit is None else min(max(limit, 1), 1000),
+        offset=max(offset, 0),
+    )
 
 
 class CreateIn(BaseModel):

@@ -57,7 +57,7 @@ export default function OutOfCell() {
   const { t } = useTranslation()
 
   const { user } = useAuth()
-  const roster = useLoad<Roster[]>('/staff/roster')
+  const roster = useLoad<Roster[]>('/staff/residents/lookup?limit=500')
   const out = useLoad<OutNow[]>('/staff/movement/now')
   const below = useLoad<Below[]>('/staff/out-of-cell/below-minimum')
   const [day, setDay] = useState(yesterday())

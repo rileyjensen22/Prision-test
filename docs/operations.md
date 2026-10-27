@@ -17,7 +17,9 @@
 
 Generate secrets with `python -c "import secrets; print(secrets.token_urlsafe(48))"`. Never commit them: `make secrets-check` fails the build if something that looks like a secret is committed. The API refuses to start in production with development values.
 
-Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. Rate-limit counters live in Postgres (`RATE_LIMIT_STORE=postgres`, the production default), so every API process shares one allowance. Development defaults to `memory`. The `rate_limit_hits` table is unlogged and purged by `make daily`.
+Run uvicorn behind a reverse proxy with `--proxy-headers --forwarded-allow-ips=<proxy address>` so rate limits see real client addresses. With `RATE_LIMIT_STORE=postgres` (the production default) the **security** limits (sign-in lockout, sign-in attempts per address, device pairing) are counted in Postgres, so every API process shares one allowance and a lockout cannot be dodged by hitting another process. The per-request flood guards (`ip`, `device`, `staff`) count per process: with N API processes a client can use up to N times its allowance, which is fine for a coarse flood guard, and sharing them cost a database round trip on every request (see the load test below). Set `RATE_LIMIT_SHARE_ALL=true` to share those too. Development defaults to `memory`. The counters (`rate_limit_counts`, one row per key and window) are unlogged and purged by `make daily`.
+
+**Database connections.** Each API process opens up to `DB_POOL_SIZE + DB_POOL_OVERFLOW` (default 20 + 20) connections for requests and `2 * LIMITER_POOL_SIZE` (default 4) for the shared limiter. Postgres allows `max_connections` (default 100) in total, so with four API processes either raise `max_connections` to at least `processes * 44 + 20` or lower the pool (the load test uses 15 + 5). Running out shows up as 500 errors and slow requests under load.
 
 ## First deployment
 
@@ -90,8 +92,7 @@ screens, then exits non-zero if any budget is missed. `--speed N` shortens the i
 
 Headroom: at `--speed 3` (the load of 1,500 kiosks on the same machine) the run missed the kiosk
 budget slightly (device view p95 351 ms, heartbeat p95 401 ms; no errors, staff pages within budget).
-Treat about 1,000 kiosks per 4-core API host as the comfortable limit until the facility-scale
-numbers in Phase 20 are recorded.
+The full-facility numbers are in the Phase 20 section below, which supersedes this limit.
 
 ### What the first run found and what changed
 
@@ -102,10 +103,36 @@ a fixed number of queries (`welfare.detect_many`): about 0.1 s cold and 0.04 s w
 residents. Same flags, same tests. Running four worker processes removed the
 single-process (GIL) ceiling.
 
-Known limits: the staff roster still computes every resident's entitlements on each request (about
-150 ms for 500 residents); Phase 20 makes the dashboard summary come from aggregate queries so it does
-not grow with the number of residents.
+Known limits: fixed in Phase 20 (the roster is paged and the summary uses aggregates; see below).
 
 ### Rerun after Phase 18 (shared Postgres rate limits, encryption on)
 
 500 devices, 4 workers, `RATE_LIMIT_STORE=postgres`, real-time speed (the default is now x1; `--speed 5` is a stress run, not the budget): **passed**. Device view p95 44 ms, heartbeat p95 20 ms, courses p95 43 ms, staff roster p95 617 ms, staff summary p95 480 ms, no errors. At `--speed 5` (2,500 device-equivalents on one small container) the API saturates and times out; that is a capacity limit of this container, not a budget.
+
+## Full facility size (Phase 20)
+
+`make load-test` now builds the full facility (5 hubs x 6 lines x 4 floors x 16 cells = 1,920 cells, a resident and a kiosk in 90% of them: **1,732 kiosks**), starts the API with four workers, runs 15 seconds of warm-up that is not counted, then measures 45 seconds with every kiosk polling at the real intervals plus five staff screens. The staff screens poll what the new dashboard polls: one page of the roster for a hub, the hub/line/floor overview, the summary and one page of devices.
+
+Result (three consecutive runs, 4 cores and 16 GB, with the API, Postgres and the load generator on one machine): **passed every time**, no errors.
+
+| Endpoint | p50 | p95 | p99 |
+|---|---|---|---|
+| kiosk view (2,500+ requests per run) | 19 to 28 ms | 64 to 118 ms | 93 to 567 ms |
+| kiosk heartbeat | 11 ms | 50 ms | 68 ms |
+| staff roster page (100 rows) | 48 to 59 ms | 132 to 158 ms | same |
+| staff summary | 27 to 32 ms | 68 to 126 ms | 83 to 461 ms |
+| staff overview (hub, line, floor) | 18 ms | 68 ms | same |
+| staff devices page | 26 ms | 67 ms | same |
+
+Budgets: kiosk p95 250 ms and p99 1,000 ms; staff p95 1,000 ms and p99 2,500 ms.
+
+**Headroom is under 2x.** With the kiosks polling twice as fast (about 3,460 kiosks of load) the same machine fell over: p50 several seconds, because the API, the database and the load generator were sharing four cores. Treat about 1,900 kiosks on one 4-core host as the limit; for more, put Postgres on its own host and run more API workers. Nothing was tuned to pass: the work below is what the run found.
+
+### What this run found and what changed
+
+- **The roster computed every resident's entitlements, and the summary called the roster.** The summary now comes from aggregate queries (a count of residents, a count of offline devices) and the roster is paged: only the 100 residents on the page get entitlements. The hub, line and floor numbers come from one grouped query (`facility_model.overview`). Residents are picked from a light list (`/staff/residents/lookup`) that does no entitlement work.
+- **Sharing every rate limit through Postgres made kiosks several times slower.** The first Postgres limiter wrote a row per hit and counted rows, so a busy key got slower the busier it was; the second used one counter row per window (cheap, 0.6 ms a check on its own) but still added a database round trip to every request. Now only the security limits are shared. Because a lockout must be exact; a flood guard need not be.
+- **Rate-limit checks and requests shared one connection pool**, so a request holding a connection while it waited for a second one for the limiter could starve itself. The limiter now has its own two-connection pool.
+- **Config was read from the database six times per kiosk request.** The six sections every view needs are now read in one query per request (`config_cache` on request sessions only; scripts and tests always read fresh).
+- **Two queries per request scanned too much** (open appeals for the whole facility, and a resident lookup done twice). Both are scoped to the resident. A kiosk view now makes 17 queries instead of 21.
+- **The first seconds of a run look slow** (cold caches, first connections, and the load generator itself), so the load test counts only after a warm-up.

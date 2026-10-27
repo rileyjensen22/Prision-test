@@ -53,7 +53,9 @@ export default function ChessAdmin() {
   async function saveSwitch() {
     setMsg(null)
     try {
-      const roster = await api<{ code: string; resident_id: number }[]>('/staff/roster')
+      const roster = await api<{ code: string; resident_id: number }[]>(
+        `/staff/residents/lookup?q=${encodeURIComponent(resident.trim())}&limit=20`,
+      )
       const found = roster.find((r) => r.code === resident.trim())
       if (!found) throw new Error(t('staff.chess.noResident'))
       await save(

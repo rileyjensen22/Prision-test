@@ -95,6 +95,53 @@ class Resident(Base):
     chess_human: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
 
+class Site(Base):
+    """The facility. One row today; the table exists so a second site is data, not a rewrite."""
+
+    __tablename__ = "sites"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(128))
+
+
+class Hub(Base):
+    __tablename__ = "hubs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    site_id: Mapped[int] = mapped_column(ForeignKey("sites.id"), index=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class Line(Base):
+    """A line (a housing unit of a few floors). Its code is the cell `unit` and `line_code`."""
+
+    __tablename__ = "lines"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    hub_id: Mapped[int] = mapped_column(ForeignKey("hubs.id"), index=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class Floor(Base):
+    __tablename__ = "floors"
+    __table_args__ = (UniqueConstraint("line_id", "level", name="uq_floor_level"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    line_id: Mapped[int] = mapped_column(ForeignKey("lines.id"), index=True)
+    level: Mapped[int] = mapped_column(Integer)  # 1 is the ground floor
+
+
+class RecArea(Base):
+    """A recreation room belonging to a line. How many may be in use at once is config."""
+
+    __tablename__ = "rec_areas"
+    __table_args__ = (CheckConstraint("kind IN ('indoor', 'outdoor')", name="ck_rec_area_kind"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    line_id: Mapped[int] = mapped_column(ForeignKey("lines.id"), index=True)
+    code: Mapped[str] = mapped_column(String(24), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+    kind: Mapped[str] = mapped_column(String(8))
+
+
 class Cell(Base):
     __tablename__ = "cells"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -103,6 +150,7 @@ class Cell(Base):
     # The line the cell is on. Chess never pairs two residents on the same line. Phase 20 derives
     # it from the facility model; until then staff set it at intake.
     line_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    floor_id: Mapped[int | None] = mapped_column(ForeignKey("floors.id"), nullable=True, index=True)
 
 
 class Device(Base):
@@ -121,6 +169,13 @@ class DeviceAssignment(Base):
     """Device -> cell -> resident. Identity source for the kiosk; changes are audit-logged."""
 
     __tablename__ = "device_assignments"
+    __table_args__ = (
+        Index(
+            "ix_device_assignments_open",
+            "resident_id",
+            postgresql_where=text("ended_at IS NULL"),
+        ),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     device_id: Mapped[int] = mapped_column(ForeignKey("devices.id"))
     cell_id: Mapped[int] = mapped_column(ForeignKey("cells.id"))
@@ -806,7 +861,7 @@ class ScheduleBlock(Base):
 
     __tablename__ = "schedule_blocks"
     __table_args__ = (
-        UniqueConstraint("unit", "day", "kind", "start", name="uq_schedule_block"),
+        UniqueConstraint("unit", "day", "kind", "start", "floor", name="uq_schedule_block"),
         CheckConstraint(f"kind IN {BLOCK_KINDS}", name="ck_block_kind"),
         CheckConstraint("status IN ('scheduled', 'cancelled')", name="ck_block_status"),
         CheckConstraint("minutes > 0 AND capacity > 0", name="ck_block_positive"),
@@ -815,6 +870,8 @@ class ScheduleBlock(Base):
     unit: Mapped[str] = mapped_column(String(16), index=True)
     day: Mapped[date] = mapped_column(Date, index=True)
     kind: Mapped[str] = mapped_column(String(8))
+    floor: Mapped[int] = mapped_column(Integer, default=0, server_default="0")  # 0 = every floor
+    rec_area_id: Mapped[int | None] = mapped_column(ForeignKey("rec_areas.id"), nullable=True)
     start: Mapped[str] = mapped_column(String(5))  # HH:MM, facility local time as entered
     minutes: Mapped[int] = mapped_column(Integer)
     capacity: Mapped[int] = mapped_column(Integer)

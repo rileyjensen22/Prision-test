@@ -20,6 +20,10 @@ log that nobody, including administrators, can change.
 | **Admin** | Everything a supervisor can, plus edit configuration (every change is a new version), manage devices and staff accounts, enter outcomes | Change or delete the audit log. An admin can only add a correcting entry. |
 | **Auditor** | Read everything, including the audit log, transparency data and the config history | Change anything |
 
+## The facility view
+
+The dashboard shows the facility by hub, then line, then floor: how many cells are in use, how many kiosks are offline and how many residents have a lock. Open a hub, then a line, then choose a floor to see that floor's residents on the roster. The roster and the device list can be filtered by hub, line and floor, and the roster by a search on code or cell. See `docs/facility.md`.
+
 ## Your screen
 
 The left side lists the pages. A number next to **Welfare**, **Devices**, **Confirmations** or

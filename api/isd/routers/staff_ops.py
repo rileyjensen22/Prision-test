@@ -40,6 +40,52 @@ def roster(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> list[dict]
     return staff_views.roster(db, _now())
 
 
+@router.get("/roster/page")
+def roster_page(
+    hub: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    q: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+    _: Staff = Depends(ALL),
+    db: Session = Depends(get_db),
+) -> dict:
+    """The roster one page at a time, for a hub, line or floor, or a search on code or cell."""
+    return staff_views.roster_page(
+        db,
+        _now(),
+        hub=hub,
+        line=line,
+        floor=floor,
+        q=q,
+        limit=min(max(limit, 1), 500),
+        offset=max(offset, 0),
+    )
+
+
+@router.get("/residents/lookup")
+def residents_lookup(
+    q: str | None = None,
+    unit: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    limit: int = 50,
+    _: Staff = Depends(ALL),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """A light picker list (code, name, cell, unit, floor): no entitlements are worked out."""
+    return staff_views.lookup(
+        db, q=q, unit=unit, line=line, floor=floor, limit=min(max(limit, 1), 500)
+    )
+
+
+@router.get("/facility/overview")
+def facility_overview(_: Staff = Depends(ALL), db: Session = Depends(get_db)) -> dict:
+    """Cells, residents, offline devices and locked residents by hub, line and floor."""
+    return staff_views.facility_overview(db, _now())
+
+
 @router.get("/residents/{resident_id}")
 def resident(resident_id: int, _: Staff = Depends(ALL), db: Session = Depends(get_db)) -> dict:
     detail = staff_views.resident_detail(db, resident_id, _now())

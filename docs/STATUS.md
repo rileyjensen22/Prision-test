@@ -1,14 +1,14 @@
 # Status
 
-Last updated: Phase 19 (chess). Everything below was checked by running the code, not from memory.
+Last updated: Phase 20 (facility model and scale). Everything below was checked by running the code, not from memory.
 
 ## Verification run
 
 | Check | Result |
 |---|---|
-| `pytest` (API, engine, security, simulation) | 635 passed |
+| `pytest` (API, engine, security, simulation) | 647 passed |
 | `vitest` | 79 passed |
-| Playwright e2e | 89 passed |
+| Playwright e2e | 93 passed |
 | `make lint` (ruff, tsc, eslint, prettier) | clean (after fixing an unused import and formatting in the phone-demo files) |
 | `make secrets-check` | no secrets found |
 | `make simulate-week` | 26 of 26 checks pass; `not_exercised: []`; audit chain verified before and after the public export |
@@ -26,6 +26,7 @@ Last updated: Phase 19 (chess). Everything below was checked by running the code
 | 14 Education depth | **Built** | Course folders with validator CLI, prerequisites, resume, offline lesson progress, certificates (device list, staff print page), 8 sample courses (5 with Spanish, 2 with a simple level), random question draw with shuffled choices, attempt limit and cooldown, points mapped by level through config. |
 | 15 Intake, reentry, outcomes | **Built** | One audited intake step (settings, prior returns with source, offense categories, contacts, keep-separate, cell and device), release countdown on the device, reentry checklist and resources directory from config, cohort outcomes dashboard with outcome entry, pseudonymized researcher export (off by default), import-boundary tests for invariant 17. |
 | 16 | **Built** | Device pairing with one-time codes, heartbeats, staff pause/restart, kiosk provisioning script (tested as files only), structured logs, per-address rate limits, backup and restore drill, load test. Threat model, OTA design, admin guide and compliance gap report written in Phase 17. |
+| 20 | **Built** | Facility model (site, hub, line, floor, cell, recreation rooms) from `config/facility.yaml`: 5 hubs x 6 lines x 4 floors x 16 cells = 1,920 cells; dashboard grouped by hub, line and floor; roster paged and filtered; per-floor recreation with a yard concurrency limit; `make seed` (small) and `make seed-full`; load test at full size (1,732 kiosks) passes the budgets. See `docs/facility.md`, `docs/operations.md`. |
 | 19 | **Built** | Chess: see Phase 10 and invariant 13. Own MIT engine on chess.js (BSD-2) with five levels, offline; human matches with server-checked moves (own rules module, perft-verified), anonymous handles, keep-separate and same-line pairing rules, staff switches per facility, unit and resident, `games` sanction scope, match log and staff page, nullable `line_code` on cells. |
 | 18 | **Built** | Resident vacate and transfer, keep-separate screen, monitored-call review (role and reason; attorney calls never listed), retention jobs from compliance config, staff TOTP MFA with recovery codes and admin password reset, shared Postgres rate limits, AES-GCM encryption at rest with key rotation, reading levels change wording in courses and the reader, demo captions in the video call, Spanish legal and religious placeholder texts, outcomes CSV import (preview, all-or-nothing, append-only), reentry offline from the saved copy, reentry as a named baseline feature, no daily quiz cap on basic courses. |
 | 17 | **Built** | Owner questions answered (`docs/owner-questions.md`); `docs/threat-model.md`, `docs/ota-design.md`, `docs/admin-guide.md`, `docs/compliance-gap-report.md`; load test passes at 500 devices (`docs/operations.md`); welfare detection made set-based after the first run exposed a 4 second cost. |

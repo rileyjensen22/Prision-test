@@ -43,7 +43,7 @@ demo, and every compliance item is unverified).
 | Encryption at rest: AES-256-GCM on message bodies, contact numbers, call recording references and the MFA secret; key id stored with each value; keys from the environment; `scripts/rotate-encryption-key.py` re-encrypts in batches (rotation steps in `isd/services/key_rotation.py`). Contact numbers keep a keyed hash for duplicate checks | Done | `test_crypto.py` |
 | Retention jobs driven by `config/compliance.yaml` (periods unset in the real config, so nothing is deleted until counsel sets them); audit, ledger and other protected tables are never touched | Done | `test_retention.py` |
 | Disk and backup encryption | **Open** | operator responsibility; see `docs/operations.md` |
-| Rate limits in a store shared by every API process (Postgres, sliding window, fails open if the store is down); default in production | Done | `test_shared_ratelimit.py` |
+| Security rate limits (sign-in lockout, sign-in attempts per address, pairing) in a store shared by every API process (Postgres, sliding-window counter, fails open if the store is down); default in production. Per-request flood guards count per process unless `RATE_LIMIT_SHARE_ALL=true` | Done | `test_shared_ratelimit.py` |
 
 ## Application hardening
 
@@ -74,7 +74,7 @@ The kiosk is only as locked down as its operating system. `docs/kiosk.md` lists 
 ## Open items and known limits
 
 1. Keys for encryption at rest live in the environment. A cloud KMS or HSM is the production upgrade and is not built.
-2. The shared rate limiter fails open when Postgres is unreachable (the API is down then anyway); the in-memory limiter is still used in development.
+2. The shared rate limiter fails open when Postgres is unreachable (the API is down then anyway); the in-memory limiter is still used in development. The per-request flood guards are per process, so a client can use up to N times its allowance across N API processes.
 3. Device tokens are long-lived until rotated; no automatic expiry or hardware attestation.
 4. Retention periods are unset pending counsel, so the jobs delete nothing in the real config.
 5. Disks and backups must be encrypted by the operator; application-level encryption covers only the columns listed above.

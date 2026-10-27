@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: seed-full load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -30,6 +30,9 @@ migrate: $(VENV)/.installed
 seed: $(VENV)/.installed migrate
 	$(PY) scripts/seed.py
 
+seed-full: $(VENV)/.installed migrate  ## the full 1,920-cell facility with synthetic residents (needs an empty database)
+	$(PY) scripts/seed-full.py
+
 lint: $(VENV)/.installed
 	$(VENV)/bin/ruff check api scripts
 	$(VENV)/bin/ruff format --check api scripts
@@ -55,8 +58,8 @@ courses-check: $(VENV)/.installed  ## validate every course folder under content
 secrets-check:  ## fail if the repository contains anything that looks like a secret
 	$(PY) scripts/check-secrets.py
 
-load-test: $(VENV)/.installed  ## 500 simulated kiosks plus staff screens against a real API; exit 1 if a budget is missed
-	$(PY) scripts/load-test.py
+load-test: $(VENV)/.installed  ## the full 1,920-cell facility (one kiosk per occupied cell) plus staff screens against a real API; exit 1 if a budget is missed
+	$(PY) scripts/load-test.py --scale full
 
 simulate-week: $(VENV)/.installed
 	$(PY) scripts/simulate-week.py

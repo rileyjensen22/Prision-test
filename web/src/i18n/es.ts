@@ -1129,6 +1129,19 @@ const es: Dict = {
       line: 'Línea de',
       lineReason: 'Línea indicada desde la página de ajedrez',
     },
+    facility: {
+      title: 'Centro por módulo, línea y piso',
+      hub: 'Módulo {{code}}',
+      line: 'Línea {{code}}',
+      floor: 'Piso {{n}}',
+      occupied: '{{n}} de {{cells}} celdas en uso',
+      offline: '{{n}} sin conexión',
+      locked: '{{n}} con restricción',
+    },
+    devicesPage: {
+      offlineOnly: 'Solo sin conexión',
+      capped: 'Se muestran los primeros {{n}}. Filtre por módulo o línea para ver el resto.',
+    },
     keepSeparate: {
       title: 'Mantener separados',
       intro:
@@ -1224,6 +1237,16 @@ const es: Dict = {
     },
     roster: {
       title: 'Lista de residentes',
+      where: 'Línea y piso',
+      hub: 'Módulo',
+      line: 'Línea',
+      floor: 'Piso',
+      all: 'Todos',
+      search: 'Buscar',
+      searchHint: 'Código o celda, luego Enter',
+      previous: 'Anterior',
+      next: 'Siguiente',
+      showing: 'Mostrando {{from}} a {{to}} de {{total}}',
       resident: 'Residente',
       cell: 'Celda',
       tier: 'Nivel',

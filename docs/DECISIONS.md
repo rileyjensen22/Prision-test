@@ -261,3 +261,13 @@ Visual and UX pass only. No engine, API, entitlement or invariant code changed. 
 - **No free text.** Request bodies are Pydantic models with `extra=forbid`, a coordinate pattern for moves and fixed words for everything else. Handles are drawn from two word lists in config plus two digits. The view sent to a player holds the colour, both handles, the position and the moves, never the other resident's code, unit or line. Moves are append-only at the database level.
 - **`ChessProvider` stays** as the seam for a future outside partner; the built-in service does not call it.
 - **Line code** is a nullable column on cells (set by staff on the chess page and audited). Phase 20 derives it from the facility model.
+
+## Phase 20 (facility model and scale)
+
+- **The line is the housing unit.** A line's code is the cell `unit` and `line_code`, so scheduling, keep-separate-on-unit checks, unit switches and chess pairing all use one idea. Rejected: a separate unit table on top of lines (two names for one thing).
+- **Recreation by floor.** Each floor of a line gets its own staggered, room-assigned blocks (greedy placement against the limits). The concurrency limit applies to the yards only; day rooms are limited by the number of day rooms, so the protected baseline out-of-cell time is never held back by it (invariant 1). Rejected: a capacity report (the owner said four yards per line is enough), one-at-a-time per line (cannot give 64 residents 60 minutes each).
+- **Facility tables are plain data, not config.** The shape is rows; the config holds scales and recreation settings. Building refuses to run twice.
+- **Aggregates for the dashboard.** The summary no longer calls the roster; hub, line and floor numbers are one grouped query; the roster is paged and filtered; pickers use a light lookup. `GET /staff/roster` still returns everyone for old callers and tests.
+- **Rate limiting split in two** (found by the full-size load test, details in `docs/operations.md`): security limits are shared through Postgres, per-request flood guards count per process unless `RATE_LIMIT_SHARE_ALL=true`. The Postgres limiter became a sliding-window counter (one row per key and window) on its own small connection pool. This changes the Phase 18 limiter; its tests were updated and a test pins which limiters are shared.
+- **Per-request config cache** for the six hot sections, on request sessions only. A `set_config` in the same session clears it. A change made by another process shows on the next request.
+- **Load test** now builds the facility, discards a 15 second warm-up, and `--scale full` is what `make load-test` runs. Result and limits are in `docs/operations.md`.

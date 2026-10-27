@@ -282,6 +282,22 @@ def main() -> None:
         sanctions.confirm_sanction(
             s, staff_actor("e2e_sup1", "supervisor"), lock.id, now - timedelta(hours=1)
         )
+    with Session(create_engine(url)) as s, s.begin():
+        # A small facility (1 hub, 2 lines, 2 floors) for the grouped dashboard: the two chess
+        # residents are placed on it, one per line; everyone else stays on a plain unit.
+        from isd.models import Cell as _Cell
+        from isd.models import Floor, Line
+        from isd.services import facility_model
+
+        facility_model.build(
+            s, {"hubs": 1, "lines_per_hub": 2, "floors_per_line": 2, "cells_per_floor": 2}
+        )
+        for key, line_code in (("cha", "H1-L1"), ("chb", "H1-L2")):
+            floor = s.execute(
+                select(Floor).join(Line, Line.id == Floor.line_id).where(Line.code == line_code, Floor.level == 1)
+            ).scalar()
+            cell = s.execute(select(_Cell).where(_Cell.code == f"E2E-{key}")).scalar()
+            cell.floor_id, cell.unit, cell.line_code = floor.id, line_code, line_code
     fixtures = {
         "tokens": tokens,
         "staff": STAFF,

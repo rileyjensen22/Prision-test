@@ -1,0 +1,23 @@
+# The facility's shape. The structure itself (hubs, lines, floors, cells, rec rooms) lives in the
+# database; this file says how big the seeded facility is and how recreation is shared out.
+#
+# Full size (the target facility): 5 hubs x 6 lines x 4 floors x 16 cells (one hallway per floor)
+# = 1,920 cells. The default demo seed is small so a laptop starts fast; `make seed-full` builds the
+# full facility with one device in each occupied cell.
+version: 1
+site: {code: SITE1, name: Demonstration facility}
+default_scale: demo
+scales:
+  demo: {hubs: 1, lines_per_hub: 2, floors_per_line: 2, cells_per_floor: 8}
+  full: {hubs: 5, lines_per_hub: 6, floors_per_line: 4, cells_per_floor: 16}
+# Recreation. Each line has `rooms_per_line` day rooms and `outdoor_rooms_per_line` yards. At most
+# `max_concurrent_out_per_line` floors of a line are in the yards at once (never more than there are
+# yards). Day rooms, which carry the baseline out-of-cell time, are held back only by how many day
+# rooms the line has. Floors start `stagger_minutes` apart so they are not all let out together.
+# Room capacity is the most residents in a room at a time (a whole floor is 16 cells).
+rec:
+  rooms_per_line: 4
+  outdoor_rooms_per_line: 4
+  room_capacity: 16
+  max_concurrent_out_per_line: 4
+  stagger_minutes: 15

@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
-import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import { Badge, Btn, ErrorLine, FIELD, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import type { Overview } from './FacilityOverview'
 
 interface Row {
   device: string
@@ -24,12 +25,22 @@ interface Row {
 }
 
 const mb = (n?: number) => (n === undefined ? '—' : `${n} MB`)
+const LIMIT = 200
 
 export default function Devices() {
   const { t } = useTranslation()
 
   const { user } = useAuth()
-  const { data, error, reload } = useLoad<Row[]>('/staff/devices')
+  const [hub, setHub] = useState('')
+  const [line, setLine] = useState('')
+  const [offlineOnly, setOfflineOnly] = useState(false)
+  const query = new URLSearchParams({ limit: String(LIMIT) })
+  if (hub) query.set('hub', hub)
+  if (line) query.set('line', line)
+  if (offlineOnly) query.set('offline_only', 'true')
+  const { data, error, reload } = useLoad<Row[]>(`/staff/devices?${query}`)
+  const hubs = useLoad<Overview>('/staff/facility/overview').data?.hubs ?? []
+  const lines = hubs.filter((h) => !hub || h.code === hub).flatMap((h) => h.lines)
   const isAdmin = user?.role === 'admin'
   const canPair = !!user && ['supervisor', 'admin'].includes(user.role)
   const [newCode, setNewCode] = useState('')
@@ -67,6 +78,50 @@ export default function Devices() {
           </p>
         </Panel>
       )}
+      <div className="flex flex-wrap items-end gap-3" data-testid="device-filters">
+        {hubs.length > 0 && (
+          <>
+            <label className="text-sm">
+              {t('staff.roster.hub')}
+              <select
+                className={FIELD}
+                value={hub}
+                onChange={(e) => {
+                  setHub(e.target.value)
+                  setLine('')
+                }}
+              >
+                <option value="">{t('staff.roster.all')}</option>
+                {hubs.map((h) => (
+                  <option key={h.code}>{h.code}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm">
+              {t('staff.roster.line')}
+              <select className={FIELD} value={line} onChange={(e) => setLine(e.target.value)}>
+                <option value="">{t('staff.roster.all')}</option>
+                {lines.map((l) => (
+                  <option key={l.code}>{l.code}</option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
+        <label className="flex min-h-touch items-center gap-2">
+          <input
+            type="checkbox"
+            checked={offlineOnly}
+            onChange={(e) => setOfflineOnly(e.target.checked)}
+          />
+          {t('staff.devicesPage.offlineOnly')}
+        </label>
+        {(data?.length ?? 0) >= LIMIT && (
+          <span className="text-sm text-ink-soft">
+            {t('staff.devicesPage.capped', { n: LIMIT })}
+          </span>
+        )}
+      </div>
       {isAdmin && (
         <Panel title={t('staff.pages.Devices.enrollADevice')}>
           <div className="flex flex-wrap gap-2">

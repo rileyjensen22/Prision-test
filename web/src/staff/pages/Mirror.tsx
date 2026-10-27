@@ -40,7 +40,7 @@ export default function Mirror() {
 
   const { user } = useAuth()
   const canStart = user?.role === 'supervisor' || user?.role === 'admin'
-  const roster = useLoad<RosterRow[]>('/staff/roster')
+  const roster = useLoad<RosterRow[]>('/staff/residents/lookup?limit=500')
   const history = useLoad<Hist[]>('/staff/mirror/sessions')
   const [residentId, setResidentId] = useState('')
   const [reason, setReason] = useState('')

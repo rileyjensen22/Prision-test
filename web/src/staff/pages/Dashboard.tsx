@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { fmt } from '../api'
 import { ErrorLine, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import { FacilityOverview } from './FacilityOverview'
 
 interface Summary {
   residents: number
@@ -135,6 +136,7 @@ export default function Dashboard() {
           {s.overdue_appeals} appeal(s) are past their review deadline.
         </p>
       )}
+      <FacilityOverview />
       <Panel title={t('staff.pages.Dashboard.recentEvents')}>
         <ErrorLine error={events.error} />
         <Table data-testid="event-feed">
