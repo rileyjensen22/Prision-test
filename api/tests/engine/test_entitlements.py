@@ -100,7 +100,7 @@ def test_effective_tier_respects_ceiling(cfg, f):
 def test_seed_matrix(cfg):
     t1 = compute_entitlements(ResidentFacts(1, 0), cfg, T0)
     assert t1.features["calls"].limits == {"minutes_per_day": 15}
-    assert not t1.allowed("texting") and not t1.allowed("chess_engine")
+    assert not t1.allowed("texting") and not t1.allowed("chess")
     assert t1.features["texting"].reasons[0].code == "TIER_LOCKED"
     t10 = compute_entitlements(ResidentFacts(10, 0), cfg, T0)
     assert t10.features["calls"].limits == {"minutes_per_day": 90}

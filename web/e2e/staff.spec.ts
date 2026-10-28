@@ -58,7 +58,7 @@ test('full flow: record, confirm, resident appeals, other supervisor overturns, 
   await expect(kiosk.getByTestId('lock-title')).toHaveText('Cell camera blocked')
   await expect(kiosk.getByTestId('tile-calls')).toHaveAttribute('data-allowed', 'false')
   await expect(kiosk.getByTestId('tile-commissary')).toHaveAttribute('data-allowed', 'false')
-  for (const f of ['attorney_calls', 'legal_materials', 'medical_requests', 'basic_education'])
+  for (const f of ['attorney_calls', 'legal_materials', 'health_requests', 'basic_education'])
     await expect(kiosk.getByTestId(`tile-${f}`)).toHaveAttribute('data-allowed', 'true')
   await kiosk.getByTestId('lock').getByRole('link', { name: 'Appeal' }).click()
   await kiosk.getByRole('button', { name: 'Send appeal' }).click()

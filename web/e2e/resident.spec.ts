@@ -24,7 +24,7 @@ test('locks show a reason, an end time and a way to appeal; baseline and Request
     'attorney_calls',
     'legal_materials',
     'grievances_appeals',
-    'medical_requests',
+    'health_requests',
     'basic_education',
   ])
     await expect(page.getByTestId(`tile-${f}`)).toHaveAttribute('data-allowed', 'true')

@@ -26,6 +26,7 @@ export function TierStaircase({ tier }: { tier: Tier }) {
       {STEPS.map((n) => {
         const earned = n <= tier.effective
         const beyond = n > tier.ceiling
+        const manualCap = tier.max_tier_override !== null && n > tier.max_tier_override
         return (
           <div key={n} className="flex flex-1 flex-col items-center gap-1">
             <div
@@ -33,8 +34,8 @@ export function TierStaircase({ tier }: { tier: Tier }) {
                 'w-full rounded-t-md border-2',
                 earned
                   ? 'border-primary-ink bg-primary-ink'
-                  : beyond
-                    ? 'border-dashed border-primary-ink/40'
+                  : beyond || manualCap
+                    ? 'border-dashed border-primary-ink/40 opacity-50'
                     : 'border-primary-ink/70',
                 n === tier.effective && 'ring-2 ring-primary-ink ring-offset-2 ring-offset-primary',
               )}

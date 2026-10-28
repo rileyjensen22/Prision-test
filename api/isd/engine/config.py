@@ -11,10 +11,10 @@ from isd.engine.reading import CATALOG_FEATURE
 class TierRow:
     calls_min_day: int
     texts_day: int
-    video_min_week: int
+    video_min_day: int
     commissary_usd_week: int
     chess: str  # none | engine | human
-    outdoor_rec_h_day: int
+    outdoor_rec_min_day: int
 
 
 @dataclass(frozen=True)
@@ -48,7 +48,6 @@ class EngineConfig:
     ceiling_p: float
     tiers: dict[int, TierRow]
     general_reading_from_tier: int
-    expanded_catalog_from_tier: int
     advanced_education_from_tier: int
     infractions: dict[str, InfractionRule]
     offense_rules: dict[str, OffenseRule]
@@ -68,9 +67,8 @@ class EngineConfig:
             ceiling_N=float(t["repeat_return"]["N"]),
             ceiling_p=float(t["repeat_return"]["p"]),
             tiers={int(k): TierRow(**v) for k, v in t["tiers"].items()},
-            general_reading_from_tier=content["general_reading_from_tier"],
-            expanded_catalog_from_tier=content["expanded_catalog_from_tier"],
-            advanced_education_from_tier=content["advanced_education_from_tier"],
+            general_reading_from_tier=int(content["general_reading_from_tier"]),
+            advanced_education_from_tier=int(content["advanced_education_from_tier"]),
             infractions={c: InfractionRule(code=c, **v) for c, v in sanc["infractions"].items()},
             offense_rules={
                 r["offense_category"]: OffenseRule(

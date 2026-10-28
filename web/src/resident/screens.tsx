@@ -26,13 +26,11 @@ const ALWAYS_ORDER = [
   'contact_requests',
   'legal_materials',
   'grievances_appeals',
-  'medical_requests',
-  'mental_health_requests',
-  'emergency_contact',
-  'religious_texts',
+  'health_requests',
   'basic_education',
-  'out_of_cell_minimum',
-] // request_staff is the persistent button, so it is not repeated as a tile
+  'religious_texts',
+  'reentry',
+] // request_staff is the persistent button; emergency_contact / out_of_cell_minimum are not tiled
 
 export function Home() {
   const { t, i18n } = useTranslation()
@@ -126,6 +124,19 @@ export function Home() {
           )}
         </section>
 
+        <section aria-labelledby="h-always" className="space-y-3">
+          <h2 id="h-always" className="text-h2 font-bold">
+            {t('home.always')}
+          </h2>
+          <ul className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]">
+            {ALWAYS_ORDER.filter((n) => features[n]).map((name) => (
+              <li key={name}>
+                <Tile name={name} feature={features[name]} compact />
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {view.allowances.length > 0 && (
           <section data-testid="allowances" aria-labelledby="h-allow" className="space-y-3">
             <h2 id="h-allow" className="text-h2 font-bold">
@@ -187,28 +198,10 @@ export function Home() {
           </h2>
           <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]">
             <li>
-              <OptionalLink to="/resident/reentry" testId="reentry-link" icon={Sprout}>
-                {t('home.reentryLink')}
-              </OptionalLink>
-            </li>
-            <li>
               <OptionalLink to="/resident/jobs" testId="jobs-link" icon={Wrench}>
                 {t('home.jobsLink')}
               </OptionalLink>
             </li>
-          </ul>
-        </section>
-
-        <section aria-labelledby="h-always" className="space-y-3">
-          <h2 id="h-always" className="text-h2 font-bold">
-            {t('home.always')}
-          </h2>
-          <ul className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]">
-            {ALWAYS_ORDER.filter((n) => features[n]).map((name) => (
-              <li key={name}>
-                <Tile name={name} feature={features[name]} compact />
-              </li>
-            ))}
           </ul>
         </section>
       </div>

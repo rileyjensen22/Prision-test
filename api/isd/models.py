@@ -93,6 +93,8 @@ class Resident(Base):
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Staff switch for human chess: None follows the unit and facility setting.
     chess_human: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    # Staff-settable hard cap on earned tier (repeat-return ceiling is automatic; this is manual).
+    max_tier_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class Site(Base):

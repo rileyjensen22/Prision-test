@@ -115,7 +115,7 @@ def test_significant_sanction_needs_other_supervisor_and_evidence(
     assert e.value.code == "SAME_PERSON"
     sanctions.confirm_sanction(owner, sup2, s.id, NOW + timedelta(hours=1))
     ent = get_entitlements(owner, rid, NOW + timedelta(hours=2))
-    assert not any(ent.allowed(f) for f in ("calls", "commissary", "texting", "chess_engine"))
+    assert not any(ent.allowed(f) for f in ("calls", "commissary", "texting", "chess"))
     assert ent.allowed("attorney_calls") and ent.allowed("basic_education")
     assert all(r.code == "CAM_BLOCK" for r in ent.features["calls"].reasons)
 

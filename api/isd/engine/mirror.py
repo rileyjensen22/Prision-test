@@ -10,8 +10,7 @@ import re
 PRIVATE_SCREEN_PREFIXES = (
     "/resident/feature/legal_materials",
     "/resident/feature/grievances_appeals",
-    "/resident/feature/medical_requests",
-    "/resident/feature/mental_health_requests",
+    "/resident/feature/health_requests",
     "/resident/feature/attorney_calls",
     "/resident/feature/contact_requests",  # names and numbers of people, including attorneys
 )

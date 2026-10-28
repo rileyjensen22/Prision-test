@@ -94,16 +94,14 @@ const en = {
     texting: 'Text messages',
     video: 'Video calls',
     commissary: 'Commissary',
-    chess_engine: 'Chess vs computer',
+    chess: 'Chess',
     chess_human: 'Chess vs people',
     reading_general: 'Reading library',
-    reading_expanded: 'Expanded reading',
     advanced_education: 'Advanced classes',
     outdoor_rec: 'Outdoor recreation',
     legal_materials: 'Law library',
     grievances_appeals: 'Grievances and appeals',
-    medical_requests: 'Medical requests',
-    mental_health_requests: 'Mental health requests',
+    health_requests: 'Health and mental health',
     request_staff: 'Request staff',
     emergency_contact: 'Emergency contact',
     religious_texts: 'Religious texts',
@@ -278,8 +276,9 @@ const en = {
   },
   commissary: {
     title: 'Commissary',
-    balance: 'Your balance: {{amount}}',
-    weekly: 'This week: {{left}} left of {{limit}}',
+    balance: 'Deposited funds: {{amount}}',
+    weekly: 'Spending cap: {{left}} left of {{limit}} this week',
+    noFunds: 'No funds in your account. Ask staff or a family member to make a deposit.',
     add: 'Add',
     remove: 'Remove',
     cart: 'Your order',
@@ -330,6 +329,7 @@ const en = {
   },
   jobs: {
     title: 'Optional jobs',
+    comingSoon: 'Work in progress — coming soon. Jobs will be voluntary and will never affect your tier or privileges.',
     voluntary:
       'Jobs are your choice. Not joining, or leaving later, never changes your tier, points, or privileges.',
     split:
@@ -412,7 +412,7 @@ const en = {
   },
   video: {
     title: 'Video calls',
-    left: '{{n}} video minutes left this week',
+    left: '{{n}} video minutes left today',
     tab: { now: 'Call now', schedule: 'Schedule' },
     start: 'Start video call',
     inCall: 'Video call in progress',

@@ -7,19 +7,18 @@ baseline_out_of_cell_minutes: 60
 repeat_return:
   N: 12
   p: 1.5
-# calls_min_day, texts_day, video_min_week, commissary_usd_week, chess, outdoor_rec_h_day
+# calls_min_day, texts_day, video_min_day, commissary_usd_week, chess, outdoor_rec_min_day
 tiers:
-  1:  {calls_min_day: 15, texts_day: 0,  video_min_week: 0,   commissary_usd_week: 20,  chess: none,       outdoor_rec_h_day: 0}
-  2:  {calls_min_day: 20, texts_day: 0,  video_min_week: 0,   commissary_usd_week: 30,  chess: engine,     outdoor_rec_h_day: 0}
-  3:  {calls_min_day: 30, texts_day: 0,  video_min_week: 0,   commissary_usd_week: 40,  chess: engine,     outdoor_rec_h_day: 0}
-  4:  {calls_min_day: 30, texts_day: 10, video_min_week: 0,   commissary_usd_week: 50,  chess: engine,     outdoor_rec_h_day: 0}
-  5:  {calls_min_day: 40, texts_day: 20, video_min_week: 0,   commissary_usd_week: 60,  chess: human,      outdoor_rec_h_day: 0}
-  6:  {calls_min_day: 45, texts_day: 30, video_min_week: 30,  commissary_usd_week: 75,  chess: human,      outdoor_rec_h_day: 0}
-  7:  {calls_min_day: 60, texts_day: 40, video_min_week: 60,  commissary_usd_week: 90,  chess: human,      outdoor_rec_h_day: 0}
-  8:  {calls_min_day: 60, texts_day: 50, video_min_week: 90,  commissary_usd_week: 110, chess: human,      outdoor_rec_h_day: 0}
-  9:  {calls_min_day: 75, texts_day: 60, video_min_week: 120, commissary_usd_week: 130, chess: human,      outdoor_rec_h_day: 1}
-  10: {calls_min_day: 90, texts_day: 75, video_min_week: 180, commissary_usd_week: 150, chess: human,      outdoor_rec_h_day: 2}
+  1:  {calls_min_day: 15, texts_day: 0,  video_min_day: 0,  commissary_usd_week: 20, chess: human, outdoor_rec_min_day: 0}
+  2:  {calls_min_day: 20, texts_day: 0,  video_min_day: 0,  commissary_usd_week: 25, chess: human, outdoor_rec_min_day: 0}
+  3:  {calls_min_day: 30, texts_day: 0,  video_min_day: 0,  commissary_usd_week: 30, chess: human, outdoor_rec_min_day: 0}
+  4:  {calls_min_day: 35, texts_day: 10, video_min_day: 0,  commissary_usd_week: 40, chess: human, outdoor_rec_min_day: 0}
+  5:  {calls_min_day: 40, texts_day: 20, video_min_day: 0,  commissary_usd_week: 45, chess: human, outdoor_rec_min_day: 0}
+  6:  {calls_min_day: 45, texts_day: 30, video_min_day: 15, commissary_usd_week: 50, chess: human, outdoor_rec_min_day: 0}
+  7:  {calls_min_day: 55, texts_day: 40, video_min_day: 30, commissary_usd_week: 55, chess: human, outdoor_rec_min_day: 0}
+  8:  {calls_min_day: 60, texts_day: 45, video_min_day: 45, commissary_usd_week: 60, chess: human, outdoor_rec_min_day: 20}
+  9:  {calls_min_day: 75, texts_day: 50, video_min_day: 60, commissary_usd_week: 65, chess: human, outdoor_rec_min_day: 40}
+  10: {calls_min_day: 90, texts_day: 50, video_min_day: 75, commissary_usd_week: 70, chess: human, outdoor_rec_min_day: 60}
 content:
   general_reading_from_tier: 1
-  expanded_catalog_from_tier: 4
   advanced_education_from_tier: 3

@@ -137,6 +137,9 @@ export function Commissary() {
           <p data-testid="balance" className="text-label font-bold">
             {t('commissary.balance', { amount: money(cat.balance_cents, lang) })}
           </p>
+          {cat.balance_cents === 0 && (
+            <p className="text-sm text-ink-soft">{t('commissary.noFunds')}</p>
+          )}
           <p data-testid="weekly">
             {t('commissary.weekly', {
               left: money(Math.max(0, cat.weekly_limit_cents - cat.spent_this_week_cents), lang),

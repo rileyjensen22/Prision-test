@@ -287,7 +287,7 @@ def test_private_screens_are_never_mirrored(client, kiosk, account):
     sid = start(client, sup, rid).json()["session_id"]
     for path in (
         "/resident/feature/legal_materials",
-        "/resident/feature/medical_requests",
+        "/resident/feature/health_requests",
         "/resident/feature/grievances_appeals/new",
     ):
         client.post("/device/screen", json={"path": path}, headers=dh(token))

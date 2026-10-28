@@ -32,7 +32,6 @@ def test_page_clamping_and_completion():
 def test_every_catalog_maps_to_a_feature_and_legal_religious_are_the_baseline():
     assert CATALOG_FEATURE == {
         "general": "reading_general",
-        "expanded": "reading_expanded",
         "legal": "legal_materials",
         "religious": "religious_texts",
     }
