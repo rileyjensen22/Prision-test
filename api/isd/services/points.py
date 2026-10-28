@@ -37,7 +37,7 @@ def total_points_many(
         .where(PointEvent.resident_id.in_(resident_ids), PointEvent.created_at <= at_time)
         .group_by(PointEvent.resident_id)
     ).all()
-    found = {rid: int(total or 0) for rid, total in rows}
+    found = {rid: max(0, int(total or 0)) for rid, total in rows}
     return {rid: found.get(rid, 0) for rid in resident_ids}
 
 

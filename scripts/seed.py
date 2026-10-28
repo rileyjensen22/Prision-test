@@ -22,6 +22,9 @@ ROLES = [
     "supervisor",
     "admin",
     "auditor",
+    "health_staff",
+    "legal_liaison",
+    "commissary_clerk",
 ]
 
 

@@ -574,6 +574,12 @@ const es: Dict = {
       config: 'Configuración',
       audit: 'Registro de auditoría',
       styleguide: 'Guía de estilo',
+      healthRequests: 'Solicitudes de salud',
+      grievances: 'Quejas',
+      attorneyCalls: 'Llamadas de abogado',
+      commissary: 'Pedidos de comisaría',
+      video: 'Supervisión de video',
+      reentryResources: 'Recursos de reinserción',
     },
     table: {
       region: 'Tabla desplazable',
@@ -982,7 +988,7 @@ const es: Dict = {
       Schedule: {
         unitSchedule: 'Horario de la unidad',
         eachUnitHasIts:
-          'Cada unidad tiene su propio día: recreo en interiores y al aire libre, programas y visitas. Un día sin cambios usa la plantilla predeterminada. Quién puede inscribirse lo determinan las reglas de acceso (por ejemplo, el tiempo al aire libre en los niveles 9 y 10), no esta página.',
+          'Cada unidad tiene su propio día: recreo en interiores y al aire libre, programas y visitas. Un día sin cambios usa la plantilla predeterminada. Quién puede inscribirse lo determinan las reglas de acceso (por ejemplo, el tiempo al aire libre en el nivel 8 o superior), no esta página.',
         unit: 'Unidad',
         day: 'Día',
         makeTheNextWeek: 'Crear la semana siguiente',

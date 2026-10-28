@@ -554,6 +554,12 @@ const en = {
       config: 'Config',
       audit: 'Audit log',
       styleguide: 'Style guide',
+      healthRequests: 'Health requests',
+      grievances: 'Grievances',
+      attorneyCalls: 'Attorney calls',
+      commissary: 'Commissary orders',
+      video: 'Video oversight',
+      reentryResources: 'Reentry resources',
     },
     table: {
       region: 'Scrollable table',
@@ -957,7 +963,7 @@ const en = {
       Schedule: {
         unitSchedule: 'Unit schedule',
         eachUnitHasIts:
-          'Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no changes uses the default template. Who can sign up comes from the entitlement rules (for example outdoor time at tiers 9 and 10), not from this page.',
+          'Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no changes uses the default template. Who can sign up comes from the entitlement rules (for example outdoor time at Tier 8+), not from this page.',
         unit: 'Unit',
         day: 'Day',
         makeTheNextWeek: 'Make the next week',

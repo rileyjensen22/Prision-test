@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { api, errorText, getToken, post, setToken } from './api'
 import { Btn, FIELD, Notice } from './ui'
 
-export type Role = 'officer' | 'supervisor' | 'admin' | 'auditor'
+export type Role = 'officer' | 'supervisor' | 'admin' | 'auditor' | 'health_staff' | 'legal_liaison' | 'commissary_clerk'
 interface User {
   id: number
   username: string

@@ -15,7 +15,9 @@ import {
   LineChart,
   LogOut,
   MonitorPlay,
+  Package,
   Palette,
+  Phone,
   Radio,
   Scale,
   ScrollText,
@@ -26,6 +28,7 @@ import {
   UserCog,
   UserX,
   Users,
+  Video,
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -37,13 +40,17 @@ import { api } from './api'
 import { AuthProvider, LoginPage, useAuth } from './auth'
 import type { Role } from './auth'
 import Appeals from './pages/Appeals'
+import AttorneyCalls from './pages/AttorneyCalls'
 import AuditLog from './pages/AuditLog'
+import CommissaryQueue from './pages/CommissaryQueue'
 import ConfigEditor from './pages/ConfigEditor'
 import Confirmations from './pages/Confirmations'
 import ContactRequests from './pages/ContactRequests'
 import ContentJobs from './pages/ContentJobs'
 import Dashboard from './pages/Dashboard'
 import Finance from './pages/Finance'
+import Grievances from './pages/Grievances'
+import HealthRequests from './pages/HealthRequests'
 import Mirror from './pages/Mirror'
 import Monitoring from './pages/Monitoring'
 import OutOfCell from './pages/OutOfCell'
@@ -60,6 +67,7 @@ import Intake from './pages/Intake'
 import ChessAdmin from './pages/ChessAdmin'
 import KeepSeparate from './pages/KeepSeparate'
 import Outcomes from './pages/Outcomes'
+import VideoOversight from './pages/VideoOversight'
 import Welfare from './pages/Welfare'
 import Styleguide from './pages/Styleguide'
 
@@ -70,7 +78,7 @@ interface NavItem {
   icon: LucideIcon
   roles?: Role[]
   /** Which summary count to show as a badge. */
-  badge?: 'pending_confirmations' | 'open_appeals' | 'welfare_flags' | 'offline_devices'
+  badge?: 'pending_confirmations' | 'open_appeals' | 'welfare_flags' | 'offline_devices' | 'open_health_requests' | 'open_grievances' | 'pending_attorney_calls' | 'commissary_orders_waiting'
 }
 const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
   {
@@ -111,6 +119,40 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
       { to: '/staff/monitoring', key: 'monitoring', icon: Eye, roles: SUPERVISION },
       { to: '/staff/keep-separate', key: 'keepSeparate', icon: UserX, roles: SUPERVISION },
       { to: '/staff/chess', key: 'chess', icon: Crown, roles: SUPERVISION },
+      {
+        to: '/staff/health-requests',
+        key: 'healthRequests',
+        icon: HeartPulse,
+        roles: ['health_staff', 'supervisor', 'admin', 'auditor'],
+        badge: 'open_health_requests' as const,
+      },
+      {
+        to: '/staff/grievances',
+        key: 'grievances',
+        icon: Scale,
+        roles: ['supervisor', 'admin', 'auditor'],
+        badge: 'open_grievances' as const,
+      },
+      {
+        to: '/staff/attorney-calls',
+        key: 'attorneyCalls',
+        icon: Phone,
+        roles: ['legal_liaison', 'supervisor', 'admin', 'auditor'],
+        badge: 'pending_attorney_calls' as const,
+      },
+      {
+        to: '/staff/commissary',
+        key: 'commissary',
+        icon: Package,
+        roles: ['commissary_clerk', 'supervisor', 'admin', 'auditor'],
+        badge: 'commissary_orders_waiting' as const,
+      },
+      {
+        to: '/staff/video',
+        key: 'video',
+        icon: Video,
+        roles: SUPERVISION,
+      },
     ],
   },
   {
@@ -374,6 +416,46 @@ function Shell() {
                 element={
                   <Guard roles={['admin']}>
                     <Accounts />
+                  </Guard>
+                }
+              />
+              <Route
+                path="health-requests"
+                element={
+                  <Guard roles={['health_staff', 'supervisor', 'admin', 'auditor']}>
+                    <HealthRequests />
+                  </Guard>
+                }
+              />
+              <Route
+                path="grievances"
+                element={
+                  <Guard roles={['supervisor', 'admin', 'auditor']}>
+                    <Grievances />
+                  </Guard>
+                }
+              />
+              <Route
+                path="attorney-calls"
+                element={
+                  <Guard roles={['legal_liaison', 'supervisor', 'admin', 'auditor']}>
+                    <AttorneyCalls />
+                  </Guard>
+                }
+              />
+              <Route
+                path="commissary"
+                element={
+                  <Guard roles={['commissary_clerk', 'supervisor', 'admin', 'auditor']}>
+                    <CommissaryQueue />
+                  </Guard>
+                }
+              />
+              <Route
+                path="video"
+                element={
+                  <Guard roles={SUPERVISION}>
+                    <VideoOversight />
                   </Guard>
                 }
               />
