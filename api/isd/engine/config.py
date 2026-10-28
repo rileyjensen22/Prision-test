@@ -137,6 +137,10 @@ def validate_courses(payload: dict) -> None:
     quiz = payload["quiz_defaults"]
     if any(not isinstance(quiz[k], int) or quiz[k] < 1 for k in quiz):
         raise ValueError("quiz_defaults must be positive whole numbers")
+    if "basic" not in payload.get("uncapped_attempt_levels", []):
+        raise ValueError("basic education has no attempt cap (invariant 1)")
+    if not set(payload.get("uncapped_attempt_levels", [])) <= {"basic", "advanced", "program"}:
+        raise ValueError("uncapped_attempt_levels must be course levels")
     for c in payload["courses"]:
         bank = c["quiz"]["bank"]
         if not c["lessons"] or not bank:
@@ -194,3 +198,72 @@ def validate_reading(payload: dict) -> None:
         ids.add(it["id"])
         if not it.get("source", "").strip() or not it["text"].strip():
             raise ValueError(f"{it['id']}: needs a source and some text")
+        seen = {(it["language"], "standard")}
+        for v in it.get("variants", []):
+            key = (v.get("language"), v.get("reading_level"))
+            if key[0] not in ("en", "es") or key[1] not in ("standard", "simple"):
+                raise ValueError(
+                    f"{it['id']}: a variant needs language en or es and a reading level"
+                )
+            if key in seen or not str(v.get("text", "")).strip():
+                raise ValueError(f"{it['id']}: duplicate variant {key} or empty text")
+            seen.add(key)
+
+
+def validate_compliance(payload: dict) -> None:
+    """The few compliance values that protect invariants 1 and 6 cannot be configured away."""
+    if "attorney" not in (payload.get("privileged_contact_types") or []):
+        raise ValueError("privileged_contact_types must include attorney (invariant 6)")
+    for key in (
+        "min_out_of_cell_minutes_per_day",
+        "appeal_review_hours",
+        "officer_weekly_immediate_sanction_cap",
+        "offline_alert_minutes",
+    ):
+        if not isinstance(payload.get(key), int) or payload[key] < 1:
+            raise ValueError(f"{key} must be a positive whole number")
+
+
+def validate_chess(payload: dict) -> None:
+    for key in ("queue_minutes", "moves_per_minute", "max_open_matches"):
+        if not isinstance(payload.get(key), int) or payload[key] < 1:
+            raise ValueError(f"chess: {key} must be a positive whole number")
+    if not isinstance(payload.get("human_enabled"), bool):
+        raise ValueError("chess: human_enabled must be true or false")
+    if not isinstance(payload.get("disabled_units"), list):
+        raise ValueError("chess: disabled_units must be a list")
+    levels = payload.get("engine_levels") or []
+    if [lv.get("level") for lv in levels] != list(range(1, len(levels) + 1)) or not levels:
+        raise ValueError("chess: engine_levels must be numbered 1, 2, 3 ... in order")
+    for lv in levels:
+        if not 1 <= lv.get("depth", 0) <= 5 or not 0 <= lv.get("mistake_rate", -1) <= 1:
+            raise ValueError("chess: a level needs depth 1 to 5 and mistake_rate 0 to 1")
+    for key in ("handle_adjectives", "handle_nouns"):
+        words = payload.get(key) or []
+        if len(words) < 6 or any(not str(w).isalpha() for w in words):
+            raise ValueError(f"chess: {key} needs at least six plain words")
+
+
+def validate_facility(payload: dict) -> None:
+    scales = payload.get("scales") or {}
+    if payload.get("default_scale") not in scales:
+        raise ValueError("facility: default_scale must name one of the scales")
+    for name, sc in scales.items():
+        for key in ("hubs", "lines_per_hub", "floors_per_line", "cells_per_floor"):
+            if not isinstance(sc.get(key), int) or not 1 <= sc[key] <= 99:
+                raise ValueError(f"facility: scale {name} needs {key} from 1 to 99")
+    rec = payload.get("rec") or {}
+    for key in (
+        "rooms_per_line",
+        "outdoor_rooms_per_line",
+        "room_capacity",
+        "max_concurrent_out_per_line",
+        "stagger_minutes",
+    ):
+        if not isinstance(rec.get(key), int) or rec[key] < 1:
+            raise ValueError(f"facility: rec.{key} must be a positive whole number")
+    if rec["max_concurrent_out_per_line"] > rec["outdoor_rooms_per_line"]:
+        raise ValueError("facility: max_concurrent_out_per_line cannot exceed the yards in a line")
+    site = payload.get("site") or {}
+    if not str(site.get("code", "")).strip() or not str(site.get("name", "")).strip():
+        raise ValueError("facility: the site needs a code and a name")

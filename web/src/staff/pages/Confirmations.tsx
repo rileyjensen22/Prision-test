@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
-import { Badge, Btn, ErrorLine, Notice, Page, Table, Td, Th, useLoad } from '../ui'
+import { Badge, Btn, DataTable, ErrorLine, Notice, Page, useLoad } from '../ui'
+import type { Column } from '../ui'
 
 interface Item {
   id: number
@@ -19,6 +21,7 @@ interface Item {
 }
 
 export default function Confirmations() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Item[]>('/staff/confirmations')
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
@@ -39,103 +42,125 @@ export default function Confirmations() {
     }
   }
 
+  const evidenceText = (q: Item) =>
+    q.evidence.type === 'second_staff_report'
+      ? t('staff.confirm.evidenceReport', { name: q.evidence.reporter?.username ?? '?' })
+      : q.evidence.type === 'system_event'
+        ? t('staff.confirm.evidenceSystem', { ref: q.evidence.ref ?? '' })
+        : t('staff.confirm.evidenceNone')
+
+  const columns: Column<Item>[] = [
+    {
+      key: 'resident',
+      header: t('staff.confirm.resident'),
+      sort: (q) => q.resident_code,
+      text: (q) => q.resident_code,
+      cell: (q) => <strong>{q.resident_code}</strong>,
+    },
+    {
+      key: 'infraction',
+      header: t('staff.confirm.infraction'),
+      sort: (q) => q.infraction_code,
+      text: (q) => `${q.infraction_code} ${q.label}`,
+      cell: (q) => (
+        <>
+          {q.infraction_code}{' '}
+          <Badge tone={q.severity === 'major' ? 'red' : 'gray'}>{q.severity}</Badge>
+          <div className="text-ink-soft">
+            {q.label}, {q.duration_hours}h · {fmt(q.issued_at)}
+          </div>
+        </>
+      ),
+    },
+    {
+      key: 'by',
+      header: t('staff.confirm.recordedBy'),
+      sort: (q) => q.issued_by?.username ?? '',
+      text: (q) => q.issued_by?.username ?? '',
+      cell: (q) => q.issued_by?.username ?? t('staff.common.system'),
+    },
+    {
+      key: 'evidence',
+      header: t('staff.confirm.evidence'),
+      text: evidenceText,
+      cell: evidenceText,
+    },
+    {
+      key: 'why',
+      header: t('staff.confirm.why'),
+      text: (q) => q.why_pending,
+      cell: (q) => q.why_pending,
+    },
+    {
+      key: 'action',
+      header: t('staff.confirm.action'),
+      cell: (q) =>
+        !isSupervisor ? (
+          <span className="text-ink-soft">{t('staff.common.supervisorsOnly')}</span>
+        ) : !q.can_confirm ? (
+          <span data-testid="own-sanction" className="text-ink-soft">
+            {t('staff.confirm.own')}
+          </span>
+        ) : rejecting === q.id ? (
+          <span className="flex flex-wrap gap-2">
+            <input
+              aria-label={t('staff.confirm.rejectReason')}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+            <Btn
+              kind="danger"
+              disabled={!note.trim()}
+              onClick={() =>
+                void act(
+                  () => post(`/staff/sanctions/${q.id}/reject`, { note }),
+                  t('staff.confirm.okRejected'),
+                )
+              }
+            >
+              {t('staff.confirm.reject')}
+            </Btn>
+            <Btn kind="plain" onClick={() => setRejecting(null)}>
+              {t('staff.common.cancel')}
+            </Btn>
+          </span>
+        ) : (
+          <span className="flex gap-2">
+            <Btn
+              onClick={() =>
+                void act(
+                  () => post(`/staff/sanctions/${q.id}/confirm`),
+                  t('staff.confirm.okConfirmed'),
+                )
+              }
+            >
+              {t('staff.confirm.confirm')}
+            </Btn>
+            <Btn kind="plain" onClick={() => setRejecting(q.id)}>
+              {t('staff.confirm.rejectAsk')}
+            </Btn>
+          </span>
+        ),
+    },
+  ]
+
   return (
-    <Page title="Awaiting confirmation">
-      <p className="text-sm text-gray-600">
-        A supervisor other than the person who recorded it must confirm each one. Nothing is locked
-        for the resident until then.
-      </p>
+    <Page title={t('staff.confirm.title')}>
+      <p className="text-ink-soft">{t('staff.confirm.intro')}</p>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      <Table data-testid="confirmation-queue">
-        <thead>
-          <tr>
-            <Th>Resident</Th>
-            <Th>Infraction</Th>
-            <Th>Recorded by</Th>
-            <Th>Evidence</Th>
-            <Th>Why waiting</Th>
-            <Th>Action</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {(data ?? []).length === 0 && (
-            <tr>
-              <Td>Nothing waiting.</Td>
-            </tr>
-          )}
-          {(data ?? []).map((q) => (
-            <tr key={q.id} data-testid={`pending-${q.id}`}>
-              <Td>{q.resident_code}</Td>
-              <Td>
-                {q.infraction_code}{' '}
-                <Badge tone={q.severity === 'major' ? 'red' : 'gray'}>{q.severity}</Badge>
-                <div className="text-gray-600">
-                  {q.label}, {q.duration_hours}h · {fmt(q.issued_at)}
-                </div>
-              </Td>
-              <Td>{q.issued_by?.username ?? 'system'}</Td>
-              <Td>
-                {q.evidence.type === 'second_staff_report'
-                  ? `Report from ${q.evidence.reporter?.username ?? '?'}`
-                  : q.evidence.type === 'system_event'
-                    ? `System event ${q.evidence.ref ?? ''}`
-                    : 'None needed'}
-              </Td>
-              <Td>{q.why_pending}</Td>
-              <Td>
-                {!isSupervisor ? (
-                  <span className="text-gray-500">Supervisors only</span>
-                ) : !q.can_confirm ? (
-                  <span data-testid="own-sanction" className="text-gray-600">
-                    You recorded this; another supervisor must confirm.
-                  </span>
-                ) : rejecting === q.id ? (
-                  <span className="flex gap-2">
-                    <input
-                      aria-label="Reason for rejecting"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      className="rounded border px-2 py-1"
-                    />
-                    <Btn
-                      kind="danger"
-                      disabled={!note.trim()}
-                      onClick={() =>
-                        void act(
-                          () => post(`/staff/sanctions/${q.id}/reject`, { note }),
-                          'Rejected.',
-                        )
-                      }
-                    >
-                      Reject
-                    </Btn>
-                    <Btn kind="plain" onClick={() => setRejecting(null)}>
-                      Cancel
-                    </Btn>
-                  </span>
-                ) : (
-                  <span className="flex gap-2">
-                    <Btn
-                      onClick={() =>
-                        void act(
-                          () => post(`/staff/sanctions/${q.id}/confirm`),
-                          'Confirmed. The lock is now active.',
-                        )
-                      }
-                    >
-                      Confirm
-                    </Btn>
-                    <Btn kind="plain" onClick={() => setRejecting(q.id)}>
-                      Reject…
-                    </Btn>
-                  </span>
-                )}
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <DataTable
+        columns={columns}
+        rows={data ?? []}
+        rowKey={(q) => q.id}
+        testId="confirmation-queue"
+        rowTestId={(q) => `pending-${q.id}`}
+        empty={
+          <p className="rounded-card border border-line bg-surface p-4">
+            {t('staff.confirm.empty')}
+          </p>
+        }
+      />
     </Page>
   )
 }

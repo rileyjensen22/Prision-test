@@ -13,6 +13,7 @@ BASELINE_FEATURES = frozenset(
         "attorney_calls",
         "contact_requests",  # asking staff to approve a contact; attorney access depends on it
         "out_of_cell_minimum",
+        "reentry",  # release countdown, checklist and resources: information, never lockable
     }
 )
 
@@ -38,6 +39,7 @@ SCOPES: dict[str, frozenset[str]] = {
     "communication": frozenset({"calls", "texting", "video"}),
     "commissary": frozenset({"commissary"}),
     "video": frozenset({"video"}),
+    "games": frozenset({"chess_human"}),  # blocks human play only; the engine stays open
     "all_non_baseline": NON_BASELINE_FEATURES,
 }
 

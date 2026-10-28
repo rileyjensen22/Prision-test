@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Link2 } from 'lucide-react'
+
+import { Button } from '../ui/Button'
 import { TOKEN_KEY } from './api'
 
 /** First boot: the kiosk trades the one-time code staff give it for its own device token. */
@@ -40,16 +43,16 @@ export function Pairing() {
 
   return (
     <form
-      className="space-y-4"
+      className="space-y-5 rounded-card border border-line bg-surface p-8 shadow-card"
       data-testid="pairing"
       onSubmit={(e) => {
         e.preventDefault()
         void pair(code)
       }}
     >
-      <h1 className="text-3xl font-bold">{t('pairing.title')}</h1>
+      <h1 className="text-h2 font-bold">{t('pairing.title')}</h1>
       <p>{t('pairing.help')}</p>
-      <label className="block text-xl">
+      <label className="block text-label font-bold">
         {t('pairing.code')}
         <input
           value={code}
@@ -57,17 +60,22 @@ export function Pairing() {
           autoComplete="off"
           autoCapitalize="characters"
           maxLength={16}
-          className="mt-2 block min-h-14 w-full rounded-lg border-2 border-white bg-slate-900 px-4 font-mono text-2xl"
+          className="mt-2 block min-h-touch w-full rounded-ctl border-2 border-ink bg-surface px-4 font-mono text-h3 tracking-widest"
         />
       </label>
-      {error && <p role="alert">{error}</p>}
-      <button
+      {error && (
+        <p role="alert" className="rounded-ctl bg-danger-soft p-4 font-bold text-danger">
+          {error}
+        </p>
+      )}
+      <Button
         type="submit"
+        variant="primary"
+        icon={Link2}
         disabled={busy || code.trim().length < 6}
-        className="min-h-14 rounded-lg bg-blue-700 px-6 py-3 font-semibold disabled:opacity-40"
       >
         {t('pairing.connect')}
-      </button>
+      </Button>
     </form>
   )
 }

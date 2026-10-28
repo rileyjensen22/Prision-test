@@ -15,6 +15,7 @@ from isd.engine.reading import (
     clamp_page,
     is_complete,
     paginate,
+    pick_variant,
 )
 from isd.models import (
     ApprovedContentSource,
@@ -22,6 +23,7 @@ from isd.models import (
     ReadingBookmark,
     ReadingLog,
     ReadingProgress,
+    Resident,
 )
 from isd.services.audit import SYSTEM, Actor, append_audit
 from isd.services.config_store import get_current
@@ -35,6 +37,12 @@ class ReadingDenied(ValueError):
     def __init__(self, code: str, message: str):
         super().__init__(message)
         self.code = code
+
+
+def _preferences(session: Session, resident_id: int) -> tuple[str, str]:
+    """The resident's language and reading level (set by staff)."""
+    r = session.get(Resident, resident_id)
+    return (r.language, r.reading_level) if r else ("en", "standard")
 
 
 def _items(session: Session) -> dict[str, dict]:
@@ -90,18 +98,21 @@ def list_items(session: Session, resident_id: int, now: datetime) -> list[dict]:
     progress = _progress(session, resident_id)
     marks = _bookmarks(session, resident_id)
     out = []
+    language, level = _preferences(session, resident_id)
     for i in _items(session).values():
         allowed, reasons, _ = _can_read(i, ent, sources)
         p = progress.get(i["id"])
+        v = pick_variant(i, language, level)
         out.append(
             {
                 "id": i["id"],
-                "title": i["title"],
-                "author": i["author"],
+                "title": v["title"],
+                "author": v["author"],
                 "catalog": i["catalog"],
                 "feature": CATALOG_FEATURE[i["catalog"]],
-                "language": i["language"],
-                "pages": len(paginate(i["text"])),
+                "language": v["language"],
+                "reading_level": v["reading_level"],
+                "pages": len(paginate(v["text"])),
                 "page": p.page if p else 0,
                 "completed": bool(p and p.completed_at),
                 "bookmarks": len(marks.get(i["id"], [])),
@@ -138,13 +149,15 @@ def read_item(session: Session, resident_id: int, item_id: str, now: datetime) -
             ReadingProgress.resident_id == resident_id, ReadingProgress.item_id == item_id
         )
     ).scalar()
-    pages = paginate(item["text"])
+    v = pick_variant(item, *_preferences(session, resident_id))
+    pages = paginate(v["text"])
     return {
         "id": item["id"],
-        "title": item["title"],
-        "author": item["author"],
-        "language": item["language"],
-        "text": item["text"],
+        "title": v["title"],
+        "author": v["author"],
+        "language": v["language"],
+        "reading_level": v["reading_level"],
+        "text": v["text"],
         "pages": pages,
         "page": clamp_page(p.page if p else 0, len(pages)),
         "completed": bool(p and p.completed_at),

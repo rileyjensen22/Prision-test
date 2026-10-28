@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState } from '../../ui/States'
 import { NetworkError } from '../api'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
@@ -101,22 +103,22 @@ export function Video() {
   const nameOf = (id: number) => contacts?.find((c) => c.id === id)?.name ?? ''
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('video.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('video.title')}</h1>
       {allowance && (
         <p data-testid="video-left">
           {t('video.left', { n: Math.max(0, allowance.limit - allowance.used) })}
         </p>
       )}
       {notice && (
-        <p
+        <Notice
+          tone={notice.kind === 'ok' ? 'ok' : notice.kind === 'tamper' ? 'notice' : 'danger'}
           role={notice.kind === 'ok' ? 'status' : 'alert'}
           data-testid={notice.kind === 'tamper' ? 'video-tamper' : 'video-notice'}
-          className="rounded-lg border-2 border-amber-400 p-3"
         >
           {notice.text}
-        </p>
+        </Notice>
       )}
       <div className="flex gap-3" role="tablist">
         {(['now', 'schedule'] as const).map((k) => (
@@ -125,8 +127,8 @@ export function Video() {
             role="tab"
             aria-selected={tab === k}
             onClick={() => setTab(k)}
-            className={`min-h-14 rounded-lg border-2 px-5 py-3 font-semibold ${
-              tab === k ? 'border-white bg-slate-700' : 'border-slate-500'
+            className={`min-h-touch rounded-ctl border-2 px-6 py-3 text-label font-bold ${
+              tab === k ? 'border-primary bg-primary-soft' : 'border-line bg-surface'
             }`}
           >
             {t(`video.tab.${k}`)}
@@ -140,12 +142,12 @@ export function Video() {
             {(contacts ?? []).map((c) => (
               <li key={c.id}>
                 <Card data-testid={`video-contact-${c.type}`}>
-                  <p className="text-xl font-semibold">{c.name}</p>
+                  <p className="text-label font-bold">{c.name}</p>
                   <p>{t(`calls.type.${c.type}`)}</p>
                   <button
                     disabled={!c.available}
                     onClick={() => void begin('/device/video-calls', { contact_id: c.id })}
-                    className="mt-2 min-h-14 rounded-lg bg-green-700 px-6 py-3 font-semibold disabled:opacity-40"
+                    className="mt-2 min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110 disabled:opacity-40"
                   >
                     {c.available ? t('video.start') : t('calls.unavailable')}
                   </button>
@@ -153,7 +155,7 @@ export function Video() {
               </li>
             ))}
           </ul>
-          {contacts?.length === 0 && <p>{t('calls.none')}</p>}
+          {contacts?.length === 0 && <EmptyState title={t('calls.none')} />}
         </>
       ) : (
         <Schedule
@@ -171,7 +173,7 @@ export function Video() {
 
 function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) => void }) {
   const { t } = useTranslation()
-  const { request, now } = useResident()
+  const { request, now, view } = useResident()
   const localRef = useRef<HTMLVideoElement>(null)
   const remoteRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -273,13 +275,13 @@ function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) 
   }, [left, finish])
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">{t('video.inCall')}</h1>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <h1 className="text-h1 font-bold">{t('video.inCall')}</h1>
       <Card data-testid="in-video-call">
-        <p data-testid="video-call-notice" className="text-2xl font-semibold">
+        <p data-testid="video-call-notice" className="text-h3 font-bold">
           {call.privileged ? t('video.privileged') : t('video.monitored')}
         </p>
-        <p data-testid="video-timer" className="mt-3 text-4xl">
+        <p data-testid="video-timer" className="mt-3 text-display tabular-nums">
           {t('calls.timeLeft', { time: clock(left) })}
         </p>
       </Card>
@@ -298,16 +300,38 @@ function InCall({ call, onDone }: { call: VideoCall; onDone: (n: Notice | null) 
           autoPlay
           playsInline
           muted
-          className="absolute bottom-3 right-3 w-1/4 rounded-lg border-2 border-white bg-black"
+          className="absolute bottom-3 right-3 w-1/4 rounded-lg border-2 border-surface bg-black"
         />
       </div>
+      {view?.settings.captions && <DemoCaptions />}
       <p>{t('video.keepCameraClear')}</p>
       <button
         onClick={() => void finish('end')}
-        className="min-h-16 w-full rounded-xl bg-red-700 px-6 py-4 text-xl font-bold"
+        className="min-h-touch w-full rounded-ctl bg-danger px-6 py-4 text-label font-bold text-primary-ink"
       >
         {t('calls.end')}
       </button>
+    </div>
+  )
+}
+
+/**
+ * Demo captions. The demo link has no remote speaker, so these are fixed sample lines that rotate.
+ * They are never made from the call's audio: nothing is transcribed (invariant 6). A real
+ * deployment gets live captions from the video provider's own caption feed.
+ */
+function DemoCaptions() {
+  const { t } = useTranslation()
+  const lines = t('video.demoCaptions', { returnObjects: true }) as unknown as string[]
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setI((n) => n + 1), 4000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div data-testid="video-captions" className="rounded-card border border-line bg-surface p-4">
+      <p className="text-sm text-ink-soft">{t('video.captionsLabel')}</p>
+      <p className="mt-1 text-h3 font-bold">{lines[i % lines.length]}</p>
     </div>
   )
 }
@@ -371,11 +395,11 @@ function Schedule({
     }
   }
 
-  const field = 'min-h-14 w-full rounded-lg border-2 border-white bg-slate-900 px-3'
+  const field = 'min-h-touch w-full rounded-ctl border-2 border-ink bg-surface px-3 text-body'
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <Card data-testid="booking-form">
-        <h2 className="mb-3 text-2xl font-bold">{t('video.schedule')}</h2>
+        <h2 className="mb-3 text-h2 font-bold">{t('video.schedule')}</h2>
         <label className="block">
           {t('video.with')}
           <select className={field} value={who} onChange={(e) => setWho(e.target.value)}>
@@ -422,18 +446,22 @@ function Schedule({
         <button
           disabled={contacts.length === 0}
           onClick={() => void book()}
-          className="mt-4 min-h-14 rounded-lg bg-blue-700 px-6 py-3 font-semibold disabled:opacity-40"
+          className="mt-4 min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110 disabled:opacity-40"
         >
           {t('video.book')}
         </button>
       </Card>
-      <h2 className="text-2xl font-bold">{t('video.upcoming')}</h2>
-      {bookings.length === 0 && <p data-testid="no-bookings">{t('video.noneBooked')}</p>}
+      <h2 className="text-h2 font-bold">{t('video.upcoming')}</h2>
+      {bookings.length === 0 && (
+        <div data-testid="no-bookings">
+          <EmptyState title={t('video.noneBooked')} />
+        </div>
+      )}
       <ul className="space-y-3">
         {bookings.map((b) => (
           <li key={b.id}>
             <Card data-testid={`booking-${b.id}`}>
-              <p className="text-xl font-semibold">{nameOf(b.contact_id)}</p>
+              <p className="text-label font-bold">{nameOf(b.contact_id)}</p>
               <p>
                 {new Date(b.starts_at).toLocaleString(i18n.language, {
                   dateStyle: 'medium',
@@ -444,13 +472,13 @@ function Schedule({
               <div className="mt-2 flex gap-3">
                 <button
                   onClick={() => onStart(b.id)}
-                  className="min-h-14 rounded-lg bg-green-700 px-6 py-3 font-semibold"
+                  className="min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110"
                 >
                   {t('video.start')}
                 </button>
                 <button
                   onClick={() => void cancel(b.id)}
-                  className="min-h-14 rounded-lg border-2 border-white px-6 py-3"
+                  className="min-h-touch rounded-ctl border-2 border-ink bg-surface px-6 py-3 text-label font-bold text-ink hover:bg-surface-2"
                 >
                   {t('video.cancelBooking')}
                 </button>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, post } from '../api'
 import { useAuth } from '../auth'
@@ -25,6 +26,8 @@ interface Day {
 const today = () => new Date().toISOString().slice(0, 10)
 
 export default function Schedule() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const units = useLoad<string[]>('/staff/schedule/units')
   const [unit, setUnit] = useState('A')
@@ -52,22 +55,18 @@ export default function Schedule() {
     }
   }
 
-  const field = 'rounded border px-2 py-1'
+  const field = 'rounded-ctl border px-2 py-1'
   return (
-    <Page title="Unit schedule">
-      <p className="text-sm text-gray-600">
-        Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no
-        changes uses the default template. Who can sign up comes from the entitlement rules (for
-        example outdoor time at tiers 9 and 10), not from this page.
-      </p>
+    <Page title={t('staff.pages.Schedule.unitSchedule')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.Schedule.eachUnitHasIts')}</p>
       <ErrorLine error={units.error ?? view.error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <Panel>
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-sm">
-            Unit
+            {t('staff.pages.Schedule.unit')}
             <select
-              aria-label="Unit"
+              aria-label={t('staff.pages.Schedule.unit')}
               className={`${field} ml-2`}
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
@@ -78,9 +77,9 @@ export default function Schedule() {
             </select>
           </label>
           <label className="text-sm">
-            Day
+            {t('staff.pages.Schedule.day')}
             <input
-              aria-label="Day"
+              aria-label={t('staff.pages.Schedule.day')}
               type="date"
               className={`${field} ml-2`}
               value={day}
@@ -99,7 +98,7 @@ export default function Schedule() {
                 void run(() => post('/staff/schedule/generate?days=7'), 'Next week made.')
               }
             >
-              Make the next week
+              {t('staff.pages.Schedule.makeTheNextWeek')}
             </Btn>
           )}
         </div>
@@ -108,11 +107,11 @@ export default function Schedule() {
         <Table data-testid="schedule-blocks">
           <thead>
             <tr>
-              <Th>Start</Th>
-              <Th>What</Th>
-              <Th>Length</Th>
-              <Th>Signed up</Th>
-              <Th>Who can sign up</Th>
+              <Th>{t('staff.pages.Schedule.start')}</Th>
+              <Th>{t('staff.pages.Schedule.what')}</Th>
+              <Th>{t('staff.pages.Schedule.length')}</Th>
+              <Th>{t('staff.pages.Schedule.signedUp')}</Th>
+              <Th>{t('staff.pages.Schedule.whoCanSignUp')}</Th>
               <Th></Th>
             </tr>
           </thead>
@@ -123,9 +122,11 @@ export default function Schedule() {
                 <Td>
                   {b.title ?? b.kind}{' '}
                   <Badge tone={b.kind === 'visit' ? 'amber' : 'gray'}>{b.kind}</Badge>
-                  {b.status === 'cancelled' && <Badge tone="red">cancelled</Badge>}
+                  {b.status === 'cancelled' && (
+                    <Badge tone="red">{t('staff.pages.Schedule.cancelled')}</Badge>
+                  )}
                 </Td>
-                <Td>{b.minutes} min</Td>
+                <Td>{t('staff.msg.minutes', { n: b.minutes })}</Td>
                 <Td>
                   {b.booked} / {b.capacity}
                 </Td>
@@ -143,7 +144,7 @@ export default function Schedule() {
                         )
                       }
                     >
-                      Cancel
+                      {t('staff.pages.Schedule.cancel')}
                     </Btn>
                   )}
                 </Td>
@@ -153,9 +154,9 @@ export default function Schedule() {
         </Table>
         {canEdit && (
           <label className="mt-3 block text-sm">
-            Reason for cancelling
+            {t('staff.pages.Schedule.reasonForCancelling')}
             <input
-              aria-label="Reason for cancelling"
+              aria-label={t('staff.pages.Schedule.reasonForCancelling')}
               className={`${field} ml-2 w-72`}
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
@@ -164,12 +165,12 @@ export default function Schedule() {
         )}
       </Panel>
       {canEdit && (
-        <Panel title="Add a block">
+        <Panel title={t('staff.pages.Schedule.addABlock')}>
           <div className="flex flex-wrap items-end gap-3">
             <label className="text-sm">
-              Kind
+              {t('staff.pages.Schedule.kind')}
               <select
-                aria-label="Kind"
+                aria-label={t('staff.pages.Schedule.kind')}
                 className={`${field} ml-2`}
                 value={form.kind}
                 onChange={(e) => setForm({ ...form, kind: e.target.value })}
@@ -180,18 +181,18 @@ export default function Schedule() {
               </select>
             </label>
             <label className="text-sm">
-              Start
+              {t('staff.pages.Schedule.start')}
               <input
-                aria-label="Start time"
+                aria-label={t('staff.pages.Schedule.startTime')}
                 className={`${field} ml-2 w-20`}
                 value={form.start}
                 onChange={(e) => setForm({ ...form, start: e.target.value })}
               />
             </label>
             <label className="text-sm">
-              Minutes
+              {t('staff.pages.Schedule.minutes')}
               <input
-                aria-label="Minutes"
+                aria-label={t('staff.pages.Schedule.minutes')}
                 type="number"
                 className={`${field} ml-2 w-20`}
                 value={form.minutes}
@@ -199,9 +200,9 @@ export default function Schedule() {
               />
             </label>
             <label className="text-sm">
-              Capacity
+              {t('staff.pages.Schedule.capacity')}
               <input
-                aria-label="Capacity"
+                aria-label={t('staff.pages.Schedule.capacity')}
                 type="number"
                 className={`${field} ml-2 w-20`}
                 value={form.capacity}
@@ -209,18 +210,18 @@ export default function Schedule() {
               />
             </label>
             <label className="text-sm">
-              Title
+              {t('staff.pages.Schedule.title')}
               <input
-                aria-label="Title"
+                aria-label={t('staff.pages.Schedule.title')}
                 className={`${field} ml-2 w-48`}
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </label>
             <label className="text-sm">
-              Reason
+              {t('staff.pages.Schedule.reason')}
               <input
-                aria-label="Reason"
+                aria-label={t('staff.pages.Schedule.reason')}
                 className={`${field} ml-2 w-64`}
                 value={form.reason}
                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
@@ -244,7 +245,7 @@ export default function Schedule() {
                 )
               }
             >
-              Add block
+              {t('staff.pages.Schedule.addBlock')}
             </Btn>
           </div>
         </Panel>

@@ -21,7 +21,7 @@ test('sandbox: override tier, sanctions and language; nothing is written anywher
   const staff = await context.newPage()
   await staffLogin(staff, 'e2e_officer', '/staff/view-as')
   await expect(staff.getByTestId('sandbox-note')).toContainText('SIMULATION')
-  await staff.getByLabel('Resident').selectOption({ label: 'E2E-FAY (tier 1)' })
+  await staff.getByLabel('Resident').selectOption({ label: 'E2E-FAY (E2E-fay)' })
   await expect(sim(staff).getByTestId('tier-label')).toHaveText('Tier 1')
   await expect(sim(staff)).toContainText('SIMULATION')
 
@@ -59,7 +59,7 @@ test('sandbox: override tier, sanctions and language; nothing is written anywher
 
 test('sandbox: time travel and the repeat-return ceiling', async ({ page }) => {
   await staffLogin(page, 'e2e_officer', '/staff/view-as')
-  await page.getByLabel('Resident').selectOption({ label: 'E2E-ALICE (tier 3)' })
+  await page.getByLabel('Resident').selectOption({ label: 'E2E-ALICE (E2E-alice)' })
   await expect(sim(page).getByTestId('lock-title')).toHaveText('Disruptive behavior') // real lock, ~22h left
 
   const inTwoDays = new Date(Date.now() + 2 * 24 * 3600 * 1000)
@@ -109,7 +109,7 @@ test('live mirror: logged, read-only, follows the device, hides private screens'
   await expect(sup.getByTestId('sim-screen')).not.toContainText('SIMULATION')
 
   // The mirror follows the resident to the home screen...
-  await kiosk.getByRole('link', { name: '← Back' }).click()
+  await kiosk.getByRole('link', { name: 'Back' }).click()
   await expect(sup.getByTestId('mirror-screen')).toContainText(/Screen: \/resident( |\()/, {
     timeout: 10_000,
   })
@@ -123,7 +123,7 @@ test('live mirror: logged, read-only, follows the device, hides private screens'
   await expect(sup.getByTestId('sim-screen')).toHaveCount(0)
   await expect(sup.getByTestId('mirror-redacted')).not.toContainText('legal_materials')
 
-  await kiosk.getByRole('link', { name: '← Back' }).click()
+  await kiosk.getByRole('link', { name: 'Back' }).click()
   await expect(sup.getByTestId('sim-screen')).toBeVisible({ timeout: 10_000 })
 
   await sup.getByRole('button', { name: 'End mirror' }).click()

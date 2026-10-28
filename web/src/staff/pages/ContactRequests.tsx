@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { errorText, fmt, post } from '../api'
@@ -22,6 +23,8 @@ const VERIFY: Record<string, { text: string; tone: 'green' | 'amber' | 'gray' }>
 }
 
 export default function ContactRequests() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Request[]>('/staff/contact-requests')
   const [note, setNote] = useState<Record<number, string>>({})
@@ -41,26 +44,27 @@ export default function ContactRequests() {
     !!user && (r.type !== 'attorney' || ['supervisor', 'admin'].includes(user.role))
 
   return (
-    <Page title="Contact requests">
-      <p className="text-sm text-gray-600">
-        Residents ask to add people to their call and text lists. Nothing can be used until it is
-        approved. Attorney contacts need a supervisor. Number checks are a stub in this version.
-      </p>
+    <Page title={t('staff.pages.ContactRequests.contactRequests')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.ContactRequests.residentsAskToAdd')}</p>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       <Panel>
-        {data?.length === 0 && <p data-testid="no-contact-requests">No requests are waiting.</p>}
+        {data?.length === 0 && (
+          <p data-testid="no-contact-requests">
+            {t('staff.pages.ContactRequests.noRequestsAreWaiting')}
+          </p>
+        )}
         {!!data?.length && (
           <Table data-testid="contact-requests">
             <thead>
               <tr>
-                <Th>Resident</Th>
-                <Th>Name</Th>
-                <Th>Type</Th>
-                <Th>Number</Th>
-                <Th>Asked</Th>
-                <Th>Check</Th>
-                <Th>Decision</Th>
+                <Th>{t('staff.pages.ContactRequests.resident')}</Th>
+                <Th>{t('staff.pages.ContactRequests.name')}</Th>
+                <Th>{t('staff.pages.ContactRequests.type')}</Th>
+                <Th>{t('staff.pages.ContactRequests.number')}</Th>
+                <Th>{t('staff.pages.ContactRequests.asked')}</Th>
+                <Th>{t('staff.pages.ContactRequests.check')}</Th>
+                <Th>{t('staff.pages.ContactRequests.decision')}</Th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +72,7 @@ export default function ContactRequests() {
                 <tr key={r.id} data-testid={`request-${r.id}`}>
                   <Td>
                     <Link
-                      className="text-blue-700 underline"
+                      className="text-primary underline"
                       to={`/staff/residents/${r.resident_id}`}
                     >
                       #{r.resident_id}
@@ -88,18 +92,22 @@ export default function ContactRequests() {
                       <div className="flex flex-wrap items-center gap-2">
                         <input
                           aria-label={`Note for request ${r.id}`}
-                          placeholder="Note (needed to refuse)"
-                          className="rounded border px-2 py-1"
+                          placeholder={t('staff.pages.ContactRequests.noteNeededToRefuse')}
+                          className="rounded-ctl border px-2 py-1"
                           value={note[r.id] ?? ''}
                           onChange={(e) => setNote({ ...note, [r.id]: e.target.value })}
                         />
-                        <Btn onClick={() => void review(r, true)}>Approve</Btn>
+                        <Btn onClick={() => void review(r, true)}>
+                          {t('staff.pages.ContactRequests.approve')}
+                        </Btn>
                         <Btn kind="danger" onClick={() => void review(r, false)}>
-                          Refuse
+                          {t('staff.pages.ContactRequests.refuse')}
                         </Btn>
                       </div>
                     ) : (
-                      <span className="text-gray-600">A supervisor must review this.</span>
+                      <span className="text-ink-soft">
+                        {t('staff.pages.ContactRequests.aSupervisorMustReview')}
+                      </span>
                     )}
                   </Td>
                 </tr>

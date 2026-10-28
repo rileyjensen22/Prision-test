@@ -1,29 +1,52 @@
+# The demo stack: Postgres, the API and the web app, with demo data. `make demo` starts it and
+# prints the addresses and logins. Development secrets only; this is not a production deployment.
+name: isd
 services:
   db:
     image: postgres:16
     environment:
       POSTGRES_PASSWORD: postgres_dev_only
-    ports: ["5432:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      retries: 10
-  api:
-    build: ./api
-    environment:
+      interval: 3s
+      retries: 20
+
+  # Runs once: creates the tables and loads the synthetic demo data (safe to repeat).
+  setup:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: isd-api
+    command: ["sh", "-c", "alembic upgrade head && python /scripts/seed.py"]
+    environment: &database
       DATABASE_URL: postgresql+psycopg://isd_app:isd_app_dev_only@db:5432/isd
       MIGRATION_DATABASE_URL: postgresql+psycopg://isd:isd_dev_only@db:5432/isd
-    ports: ["8000:8000"]
     depends_on:
       db: { condition: service_healthy }
-    volumes: ["./api:/app", "./config:/config"]
+    restart: "no"
+
+  api:
+    image: isd-api   # built by the setup service above
+    pull_policy: never
+    environment:
+      DATABASE_URL: postgresql+psycopg://isd_app:isd_app_dev_only@db:5432/isd
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      setup: { condition: service_completed_successfully }
+    restart: unless-stopped
+
   web:
-    build: ./web
-    ports: ["5173:5173"]
-    depends_on: [api]
-    volumes: ["./web/src:/app/src"]
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports: ["${ISD_WEB_PORT:-8080}:80"]
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+
 volumes:
   pgdata:
+

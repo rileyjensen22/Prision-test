@@ -94,15 +94,17 @@ def main() -> None:
             assigned_days_ago=0,
             quiet_after_days=None,
             unit="A",
+            text_size="normal",
         ):
             r = Resident(
                 code=f"E2E-{key.upper()}",
                 display_name=f"Synthetic {key}",
                 language=lang,
+                text_size=text_size,
                 prior_returns=prior,
             )
             cell, dev = (
-                Cell(code=f"E2E-{key}", unit=unit),
+                Cell(code=f"E2E-{key}", unit=unit, line_code=f"L{len(tokens) % 2 + 1}"),
                 Device(code=f"E2E-DEV-{key}"),
             )
             tokens[key] = f"e2e-token-{key}"
@@ -214,6 +216,10 @@ def main() -> None:
         resident("uma", unit="B")  # unit B: schedule and out-of-cell tests
         resident("val", unit="B")
         resident(
+            "cha", start_points=700
+        )  # chess e2e: tier 5, human play, line L1 or L2
+        resident("chb", start_points=700)  # chess e2e: the other line
+        resident(
             "ola", start_points=450, contacts=("family", "attorney")
         )  # tier 4: monitored texting and the keyword-flag review
         resident(
@@ -225,6 +231,24 @@ def main() -> None:
         resident(
             "lee", start_points=450
         )  # tier 4, then a confirmed CAM_BLOCK: reading locks
+        # UI audit residents: large text, one per language, so overflow and a11y checks see
+        # the hardest case. Nothing else in the suite touches them.
+        resident(
+            "uxen",
+            text_size="large",
+            start_points=250,
+            contacts=("family", "attorney"),
+            funds=2500,
+        )
+        resident(
+            "uxes",
+            lang="es",
+            text_size="large",
+            start_points=250,
+            contacts=("family", "attorney"),
+            funds=2500,
+            sanction="DISRUPT",
+        )
         heavy = Actor(
             s.execute(select(Staff.id).where(Staff.username == "e2e_heavy")).scalar(),
             "officer",
@@ -260,6 +284,25 @@ def main() -> None:
         sanctions.confirm_sanction(
             s, staff_actor("e2e_sup1", "supervisor"), lock.id, now - timedelta(hours=1)
         )
+    with Session(create_engine(url)) as s, s.begin():
+        # A small facility (1 hub, 2 lines, 2 floors) for the grouped dashboard: the two chess
+        # residents are placed on it, one per line; everyone else stays on a plain unit.
+        from isd.models import Cell as _Cell
+        from isd.models import Floor, Line
+        from isd.services import facility_model
+
+        facility_model.build(
+            s,
+            {"hubs": 1, "lines_per_hub": 2, "floors_per_line": 2, "cells_per_floor": 2},
+        )
+        for key, line_code in (("cha", "H1-L1"), ("chb", "H1-L2")):
+            floor = s.execute(
+                select(Floor)
+                .join(Line, Line.id == Floor.line_id)
+                .where(Line.code == line_code, Floor.level == 1)
+            ).scalar()
+            cell = s.execute(select(_Cell).where(_Cell.code == f"E2E-{key}")).scalar()
+            cell.floor_id, cell.unit, cell.line_code = floor.id, line_code, line_code
     fixtures = {
         "tokens": tokens,
         "staff": STAFF,

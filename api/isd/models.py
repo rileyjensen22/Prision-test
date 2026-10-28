@@ -15,11 +15,14 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from isd.crypto import EncryptedText, blind_index
 
 ROLES = ("officer", "supervisor", "admin", "auditor")
 CONTACT_TYPES = ("family", "friend", "attorney")
@@ -44,6 +47,18 @@ class Staff(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = _now()
+    # Sign-in security (Phase 18). The TOTP secret is stored encrypted; recovery codes are stored
+    # only as hashes and each works once.
+    mfa_secret: Mapped[str | None] = mapped_column(EncryptedText("staff.mfa_secret"), nullable=True)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    mfa_recovery_hashes: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    mfa_last_step: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    must_change_password: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    password_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
 
 class ConfigVersion(Base):
@@ -73,6 +88,58 @@ class Resident(Base):
     prior_returns_source: Mapped[str | None] = mapped_column(String(128), nullable=True)
     release_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = _now()
+    # Set when staff vacate the resident (released or moved out). The record stays: history,
+    # ledgers and the audit log are never deleted.
+    released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Staff switch for human chess: None follows the unit and facility setting.
+    chess_human: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+
+class Site(Base):
+    """The facility. One row today; the table exists so a second site is data, not a rewrite."""
+
+    __tablename__ = "sites"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(128))
+
+
+class Hub(Base):
+    __tablename__ = "hubs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    site_id: Mapped[int] = mapped_column(ForeignKey("sites.id"), index=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class Line(Base):
+    """A line (a housing unit of a few floors). Its code is the cell `unit` and `line_code`."""
+
+    __tablename__ = "lines"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    hub_id: Mapped[int] = mapped_column(ForeignKey("hubs.id"), index=True)
+    code: Mapped[str] = mapped_column(String(16), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+
+
+class Floor(Base):
+    __tablename__ = "floors"
+    __table_args__ = (UniqueConstraint("line_id", "level", name="uq_floor_level"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    line_id: Mapped[int] = mapped_column(ForeignKey("lines.id"), index=True)
+    level: Mapped[int] = mapped_column(Integer)  # 1 is the ground floor
+
+
+class RecArea(Base):
+    """A recreation room belonging to a line. How many may be in use at once is config."""
+
+    __tablename__ = "rec_areas"
+    __table_args__ = (CheckConstraint("kind IN ('indoor', 'outdoor')", name="ck_rec_area_kind"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    line_id: Mapped[int] = mapped_column(ForeignKey("lines.id"), index=True)
+    code: Mapped[str] = mapped_column(String(24), unique=True)
+    name: Mapped[str] = mapped_column(String(64))
+    kind: Mapped[str] = mapped_column(String(8))
 
 
 class Cell(Base):
@@ -80,6 +147,10 @@ class Cell(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True)
     unit: Mapped[str] = mapped_column(String(16), default="A", server_default="A")
+    # The line the cell is on. Chess never pairs two residents on the same line. Phase 20 derives
+    # it from the facility model; until then staff set it at intake.
+    line_code: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    floor_id: Mapped[int | None] = mapped_column(ForeignKey("floors.id"), nullable=True, index=True)
 
 
 class Device(Base):
@@ -98,6 +169,13 @@ class DeviceAssignment(Base):
     """Device -> cell -> resident. Identity source for the kiosk; changes are audit-logged."""
 
     __tablename__ = "device_assignments"
+    __table_args__ = (
+        Index(
+            "ix_device_assignments_open",
+            "resident_id",
+            postgresql_where=text("ended_at IS NULL"),
+        ),
+    )
     id: Mapped[int] = mapped_column(primary_key=True)
     device_id: Mapped[int] = mapped_column(ForeignKey("devices.id"))
     cell_id: Mapped[int] = mapped_column(ForeignKey("cells.id"))
@@ -122,7 +200,11 @@ class Contact(Base):
     status: Mapped[str] = mapped_column(String(10), default="approved", server_default="approved")
     requested_by: Mapped[str] = mapped_column(String(8), default="staff", server_default="staff")
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)  # no-contact order
-    phone_ref: Mapped[str | None] = mapped_column(String(32), nullable=True)  # synthetic number
+    # Synthetic number, stored encrypted; `phone_hash` is a keyed hash for duplicate checks.
+    phone_ref: Mapped[str | None] = mapped_column(
+        EncryptedText("contacts.phone_ref"), nullable=True
+    )
+    phone_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     verification: Mapped[str | None] = mapped_column(String(32), nullable=True)
     requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
@@ -265,8 +347,10 @@ class CallRecord(Base):
     contact_type: Mapped[str] = mapped_column(String(16))
     privileged: Mapped[bool] = mapped_column(Boolean)
     monitored: Mapped[bool] = mapped_column(Boolean)
-    monitor_ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    provider_ref: Mapped[str] = mapped_column(String(64))
+    monitor_ref: Mapped[str | None] = mapped_column(
+        EncryptedText("call_records.monitor_ref"), nullable=True
+    )
+    provider_ref: Mapped[str] = mapped_column(EncryptedText("call_records.provider_ref"))
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     max_seconds: Mapped[int] = mapped_column(Integer)
@@ -441,7 +525,7 @@ class Message(Base):
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
     contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.id"))
     direction: Mapped[str] = mapped_column(String(3))
-    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    body: Mapped[str | None] = mapped_column(EncryptedText("messages.body"), nullable=True)
     privileged: Mapped[bool] = mapped_column(Boolean)
     monitored: Mapped[bool] = mapped_column(Boolean)
     delivery: Mapped[str] = mapped_column(
@@ -502,28 +586,48 @@ class FacilityEvent(Base):
 
 
 class ChessGame(Base):
-    """Chess stub. There is deliberately no chat or message column on games or moves."""
+    """A chess game or match. There is deliberately no chat, message, stake or item column here.
+
+    Engine games are played on the device and only logged (level and result). Human matches have
+    two residents, a random handle for each, the position, and how the match ended.
+    """
 
     __tablename__ = "chess_games"
     __table_args__ = (
         CheckConstraint("opponent_kind IN ('engine', 'human')", name="ck_chess_opponent"),
         CheckConstraint("status IN ('waiting', 'active', 'finished')", name="ck_chess_status"),
+        CheckConstraint("result IN ('white', 'black', 'draw')", name="ck_chess_result"),
+        CheckConstraint("draw_offer_by IN ('white', 'black')", name="ck_chess_draw_offer"),
     )
     id: Mapped[int] = mapped_column(primary_key=True)
-    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)  # white
+    black_resident_id: Mapped[int | None] = mapped_column(
+        ForeignKey("residents.id"), nullable=True, index=True
+    )
     opponent_kind: Mapped[str] = mapped_column(String(8))
     status: Mapped[str] = mapped_column(String(10), default="active")
     provider_ref: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    level: Mapped[int | None] = mapped_column(Integer, nullable=True)  # engine games
+    white_handle: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    black_handle: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    fen: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    result: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    result_reason: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    draw_offer_by: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    wait_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class ChessMove(Base):
+    """One move. Append-only: a played move is never changed."""
+
     __tablename__ = "chess_moves"
     id: Mapped[int] = mapped_column(primary_key=True)
     game_id: Mapped[int] = mapped_column(ForeignKey("chess_games.id"), index=True)
     ply: Mapped[int] = mapped_column(Integer)
     move: Mapped[str] = mapped_column(String(16))
-    by: Mapped[str] = mapped_column(String(8))  # resident | opponent
+    by: Mapped[str] = mapped_column(String(8))  # white | black (older rows: resident | opponent)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
@@ -757,7 +861,7 @@ class ScheduleBlock(Base):
 
     __tablename__ = "schedule_blocks"
     __table_args__ = (
-        UniqueConstraint("unit", "day", "kind", "start", name="uq_schedule_block"),
+        UniqueConstraint("unit", "day", "kind", "start", "floor", name="uq_schedule_block"),
         CheckConstraint(f"kind IN {BLOCK_KINDS}", name="ck_block_kind"),
         CheckConstraint("status IN ('scheduled', 'cancelled')", name="ck_block_status"),
         CheckConstraint("minutes > 0 AND capacity > 0", name="ck_block_positive"),
@@ -766,6 +870,8 @@ class ScheduleBlock(Base):
     unit: Mapped[str] = mapped_column(String(16), index=True)
     day: Mapped[date] = mapped_column(Date, index=True)
     kind: Mapped[str] = mapped_column(String(8))
+    floor: Mapped[int] = mapped_column(Integer, default=0, server_default="0")  # 0 = every floor
+    rec_area_id: Mapped[int | None] = mapped_column(ForeignKey("rec_areas.id"), nullable=True)
     start: Mapped[str] = mapped_column(String(5))  # HH:MM, facility local time as entered
     minutes: Mapped[int] = mapped_column(Integer)
     capacity: Mapped[int] = mapped_column(Integer)
@@ -867,6 +973,24 @@ class OutcomeRecord(Base):
     corrects_id: Mapped[int | None] = mapped_column(ForeignKey("outcome_records.id"), nullable=True)
     entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
     entered_at: Mapped[datetime] = _now()
+    batch_id: Mapped[int | None] = mapped_column(
+        ForeignKey("outcome_import_batches.id"), nullable=True, index=True
+    )
+
+
+class OutcomeImportBatch(Base):
+    """One CSV import of outcomes. Append-only, like the rows it created."""
+
+    __tablename__ = "outcome_import_batches"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    label: Mapped[str] = mapped_column(String(80))
+    source: Mapped[str] = mapped_column(String(80))
+    rows_total: Mapped[int] = mapped_column(Integer)
+    rows_new: Mapped[int] = mapped_column(Integer)
+    rows_correcting: Mapped[int] = mapped_column(Integer)
+    rows_unchanged: Mapped[int] = mapped_column(Integer)
+    entered_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    entered_at: Mapped[datetime] = _now()
 
 
 class DevicePairing(Base):
@@ -906,3 +1030,10 @@ class SweepState(Base):
     __tablename__ = "sweep_state"
     name: Mapped[str] = mapped_column(String(32), primary_key=True)
     last_run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+@event.listens_for(Contact, "before_insert")
+@event.listens_for(Contact, "before_update")
+def _contact_blind_index(mapper, connection, target: Contact) -> None:
+    """Keeps the searchable keyed hash of the number in step with the (encrypted) number."""
+    target.phone_hash = blind_index(target.phone_ref) if target.phone_ref else None

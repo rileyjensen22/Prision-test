@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, post } from '../api'
 import { useAuth } from '../auth'
@@ -24,6 +25,8 @@ interface Job {
 const TYPES = ['transcription_public_domain', 'captioning', 'labeling_non_personal']
 
 export default function ContentJobs() {
+  const { t: tr } = useTranslation()
+
   const { user } = useAuth()
   const admin = user?.role === 'admin'
   const sources = useLoad<Source[]>('/staff/content-sources')
@@ -44,20 +47,20 @@ export default function ContentJobs() {
   }
 
   return (
-    <Page title="Content sources and jobs">
+    <Page title={tr('staff.pages.ContentJobs.contentSourcesAndJobs')}>
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      <Panel title="Approved content sources">
-        <p className="mb-2 text-sm text-gray-600">
-          Nothing outside this list can be shown to residents. External sources must use https.
+      <Panel title={tr('staff.pages.ContentJobs.approvedContentSources')}>
+        <p className="mb-2 text-sm text-ink-soft">
+          {tr('staff.pages.ContentJobs.nothingOutsideThisList')}
         </p>
         <ErrorLine error={sources.error} />
         <Table data-testid="sources">
           <thead>
             <tr>
-              <Th>Name</Th>
-              <Th>Kind</Th>
-              <Th>Address</Th>
-              <Th>Status</Th>
+              <Th>{tr('staff.pages.ContentJobs.name')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.kind')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.address')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.status')}</Th>
               <Th></Th>
             </tr>
           </thead>
@@ -71,7 +74,9 @@ export default function ContentJobs() {
                   <Badge tone={s.active ? 'green' : 'gray'}>{s.active ? 'approved' : 'off'}</Badge>
                 </Td>
                 <Td>
-                  {s.protected && <Badge tone="amber">protected baseline</Badge>}
+                  {s.protected && (
+                    <Badge tone="amber">{tr('staff.pages.ContentJobs.protectedBaseline')}</Badge>
+                  )}
                   {admin && !s.protected && (
                     <Btn
                       kind="plain"
@@ -94,18 +99,18 @@ export default function ContentJobs() {
         {admin && (
           <div className="mt-3 flex flex-wrap items-end gap-2">
             <input
-              aria-label="Source name"
-              placeholder="Name"
+              aria-label={tr('staff.pages.ContentJobs.sourceName')}
+              placeholder={tr('staff.pages.ContentJobs.name')}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <input
-              aria-label="Source address"
-              placeholder="https://…"
+              aria-label={tr('staff.pages.ContentJobs.sourceAddress')}
+              placeholder={tr('staff.pages.ContentJobs.https')}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <Btn
               disabled={name.trim().length < 3}
@@ -116,27 +121,25 @@ export default function ContentJobs() {
                 )
               }
             >
-              Add external source
+              {tr('staff.pages.ContentJobs.addExternalSource')}
             </Btn>
           </div>
         )}
       </Panel>
 
-      <Panel title="Job listings">
-        <p className="mb-2 text-sm text-gray-600">
-          Jobs are voluntary and never change a resident’s tier, points or privileges. Only the
-          number of participants is shown here, never who. Wages, deductions and voluntariness need
-          a compliance review before real use.
+      <Panel title={tr('staff.pages.ContentJobs.jobListings')}>
+        <p className="mb-2 text-sm text-ink-soft">
+          {tr('staff.pages.ContentJobs.jobsAreVoluntaryAnd')}
         </p>
         <ErrorLine error={jobs.error} />
         <Table data-testid="job-listings">
           <thead>
             <tr>
-              <Th>Code</Th>
-              <Th>Title</Th>
-              <Th>Task type</Th>
-              <Th>Participants</Th>
-              <Th>Status</Th>
+              <Th>{tr('staff.pages.ContentJobs.code')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.title')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.taskType')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.participants')}</Th>
+              <Th>{tr('staff.pages.ContentJobs.status')}</Th>
               <Th></Th>
             </tr>
           </thead>
@@ -172,41 +175,41 @@ export default function ContentJobs() {
         {admin && (
           <div className="mt-3 grid gap-2 md:grid-cols-4">
             <input
-              aria-label="Job code"
-              placeholder="Code"
+              aria-label={tr('staff.pages.ContentJobs.jobCode')}
+              placeholder={tr('staff.pages.ContentJobs.code')}
               value={job.code}
               onChange={(e) => setJob({ ...job, code: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <input
-              aria-label="Job title"
-              placeholder="Title"
+              aria-label={tr('staff.pages.ContentJobs.jobTitle')}
+              placeholder={tr('staff.pages.ContentJobs.title')}
               value={job.title}
               onChange={(e) => setJob({ ...job, title: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <select
-              aria-label="Task type"
+              aria-label={tr('staff.pages.ContentJobs.taskType')}
               value={job.task_type}
               onChange={(e) => setJob({ ...job, task_type: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             >
               {TYPES.map((t) => (
                 <option key={t}>{t}</option>
               ))}
             </select>
             <input
-              aria-label="Job description"
-              placeholder="Description"
+              aria-label={tr('staff.pages.ContentJobs.jobDescription')}
+              placeholder={tr('staff.pages.ContentJobs.description')}
               value={job.description}
               onChange={(e) => setJob({ ...job, description: e.target.value })}
-              className="rounded border px-2 py-1"
+              className="rounded-ctl border px-2 py-1"
             />
             <Btn
               disabled={job.code.length < 2 || job.title.length < 3 || !job.description}
               onClick={() => void run(() => post('/staff/jobs', job), 'Job added.')}
             >
-              Add job
+              {tr('staff.pages.ContentJobs.addJob')}
             </Btn>
           </div>
         )}

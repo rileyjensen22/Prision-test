@@ -1,0 +1,161 @@
+<title>ISD Interface Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  /* Layout: one centered column; tabs, a control row, then a framed screenshot. Mirrors the product's own tokens. */
+  :root {
+    --bg: #f2f5f3; --surface: #ffffff; --ink: #16222b; --ink-soft: #43505b; --line: #aebcb6;
+    --primary: #0b5563; --primary-ink: #ffffff; --primary-soft: #d5e9ec;
+    --font: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181c; --surface: #1d2328; --ink: #e8e3d8; --ink-soft: #b9b4a8; --line: #4a555d;
+      --primary: #7cc8d2; --primary-ink: #0e1417; --primary-soft: #1d3a40; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181c; --surface: #1d2328; --ink: #e8e3d8; --ink-soft: #b9b4a8; --line: #4a555d;
+    --primary: #7cc8d2; --primary-ink: #0e1417; --primary-soft: #1d3a40; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 24px 48px;
+  }
+  main { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+  p { margin: 0; max-width: 62ch; color: var(--ink-soft); }
+  button, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .tabs, .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab {
+    min-height: 48px; padding: 8px 18px; border-radius: 10px; border: 2px solid var(--line);
+    background: var(--surface); font-weight: 700; cursor: pointer;
+  }
+  .tab[aria-selected="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+  .controls { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: end; }
+  .field { display: grid; gap: 4px; min-width: 0; }
+  .field > span { font-size: 0.9rem; color: var(--ink-soft); }
+  select {
+    min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--ink-soft);
+    background: var(--surface); max-width: 100%;
+  }
+  .seg button {
+    min-height: 44px; padding: 6px 14px; border: 1px solid var(--ink-soft); background: var(--surface);
+    cursor: pointer; border-radius: 8px;
+  }
+  .seg button[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary); font-weight: 700; }
+  .seg button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .frame { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+  .frame img { display: block; width: 100%; height: auto; }
+  .scroll { max-height: 78vh; overflow: auto; }
+  .caption { font-size: 0.9rem; color: var(--ink-soft); padding: 8px 4px 0; }
+  .staff { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 20px; align-items: start; }
+  .pages { display: grid; gap: 4px; position: sticky; top: 8px; max-height: 80vh; overflow: auto; }
+  .pages button {
+    text-align: left; min-height: 40px; padding: 6px 12px; border-radius: 8px; border: 0;
+    background: transparent; cursor: pointer;
+  }
+  .pages button[aria-current="true"] { background: var(--primary); color: var(--primary-ink); font-weight: 700; }
+  .pages button:not([aria-current="true"]):hover { background: var(--primary-soft); }
+  @media (max-width: 760px) {
+    .staff { grid-template-columns: 1fr; }
+    .pages { grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; position: static; max-height: none; }
+  }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: no-preference) { .frame img { transition: opacity .12s; } }
+</style>
+
+<main>
+  <h1>ISD interface preview</h1>
+  <p>Screens from the redesigned resident kiosk and the staff dashboard, captured from the running app on synthetic data.</p>
+
+  <div class="tabs" role="tablist" aria-label="Surface">
+    <button class="tab" role="tab" id="tab-resident" aria-selected="true" aria-controls="panel-resident">Resident kiosk</button>
+    <button class="tab" role="tab" id="tab-staff" aria-selected="false" aria-controls="panel-staff">Staff dashboard</button>
+  </div>
+
+  <section id="panel-resident" role="tabpanel" aria-labelledby="tab-resident" style="display:grid;gap:16px">
+    <div class="controls">
+      <label class="field"><span>Screen</span><select id="r-screen"></select></label>
+      <div class="field"><span>Language</span>
+        <div class="seg" id="r-lang"><button data-v="en">English</button><button data-v="es">Español</button></div></div>
+      <div class="field"><span>Text size (set by staff)</span>
+        <div class="seg" id="r-text"><button data-v="normal">Normal</button><button data-v="large">Large</button></div></div>
+      <div class="field"><span>Lighting</span>
+        <div class="seg" id="r-theme"><button data-v="day">Day</button><button data-v="night">Night</button></div></div>
+    </div>
+    <div>
+      <div class="frame"><img id="r-img" alt=""></div>
+      <p class="caption" id="r-cap"></p>
+    </div>
+  </section>
+
+  <section id="panel-staff" role="tabpanel" aria-labelledby="tab-staff" hidden style="display:grid;gap:16px">
+    <div class="controls">
+      <div class="field"><span>Language</span>
+        <div class="seg" id="s-lang"><button data-v="en">English</button><button data-v="es">Español</button></div></div>
+    </div>
+    <div class="staff">
+      <nav class="pages" id="s-pages" aria-label="Staff pages"></nav>
+      <div>
+        <div class="frame scroll"><img id="s-img" alt=""></div>
+        <p class="caption" id="s-cap"></p>
+      </div>
+    </div>
+  </section>
+
+  <p>Resident screens show what the 1280 by 800 kiosk displays; longer screens scroll on the device. Staff pages are full-height captures. Staff pages marked as translated in the Spanish view still keep a few English phrases.</p>
+</main>
+
+<script>
+  const RESIDENT = __RESIDENT__, STAFF = __STAFF__, IMAGES = __IMAGES__;
+  const NIGHT_SCREENS = new Set(Object.keys(IMAGES).filter(k => k.endsWith('|night')).map(k => k.split('|')[1]));
+  const st = { tab: 'resident', rs: RESIDENT[0][0], rl: 'en', rt: 'normal', rth: 'day', sp: STAFF[0][0], sl: 'en' };
+  const $ = (id) => document.getElementById(id);
+  const label = (list, key) => (list.find((x) => x[0] === key) || [])[1] || key;
+
+  RESIDENT.forEach(([k, name]) => { const o = document.createElement('option'); o.value = k; o.textContent = name; $('r-screen').append(o); });
+  STAFF.forEach(([k, name]) => { const b = document.createElement('button'); b.dataset.v = k; b.textContent = name; $('s-pages').append(b); });
+
+  function seg(id, key) {
+    $(id).querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === st[key])));
+  }
+  function render() {
+    const res = st.tab === 'resident';
+    $('panel-resident').hidden = !res; $('panel-staff').hidden = res;
+    $('tab-resident').setAttribute('aria-selected', String(res)); $('tab-staff').setAttribute('aria-selected', String(!res));
+    if (res) {
+      const hasNight = NIGHT_SCREENS.has(st.rs);
+      if (!hasNight) st.rth = 'day';
+      $('r-theme').querySelector('[data-v="night"]').disabled = !hasNight;
+      $('r-screen').value = st.rs; seg('r-lang', 'rl'); seg('r-text', 'rt'); seg('r-theme', 'rth');
+      let key = `r|${st.rs}|${st.rl}|${st.rt}|${st.rth}`;
+      if (!IMAGES[key]) key = `r|${st.rs}|${st.rl}|normal|${st.rth}`;
+      $('r-img').src = IMAGES[key] || '';
+      const name = label(RESIDENT, st.rs);
+      $('r-img').alt = `${name}, ${st.rl === 'es' ? 'Spanish' : 'English'}, ${st.rt} text, ${st.rth} lighting`;
+      $('r-cap').textContent = `${name}. ${st.rl === 'es' ? 'Spanish' : 'English'}, ${st.rt} text, ${st.rth === 'night' ? 'dimmed night mode' : 'day mode'}.` +
+        (hasNight ? '' : ' Night mode is shown on the home and restriction screens.');
+    } else {
+      seg('s-lang', 'sl');
+      $('s-pages').querySelectorAll('button').forEach((b) => { if (b.dataset.v !== st.sp) b.removeAttribute('aria-current'); else b.setAttribute('aria-current', 'true'); });
+      $('s-img').src = IMAGES[`s|${st.sp}|${st.sl}`] || IMAGES[`s|${st.sp}|en`] || '';
+      const name = label(STAFF, st.sp);
+      $('s-img').alt = `${name} page, ${st.sl === 'es' ? 'Spanish' : 'English'}`;
+      $('s-cap').textContent = `${name}. ${st.sl === 'es' ? 'Spanish' : 'English'}.`;
+    }
+  }
+  $('tab-resident').onclick = () => { st.tab = 'resident'; history.replaceState(null, '', '#resident'); render(); };
+  $('tab-staff').onclick = () => { st.tab = 'staff'; history.replaceState(null, '', '#staff'); render(); };
+  $('r-screen').onchange = (e) => { st.rs = e.target.value; render(); };
+  [['r-lang', 'rl'], ['r-text', 'rt'], ['r-theme', 'rth'], ['s-lang', 'sl']].forEach(([id, key]) =>
+    $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && !b.disabled) { st[key] = b.dataset.v; render(); } }));
+  $('s-pages').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { st.sp = b.dataset.v; render(); } });
+  if (location.hash === '#staff') st.tab = 'staff';
+  render();
+</script>

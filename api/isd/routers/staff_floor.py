@@ -54,6 +54,7 @@ class BlockIn(BaseModel):
     title: str | None = Field(default=None, max_length=128)
     required_feature: str | None = Field(default=None, max_length=32)
     reason: str = Field(max_length=500)
+    floor: int = Field(default=0, ge=0, le=20)  # 0 = every floor of the unit
 
 
 @router.post("/schedule/blocks", status_code=201)
@@ -74,6 +75,7 @@ def add_block(
             body.required_feature,
             body.reason,
             _now(),
+            floor=body.floor,
         )
     except schedule.ScheduleError as e:
         raise _fail(e) from e

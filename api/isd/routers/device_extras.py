@@ -1,6 +1,7 @@
 """Texting, video, chess, reading, jobs and rec-time endpoints for the kiosk (device token)."""
 
 from datetime import UTC, date, datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
@@ -173,33 +174,39 @@ def start_booking(
 
 
 # ---------------- chess ----------------
+# Nothing here accepts free text: a game request is an opponent kind and a level, a move is a
+# coordinate string, and the rest are fixed words. Extra fields are refused.
 class GameIn(BaseModel):
-    opponent: str
+    model_config = ConfigDict(extra="forbid")
+    opponent: Literal["engine", "human"]
+    level: int = Field(default=1, ge=1, le=9)
 
 
 class MoveIn(BaseModel):
-    move: str
+    model_config = ConfigDict(extra="forbid")
+    move: str = Field(pattern=r"^[a-h][1-8][a-h][1-8][qrbn]?$")
 
 
-def _game_out(db, g) -> dict:
-    return {
-        "id": g.id,
-        "opponent": g.opponent_kind,
-        "status": g.status,
-        "moves": [{"ply": m.ply, "move": m.move, "by": m.by} for m in chess.moves(db, g.id)],
-    }
+class DrawIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    action: Literal["offer", "accept", "decline"]
+
+
+class ResultIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["white", "black", "draw"]
+    reason: Literal["checkmate", "stalemate", "insufficient", "repetition", "resigned", "left"]
 
 
 @router.get("/chess")
 def list_games(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
-    from sqlalchemy import select
+    return chess.history(db, ctx.resident_id)
 
-    from isd.models import ChessGame
 
-    rows = db.execute(
-        select(ChessGame).where(ChessGame.resident_id == ctx.resident_id).order_by(ChessGame.id)
-    ).scalars()
-    return [_game_out(db, g) for g in rows]
+@router.get("/chess/config")
+def chess_config(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
+    """What the on-device engine needs: the levels from config."""
+    return {"levels": chess.levels(db)}
 
 
 @router.post("/chess", status_code=201)
@@ -207,7 +214,21 @@ def new_game(
     body: GameIn, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
 ):
     try:
-        return _game_out(db, chess.new_game(db, ctx.resident_id, body.opponent, _now()))
+        if body.opponent == "engine":
+            g = chess.new_engine_game(db, ctx.resident_id, body.level, _now())
+            return {"id": g.id, "opponent": "engine", "level": g.level, "status": g.status}
+        g = chess.find_match(db, ctx.resident_id, _now())
+        return chess.match_view(db, ctx.resident_id, g.id)
+    except chess.ChessDenied as e:
+        raise _err(e) from e
+
+
+@router.get("/chess/{game_id}")
+def get_game(
+    game_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        return chess.match_view(db, ctx.resident_id, game_id)
     except chess.ChessDenied as e:
         raise _err(e) from e
 
@@ -220,12 +241,50 @@ def play(
     db: Session = Depends(get_db),
 ):
     try:
-        chess.play(db, ctx.resident_id, game_id, body.move, _now())
+        chess.play_move(db, ctx.resident_id, game_id, body.move, _now())
+        return chess.match_view(db, ctx.resident_id, game_id)
     except chess.ChessDenied as e:
         raise _err(e) from e
-    return _game_out(
-        db, db.get(__import__("isd.models", fromlist=["ChessGame"]).ChessGame, game_id)
-    )
+
+
+@router.post("/chess/{game_id}/draw")
+def draw(
+    game_id: int,
+    body: DrawIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    try:
+        chess.draw(db, ctx.resident_id, game_id, body.action, _now())
+        return chess.match_view(db, ctx.resident_id, game_id)
+    except chess.ChessDenied as e:
+        raise _err(e) from e
+
+
+@router.post("/chess/{game_id}/resign")
+def resign(
+    game_id: int, ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)
+):
+    try:
+        chess.leave(db, ctx.resident_id, game_id, _now())
+        return chess.match_view(db, ctx.resident_id, game_id)
+    except chess.ChessDenied as e:
+        raise _err(e) from e
+
+
+@router.post("/chess/{game_id}/result")
+def engine_result(
+    game_id: int,
+    body: ResultIn,
+    ctx: DeviceContext = Depends(current_device),
+    db: Session = Depends(get_db),
+):
+    """The device reports how a game against the engine ended (a log only)."""
+    try:
+        g = chess.finish_engine_game(db, ctx.resident_id, game_id, body.result, body.reason, _now())
+    except chess.ChessDenied as e:
+        raise _err(e) from e
+    return {"id": g.id, "status": g.status}
 
 
 # ---------------- reading ----------------
@@ -389,7 +448,7 @@ def rec_cancel(
     return {"cancelled": rec.cancel(db, ctx.resident_id, body.day, body.slot, body.block_id)}
 
 
-# ---------------- reentry (information only, so not an entitlement feature) ----------------
+# ---------------- reentry (a named baseline feature: information, never lockable) ----------------
 @router.get("/reentry")
 def reentry_view(ctx: DeviceContext = Depends(current_device), db: Session = Depends(get_db)):
     return reentry.resident_view(db, ctx.resident_id, _now())

@@ -11,11 +11,19 @@ engine = create_engine(
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_POOL_OVERFLOW,
 )
+# Used only by the shared rate limiter: one autocommit statement per check, on its own connections.
+limiter_engine = create_engine(
+    settings.DATABASE_URL,
+    pool_size=settings.LIMITER_POOL_SIZE,
+    max_overflow=settings.LIMITER_POOL_SIZE,
+    isolation_level="AUTOCOMMIT",
+)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
 def get_db() -> Iterator[Session]:
     with SessionLocal() as session:
+        session.info["config_cache"] = {}  # per request; see services/config_store.py
         try:
             yield session
             session.commit()
@@ -31,6 +39,7 @@ def get_readonly_db() -> Iterator[Session]:
     not just by careful code.
     """
     with SessionLocal() as session:
+        session.info["config_cache"] = {}
         session.execute(text("SET TRANSACTION READ ONLY"))
         try:
             yield session

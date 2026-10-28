@@ -1,9 +1,12 @@
+import { Briefcase, PhoneCall, PhoneOff, UserRound, Users, type LucideIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
+import { Button, LinkButton } from '../../ui/Button'
+import { EmptyState } from '../../ui/States'
+import { Notice } from '../../ui/Notice'
 import { NetworkError } from '../api'
-import { BackLink, Card } from '../components'
+import { Card, ScreenFrame } from '../components'
 import { useResident } from '../ResidentContext'
 import { clock, errorCode, remainingSeconds } from './helpers'
 
@@ -21,6 +24,12 @@ interface CallInfo {
   started_at: string
   status: string
   duration_seconds: number | null
+}
+
+const TYPE_ICON: Record<Contact['type'], LucideIcon> = {
+  family: Users,
+  friend: UserRound,
+  attorney: Briefcase,
 }
 
 export function Calls() {
@@ -77,66 +86,80 @@ export function Calls() {
 
   if (active)
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">{t('calls.inCall')}</h1>
-        <Card data-testid="in-call">
-          <p data-testid="call-notice" className="text-2xl font-semibold">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 pt-6">
+        <h1 className="text-h1 font-bold">{t('calls.inCall')}</h1>
+        <Card data-testid="in-call" className="space-y-4 text-center">
+          <PhoneCall
+            aria-hidden="true"
+            className="mx-auto size-14 text-primary"
+            strokeWidth={1.5}
+          />
+          <p data-testid="call-notice" className="text-h3 font-bold">
             {active.privileged ? t('calls.privileged') : t('calls.monitored')}
           </p>
-          <p data-testid="call-timer" className="mt-3 text-4xl">
+          <p data-testid="call-timer" className="text-display font-bold tabular-nums">
             {t('calls.timeLeft', { time: clock(left) })}
           </p>
         </Card>
-        <button
-          onClick={() => void end(active)}
-          className="min-h-16 w-full rounded-xl bg-red-700 px-6 py-4 text-xl font-bold"
-        >
+        <Button variant="danger" icon={PhoneOff} onClick={() => void end(active)}>
           {t('calls.end')}
-        </button>
+        </Button>
       </div>
     )
 
   return (
-    <div className="space-y-6">
-      <BackLink />
-      <h1 className="text-3xl font-bold">{t('calls.title')}</h1>
+    <ScreenFrame title={t('calls.title')}>
       {allowance && (
-        <p data-testid="calls-left">
+        <p data-testid="calls-left" className="text-label font-bold">
           {t('calls.left', { n: Math.max(0, allowance.limit - allowance.used) })}
         </p>
       )}
       {summary && (
-        <p role="status" data-testid="call-summary">
+        <Notice tone="ok" role="status" data-testid="call-summary">
           {summary}
-        </p>
+        </Notice>
       )}
       {error && (
-        <p role="alert" data-testid="call-error">
+        <Notice tone="danger" role="alert" data-testid="call-error">
           {error}
-        </p>
+        </Notice>
       )}
-      <h2 className="text-2xl font-bold">{t('calls.contacts')}</h2>
-      {contacts?.length === 0 && <p>{t('calls.none')}</p>}
-      <Link to="/resident/feature/contact_requests" className="inline-block underline">
-        {t('contacts.link')}
-      </Link>
-      <ul className="space-y-3">
-        {(contacts ?? []).map((c) => (
-          <li key={c.id}>
-            <Card data-testid={`contact-${c.type}`}>
-              <p className="text-xl font-semibold">{c.name}</p>
-              <p>{t(`calls.type.${c.type}`)}</p>
-              <button
-                disabled={!c.available}
-                onClick={() => void start(c)}
-                className="mt-2 min-h-14 rounded-lg bg-green-700 px-6 py-3 font-semibold disabled:opacity-40"
-              >
-                {c.available ? t('calls.call') : t('calls.unavailable')}
-              </button>
-            </Card>
-          </li>
-        ))}
+      <h2 className="text-h2 font-bold">{t('calls.contacts')}</h2>
+      {contacts?.length === 0 && <EmptyState title={t('calls.none')} />}
+      <ul className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(22rem,1fr))]">
+        {(contacts ?? []).map((c) => {
+          const Icon = TYPE_ICON[c.type]
+          return (
+            <li key={c.id}>
+              <Card data-testid={`contact-${c.type}`} className="flex h-full flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <Icon
+                    aria-hidden="true"
+                    className="size-10 shrink-0 text-primary"
+                    strokeWidth={1.75}
+                  />
+                  <div>
+                    <p className="text-label font-bold">{c.name}</p>
+                    <p className="text-ink-soft">{t(`calls.type.${c.type}`)}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="primary"
+                  icon={PhoneCall}
+                  disabled={!c.available}
+                  onClick={() => void start(c)}
+                  className="mt-auto"
+                >
+                  {c.available ? t('calls.call') : t('calls.unavailable')}
+                </Button>
+              </Card>
+            </li>
+          )
+        })}
       </ul>
-    </div>
+      <LinkButton to="/resident/feature/contact_requests" icon={Users} className="self-start">
+        {t('contacts.link')}
+      </LinkButton>
+    </ScreenFrame>
   )
 }

@@ -8,11 +8,21 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from isd.auth import hash_device_token
-from isd.models import Cell, Device, DeviceAssignment, DeviceCommand, DevicePairing, Resident
+from isd.models import (
+    Cell,
+    Device,
+    DeviceAssignment,
+    DeviceCommand,
+    DevicePairing,
+    Floor,
+    Hub,
+    Line,
+    Resident,
+)
 from isd.services.audit import SYSTEM, Actor, append_audit
 from isd.services.config_store import get_current
 from isd.services.device_locks import locks_from_commands
@@ -195,9 +205,20 @@ def restart(
     return _command(session, actor, device_code, "restart", reason, now)
 
 
-def fleet(session: Session, now: datetime) -> list[dict]:
+def fleet(
+    session: Session,
+    now: datetime,
+    *,
+    hub: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    offline_only: bool = False,
+    limit: int | None = None,
+    offset: int = 0,
+) -> list[dict]:
+    """Every device, or the ones on a hub, line or floor, one page at a time."""
     offline_after = timedelta(minutes=int(_compliance(session)["offline_alert_minutes"]))
-    rows = session.execute(
+    stmt = (
         select(Device, DeviceAssignment, Cell, Resident)
         .outerjoin(
             DeviceAssignment,
@@ -205,11 +226,28 @@ def fleet(session: Session, now: datetime) -> list[dict]:
         )
         .outerjoin(Cell, Cell.id == DeviceAssignment.cell_id)
         .outerjoin(Resident, Resident.id == DeviceAssignment.resident_id)
-        .order_by(Device.code)
-    ).all()
+    )
+    if hub or line or floor:
+        stmt = stmt.join(Floor, Floor.id == Cell.floor_id).join(Line, Line.id == Floor.line_id)
+        if hub:
+            stmt = stmt.join(Hub, Hub.id == Line.hub_id).where(Hub.code == hub)
+        if line:
+            stmt = stmt.where(Line.code == line)
+        if floor:
+            stmt = stmt.where(Floor.level == floor)
+    if offline_only:
+        seen_at = func.greatest(Device.last_sync_at, Device.health_at)
+        stmt = stmt.where(
+            DeviceAssignment.id.isnot(None), seen_at.is_(None) | (seen_at < now - offline_after)
+        )
+    stmt = stmt.order_by(Device.code).offset(offset)
+    rows = session.execute(stmt.limit(limit) if limit else stmt).all()
+    device_ids = [d.id for d, *_ in rows]
     commands: dict[int, list[DeviceCommand]] = {}
     for c in session.execute(
-        select(DeviceCommand).where(DeviceCommand.kind.in_(("lock", "unlock")))
+        select(DeviceCommand).where(
+            DeviceCommand.kind.in_(("lock", "unlock")), DeviceCommand.device_id.in_(device_ids)
+        )
     ).scalars():
         commands.setdefault(c.device_id, []).append(c)
     by_device = {d: locks_from_commands(cmds) for d, cmds in commands.items()}

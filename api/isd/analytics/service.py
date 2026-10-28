@@ -5,6 +5,8 @@ reads from it. There are no per-person scores; every number is a cohort aggregat
 suppressed, and the export carries pseudonyms and bands instead of identifiers or dates.
 """
 
+import csv
+import io
 from datetime import datetime
 
 from sqlalchemy import func, select
@@ -23,6 +25,7 @@ from isd.models import (
     Certificate,
     CourseProgress,
     Message,
+    OutcomeImportBatch,
     OutcomeRecord,
     Resident,
     Sanction,
@@ -248,3 +251,148 @@ def export(session: Session, actor: Actor, reason: str, salt: str, now: datetime
         payload={"rows": len(records), "reason": reason.strip()},
     )
     return {"generated_at": now.isoformat(), "rows": records}
+
+
+# ---------------- CSV import ----------------
+MAX_IMPORT_ROWS = 5000
+IMPORT_COLUMNS = ("resident_code", "window_months", "outcome")
+
+
+def _latest_outcomes(session: Session, ids: list[int]) -> dict[tuple[int, int], OutcomeRecord]:
+    rows = session.execute(
+        select(OutcomeRecord)
+        .where(OutcomeRecord.resident_id.in_(ids))
+        .order_by(OutcomeRecord.id)  # later rows replace earlier ones below
+    ).scalars()
+    return {(r.resident_id, r.window_months): r for r in rows}
+
+
+def _parse_import(text: str) -> tuple[list[dict], list[dict]]:
+    """(rows with their line numbers, problems). Nothing here touches the database."""
+    reader = csv.DictReader(io.StringIO(text.lstrip("\ufeff")))
+    if not reader.fieldnames or set(IMPORT_COLUMNS) - {f.strip() for f in reader.fieldnames}:
+        raise OutcomeError("BAD_FILE", f"the first row must name the columns {IMPORT_COLUMNS}")
+    rows, problems = [], []
+    for line, raw in enumerate(reader, start=2):
+        if len(rows) + len(problems) >= MAX_IMPORT_ROWS:
+            raise OutcomeError("TOO_MANY_ROWS", f"at most {MAX_IMPORT_ROWS} rows per file")
+        row = {k.strip(): (v or "").strip() for k, v in raw.items() if k}
+        try:
+            row["window_months"] = int(row["window_months"])
+        except ValueError:
+            problems.append({"line": line, "code": "BAD_WINDOW", "message": "window_months"})
+            continue
+        if row["window_months"] not in WINDOWS:
+            problems.append({"line": line, "code": "BAD_WINDOW", "message": "6, 12 or 24"})
+        elif row["outcome"] not in OUTCOMES:
+            problems.append({"line": line, "code": "BAD_OUTCOME", "message": row["outcome"][:20]})
+        else:
+            rows.append({**row, "line": line})
+    return rows, problems
+
+
+def import_outcomes(
+    session: Session,
+    actor: Actor,
+    text: str,
+    source: str,
+    label: str,
+    now: datetime,
+    *,
+    dry_run: bool = True,
+) -> dict:
+    """Adds outcomes from a CSV (resident_code, window_months, outcome). All or nothing: any bad
+    row means nothing is written. A row that repeats the current answer is skipped, a row that
+    differs is added as a correcting entry pointing at the one it replaces (append-only). A dry
+    run reports exactly what an import would do and writes nothing, not even an audit entry."""
+    if len(source.strip()) < 3:
+        raise OutcomeError("SOURCE_REQUIRED", "say which customer record this came from")
+    rows, problems = _parse_import(text)
+    codes = {r["resident_code"] for r in rows}
+    residents = {
+        r.code: r
+        for r in session.execute(select(Resident).where(Resident.code.in_(codes))).scalars()
+    }
+    for r in rows:
+        if r["resident_code"] not in residents:
+            problems.append({"line": r["line"], "code": "NOT_FOUND", "message": "resident code"})
+    latest = _latest_outcomes(session, [r.id for r in residents.values()])
+    plan = []
+    for r in rows:
+        res = residents.get(r["resident_code"])
+        if res is None:
+            continue
+        current = latest.get((res.id, r["window_months"]))
+        action = (
+            "new"
+            if current is None
+            else "unchanged"
+            if current.outcome == r["outcome"]
+            else "correction"
+        )
+        plan.append(
+            {**r, "action": action, "resident_id": res.id, "corrects_id": current and current.id}
+        )
+        latest[(res.id, r["window_months"])] = (
+            OutcomeRecord(  # later lines in the file see this one
+                id=0, resident_id=res.id, window_months=r["window_months"], outcome=r["outcome"]
+            )
+            if action != "unchanged"
+            else current
+        )
+    counts = {
+        a: sum(1 for p in plan if p["action"] == a) for a in ("new", "correction", "unchanged")
+    }
+    result = {
+        "dry_run": dry_run,
+        "rows": len(rows) + len(problems),
+        "counts": counts,
+        "problems": sorted(problems, key=lambda p: p["line"]),
+        "preview": [
+            {k: p[k] for k in ("line", "resident_code", "window_months", "outcome", "action")}
+            for p in plan[:50]
+        ],
+        "imported": False,
+    }
+    if dry_run or problems:
+        return result
+    batch = OutcomeImportBatch(
+        label=label.strip()[:80] or "import",
+        source=source.strip()[:80],
+        rows_total=len(plan),
+        rows_new=counts["new"],
+        rows_correcting=counts["correction"],
+        rows_unchanged=counts["unchanged"],
+        entered_by=actor.id,
+        entered_at=now,
+    )
+    session.add(batch)
+    session.flush()
+    chain: dict[tuple[int, int], int] = {}  # a second line for the same person points at the first
+    for p in plan:
+        if p["action"] == "unchanged":
+            continue
+        key = (p["resident_id"], p["window_months"])
+        row = OutcomeRecord(
+            resident_id=p["resident_id"],
+            window_months=p["window_months"],
+            outcome=p["outcome"],
+            source=source.strip()[:80],
+            corrects_id=chain.get(key, p["corrects_id"]),
+            entered_by=actor.id,
+            entered_at=now,
+            batch_id=batch.id,
+        )
+        session.add(row)
+        session.flush()
+        chain[key] = row.id
+    append_audit(
+        session,
+        actor,
+        "outcomes_imported",
+        "outcome_import_batch",
+        str(batch.id),
+        reason_code="OUTCOME_IMPORT",
+        payload={**counts, "source": batch.source},
+    )
+    return {**result, "imported": True, "batch_id": batch.id}

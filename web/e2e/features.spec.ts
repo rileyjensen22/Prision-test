@@ -30,7 +30,7 @@ test('demo loop: finishing the sample course raises tier and call minutes', asyn
   await expect(page.getByTestId('tier-up')).toHaveText('You moved up: Tier 1 to Tier 2.')
   await expect(page.getByTestId('calls-up')).toHaveText('Phone calls: 15 to 20 minutes per day.')
 
-  await page.getByRole('link', { name: '← Back' }).click()
+  await page.getByRole('link', { name: 'Back' }).click()
   await expect(page.getByTestId('tier-label')).toHaveText('Tier 2')
   await expect(page.getByTestId('allowance-calls')).toContainText('20 of 20 minutes left')
 })

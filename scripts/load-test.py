@@ -1,6 +1,6 @@
 """Load test: many simulated kiosks and a few staff screens against a real API process.
 
-    python scripts/load-test.py [--devices 500] [--seconds 60] [--speed 5] [--workers 1]
+    python scripts/load-test.py [--devices 500] [--seconds 60] [--speed 5] [--workers 4]
 
 Builds a throwaway database (isd_load) with synthetic residents, starts uvicorn on port 8002, then
 runs one asyncio task per device: every poll interval it fetches its resident view, and on the
@@ -41,7 +41,9 @@ PORT = 8002
 VIEW_POLL, HEARTBEAT = 30.0, 60.0  # a real kiosk, in seconds
 
 
-def build_database(devices: int) -> tuple[str, dict[str, str], dict[str, str]]:
+def build_database(
+    devices: int, scale: str | None = None, occupancy: float = 0.9
+) -> tuple[str, dict[str, str], dict[str, str]]:
     owner = make_url(settings.MIGRATION_DATABASE_URL)
     admin = create_engine(owner.set(database="postgres"), isolation_level="AUTOCOMMIT")
     with admin.connect() as c:
@@ -62,6 +64,20 @@ def build_database(devices: int) -> tuple[str, dict[str, str], dict[str, str]]:
         )
         s.add(staff)
         s.flush()
+        if scale:  # the facility model at a named scale, a device in each occupied cell
+            from isd.services import facility_model
+            from isd.synthetic import populate
+
+            tokens.update(
+                populate(
+                    s,
+                    facility_model.scale_named(s, scale),
+                    occupancy=occupancy,
+                    now=datetime.now(UTC),
+                    token_for=lambda cell: f"load-token-{cell}",
+                )
+            )
+            devices = 0
         for i in range(devices):
             r = Resident(code=f"LOAD-{i:04d}", display_name=f"Synthetic {i}")
             c = Cell(code=f"LC-{i:04d}", unit="AB"[i % 2])
@@ -72,16 +88,25 @@ def build_database(devices: int) -> tuple[str, dict[str, str], dict[str, str]]:
             s.flush()
             s.add(DeviceAssignment(device_id=d.id, cell_id=c.id, resident_id=r.id))
         admin_headers = {"Authorization": f"Bearer {make_token(staff.id)}"}
+    # A fresh database has no statistics yet; real ones get them from autovacuum within a minute.
+    with create_engine(url, isolation_level="AUTOCOMMIT").connect() as c:
+        c.execute(text("ANALYZE"))
     return url, tokens, admin_headers
 
 
 class Stats:
-    def __init__(self) -> None:
+    """Latencies per endpoint. Samples before `measure_from` (a time.monotonic() value) are the
+    warm-up (cold caches, the first connections) and are not counted."""
+
+    def __init__(self, measure_from: float = 0.0) -> None:
         self.times: dict[str, list[float]] = {}
         self.errors: dict[str, int] = {}
         self.statuses: dict[int, int] = {}
+        self.measure_from = measure_from
 
     def add(self, name: str, seconds: float, status: int) -> None:
+        if time.monotonic() < self.measure_from:
+            return
         self.times.setdefault(name, []).append(seconds * 1000)
         self.statuses[status] = self.statuses.get(status, 0) + 1
         if status >= 400:
@@ -130,24 +155,35 @@ async def device_loop(client, stats, token, stop_at, speed, rng):
         await asyncio.sleep(VIEW_POLL / speed * (0.9 + 0.2 * rng.random()))
 
 
-async def staff_loop(client, stats, headers, stop_at, speed):
+async def staff_loop(client, stats, headers, stop_at, speed, rng, grouped):
+    """What the staff screens poll. A facility build is browsed by hub (one page of the roster at a
+    time); the legacy flat build loads the whole roster."""
     while time.monotonic() < stop_at:
-        for name, path in (("staff roster", "/staff/roster"), ("staff summary", "/staff/summary"),
-                           ("staff devices", "/staff/devices")):  # fmt: skip
+        if grouped:
+            hub = f"H{rng.randrange(1, grouped + 1)}"
+            steps = (("staff roster", f"/staff/roster/page?hub={hub}&limit=100"),
+                     ("staff overview", "/staff/facility/overview"),
+                     ("staff summary", "/staff/summary"),
+                     ("staff devices", "/staff/devices?limit=100"))  # fmt: skip
+        else:
+            steps = (("staff roster", "/staff/roster"), ("staff summary", "/staff/summary"),
+                     ("staff devices", "/staff/devices"))  # fmt: skip
+        for name, path in steps:
             await call(client, stats, name, "GET", path, headers=headers)
         await asyncio.sleep(10.0 / speed)
 
 
-async def run(tokens, admin_headers, seconds, speed, base):
-    stats, rng = Stats(), random.Random(7)
-    stop_at = time.monotonic() + seconds
+async def run(tokens, admin_headers, seconds, speed, base, grouped=0, warmup=0.0):
+    stats, rng = Stats(time.monotonic() + warmup), random.Random(7)
+    stop_at = time.monotonic() + warmup + seconds
     limits = httpx.Limits(max_connections=800, max_keepalive_connections=800)
     async with httpx.AsyncClient(base_url=base, timeout=30, limits=limits) as client:
         tasks = [
             device_loop(client, stats, t, stop_at, speed, rng) for t in tokens.values()
         ]
         tasks += [
-            staff_loop(client, stats, admin_headers, stop_at, speed) for _ in range(5)
+            staff_loop(client, stats, admin_headers, stop_at, speed, rng, grouped)
+            for _ in range(5)
         ]
         await asyncio.gather(*tasks)
     return stats
@@ -166,11 +202,22 @@ def start_server(url: str, workers: int) -> subprocess.Popen:
         "IP_MAX_PER_MINUTE": "100000000",
         "DEVICE_MAX_PER_MINUTE": "1000000",
         "STAFF_MAX_PER_MINUTE": "1000000",
-        "LOG_LEVEL": "WARNING",
+        "LOG_LEVEL": os.environ.get("LOAD_LOG_LEVEL", "WARNING"),
+        # Postgres allows 100 connections by default: 4 workers x (15 + 5 + 4 for the limiter).
+        "DB_POOL_SIZE": os.environ.get("LOAD_POOL", "15"),
+        "DB_POOL_OVERFLOW": "5",
+        "RATE_LIMIT_STORE": os.environ.get(
+            "LOAD_RATE_STORE", "postgres"
+        ),  # shared, as in production
     }
+    log_path = os.environ.get(
+        "LOAD_SERVER_LOG"
+    )  # keep the server's log, for finding a slow request
+    log_out = open(log_path, "w") if log_path else subprocess.DEVNULL  # noqa: SIM115
     return subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "isd.main:app", "--port", str(PORT), "--workers", str(workers)],
-        cwd=ROOT / "api", env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        cwd=ROOT / "api", env=env,
+        stdout=log_out, stderr=subprocess.STDOUT,
     )  # fmt: skip
 
 
@@ -190,23 +237,45 @@ def wait_for_server() -> None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--devices", type=int, default=500)
-    ap.add_argument("--seconds", type=int, default=60)
-    ap.add_argument("--speed", type=float, default=5.0)
-    ap.add_argument("--workers", type=int, default=1)
-    ap.add_argument("--p95-ms", type=float, default=500.0)
-    ap.add_argument("--p99-ms", type=float, default=1500.0)
+    ap.add_argument(
+        "--scale", default=None, help="facility scale from config/facility.yaml (full)"
+    )
+    ap.add_argument("--occupancy", type=float, default=0.9)
+    ap.add_argument(
+        "--seconds", type=int, default=60, help="measured time, after the warm-up"
+    )
+    ap.add_argument(
+        "--warmup", type=int, default=15, help="seconds before counting starts"
+    )
+    ap.add_argument("--speed", type=float, default=1.0)
+    ap.add_argument("--workers", type=int, default=4)
+    # Budgets (docs/operations.md): what a kiosk waits for, and what a staff screen waits for.
+    ap.add_argument("--device-p95-ms", type=float, default=250.0)
+    ap.add_argument("--device-p99-ms", type=float, default=1000.0)
+    ap.add_argument("--staff-p95-ms", type=float, default=1000.0)
+    ap.add_argument("--staff-p99-ms", type=float, default=2500.0)
     ap.add_argument(
         "--report", type=Path, default=ROOT / "var" / "load-test-report.json"
     )
     args = ap.parse_args()
 
-    print(f"building {args.devices} synthetic devices...")
-    url, tokens, admin_headers = build_database(args.devices)
+    print(f"building {args.scale or args.devices} synthetic devices...")
+    url, tokens, admin_headers = build_database(
+        args.devices, args.scale, args.occupancy
+    )
+    args.devices = len(tokens)
+    grouped = 0
+    if args.scale:
+        from isd.services import facility_model  # noqa: F401  (only to name the hubs below)
+
+        grouped = len(
+            {t.split("-")[2] for t in tokens}
+        )  # hubs: H1..Hn from the cell codes
     server = start_server(url, args.workers)
     try:
         wait_for_server()
         print(
-            f"running {args.seconds}s at speed x{args.speed} ({args.devices * args.speed:.0f} device-equivalents)"
+            f"warming up {args.warmup}s, then measuring {args.seconds}s at speed x{args.speed} ({args.devices * args.speed:.0f} device-equivalents)"
         )
         started = time.time()
         stats = asyncio.run(
@@ -216,6 +285,8 @@ def main() -> int:
                 args.seconds,
                 args.speed,
                 f"http://127.0.0.1:{PORT}",
+                grouped,
+                args.warmup,
             )
         )
         elapsed = time.time() - started
@@ -240,10 +311,13 @@ def main() -> int:
         )
         if row["errors"]:
             problems.append(f"{name}: {row['errors']} errors")
-        if row["p95"] > args.p95_ms:
-            problems.append(f"{name}: p95 {row['p95']:.0f} ms over {args.p95_ms:.0f}")
-        if row["p99"] > args.p99_ms:
-            problems.append(f"{name}: p99 {row['p99']:.0f} ms over {args.p99_ms:.0f}")
+        staff_side = name.startswith("staff ")
+        p95_limit = args.staff_p95_ms if staff_side else args.device_p95_ms
+        p99_limit = args.staff_p99_ms if staff_side else args.device_p99_ms
+        if row["p95"] > p95_limit:
+            problems.append(f"{name}: p95 {row['p95']:.0f} ms over {p95_limit:.0f}")
+        if row["p99"] > p99_limit:
+            problems.append(f"{name}: p99 {row['p99']:.0f} ms over {p99_limit:.0f}")
     print(
         f"\n{total} requests in {elapsed:.0f}s ({total / elapsed:.0f}/s); statuses {dict(sorted(stats.statuses.items()))}"
     )

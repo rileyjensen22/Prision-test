@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Notice } from '../../ui/Notice'
+import { EmptyState, LoadingState } from '../../ui/States'
 import { BackLink, Card, reasonTitle } from '../components'
 import { NetworkError } from '../api'
 import { useResident } from '../ResidentContext'
@@ -81,20 +83,25 @@ export function Reading() {
     items === null ? [] : online ? items : offlineCatalog(items, savedIds(), features)
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('reading.title')}</h1>
+      <h1 className="text-h1 font-bold">{t('reading.title')}</h1>
       {!online && <p data-testid="reading-offline">{t('reading.offline')}</p>}
-      {notice && <p role="alert">{notice}</p>}
+      {notice && (
+        <Notice tone="danger" role="alert">
+          {notice}
+        </Notice>
+      )}
       {items === null && online === false && <p>{t('reading.notSaved')}</p>}
-      {items?.length === 0 && <p>{t('reading.none')}</p>}
+      {!items && !notice && <LoadingState />}
+      {items?.length === 0 && <EmptyState title={t('reading.none')} />}
       <ul className="space-y-3">
         {shown.map((i) => (
           <li key={i.id}>
             <Card data-testid={`reading-${i.id}`} data-allowed={i.allowed}>
-              <p className="text-xl font-semibold">{i.title}</p>
-              <p className="opacity-80">{t('reading.by', { author: i.author })}</p>
-              <p className="opacity-80" data-testid={`reading-progress-${i.id}`}>
+              <p className="text-label font-bold">{i.title}</p>
+              <p className="text-ink-soft">{t('reading.by', { author: i.author })}</p>
+              <p className="text-ink-soft" data-testid={`reading-progress-${i.id}`}>
                 {i.completed
                   ? t('reading.finishedShort')
                   : t('reading.progress', { page: i.page + 1, total: i.pages })}
@@ -103,7 +110,7 @@ export function Reading() {
               {i.allowed ? (
                 <button
                   onClick={() => void read(i)}
-                  className="mt-2 min-h-14 rounded-lg bg-blue-700 px-6 py-3 font-semibold"
+                  className="mt-2 min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110"
                 >
                   {i.page > 0 && !i.completed ? t('reading.continue') : t('reading.read')}
                 </button>
@@ -197,11 +204,11 @@ function Reader({
   }
 
   const button =
-    'min-h-14 rounded-lg border-2 border-white px-5 py-3 font-semibold disabled:opacity-40'
+    'min-h-touch rounded-ctl border-2 border-ink bg-surface px-6 py-3 text-label font-bold text-ink hover:bg-surface-2 disabled:opacity-40'
 
   if (!allowed)
     return (
-      <div className="space-y-6">
+      <div className="mx-auto w-full max-w-5xl space-y-6">
         <button onClick={close} className={button}>
           ← {t('reading.back')}
         </button>
@@ -212,7 +219,7 @@ function Reader({
     )
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={close} className={button}>
           ← {t('reading.back')}
@@ -235,8 +242,8 @@ function Reader({
         </button>
       </div>
       <article data-testid="reading-text" className="space-y-3">
-        <h1 className="text-3xl font-bold">{book.title}</h1>
-        <p className="opacity-80">{t('reading.by', { author: book.author })}</p>
+        <h1 className="text-h1 font-bold">{book.title}</h1>
+        <p className="text-ink-soft">{t('reading.by', { author: book.author })}</p>
         <p
           data-testid="reading-page-text"
           data-scale={TEXT_SCALES[size]}
@@ -246,7 +253,7 @@ function Reader({
           {book.pages[page]}
         </p>
       </article>
-      <p data-testid="reading-position" className="opacity-80">
+      <p data-testid="reading-position" className="text-ink-soft">
         {t('reading.position', { page: page + 1, total: book.pages.length })}
       </p>
       {page === last && <p data-testid="reading-finished">{t('reading.finished')}</p>}
@@ -263,7 +270,7 @@ function Reader({
       </div>
       {book.bookmarks.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold">{t('reading.bookmarks')}</h2>
+          <h2 className="text-label font-bold">{t('reading.bookmarks')}</h2>
           <ul className="mt-2 flex flex-wrap gap-2">
             {book.bookmarks.map((p) => (
               <li key={p}>

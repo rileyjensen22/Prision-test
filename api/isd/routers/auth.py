@@ -1,13 +1,16 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from isd import limits, settings
-from isd.auth import authenticate, make_token, require_roles
+from isd.auth import authenticate, make_token, password_version, require_roles
 from isd.db import get_db
 from isd.models import ROLES, Staff
 from isd.providers import get_sso
+from isd.services import staff_security
 from isd.services.audit import SYSTEM, Actor, append_audit
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -16,6 +19,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 class LoginIn(BaseModel):
     username: str = Field(min_length=1, max_length=64)
     password: str = Field(min_length=1, max_length=256)  # a cap, so huge inputs cannot burn CPU
+    totp: str | None = Field(default=None, max_length=12)  # the 6-digit code from the app
+    recovery: str | None = Field(default=None, max_length=32)  # one recovery code instead
 
 
 @router.post("/login")
@@ -42,6 +47,19 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> dic
                 )
                 db.commit()  # keep the entry even though we answer with an error
         raise HTTPException(401, "invalid credentials")
+    if staff.mfa_enabled:
+        if not body.totp and not body.recovery:
+            raise HTTPException(
+                401,
+                {"code": "MFA_REQUIRED", "message": "enter the code from your authenticator app"},
+            )
+        if not staff_security.check_second_factor(
+            db, staff, body.totp, body.recovery, datetime.now(UTC)
+        ):
+            if on:
+                failures.hit(key)
+            db.commit()
+            raise HTTPException(401, "invalid credentials")
     failures.reset(key)
     append_audit(
         db,
@@ -50,9 +68,17 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)) -> dic
         "staff",
         staff.id,
         "LOGIN",
-        payload={"method": "password"},
+        payload={"method": "password", "mfa": staff.mfa_enabled},
     )
-    return {"token": make_token(staff.id), "role": staff.role}
+    needs_enrolment = settings.STAFF_MFA_REQUIRED and not staff.mfa_enabled
+    pv = password_version(staff)
+    token = make_token(staff.id, scope="enroll" if needs_enrolment else None, pv=pv)
+    return {
+        "token": token,
+        "role": staff.role,
+        "mfa_enrollment_required": needs_enrolment,
+        "must_change_password": staff.must_change_password,
+    }
 
 
 class SSOIn(BaseModel):
@@ -86,9 +112,68 @@ def sso_login(body: SSOIn, request: Request, db: Session = Depends(get_db)) -> d
 @router.post("/refresh")
 def refresh(staff: Staff = Depends(require_roles(*ROLES))) -> dict:
     """A fresh token for a valid one. Staff who stop using the app are signed out at expiry."""
-    return {"token": make_token(staff.id), "role": staff.role}
+    return {"token": make_token(staff.id, pv=password_version(staff)), "role": staff.role}
 
 
 @router.get("/me")
 def me(staff: Staff = Depends(require_roles(*ROLES))) -> dict:
-    return {"id": staff.id, "username": staff.username, "role": staff.role}
+    return {
+        "id": staff.id,
+        "username": staff.username,
+        "role": staff.role,
+        "mfa_enabled": staff.mfa_enabled,
+        "must_change_password": staff.must_change_password,
+    }
+
+
+def _fail(e: staff_security.SecurityError) -> HTTPException:
+    return HTTPException(422, {"code": e.code, "message": str(e)})
+
+
+class ChangePasswordIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    current_password: str = Field(min_length=1, max_length=256)
+    new_password: str = Field(min_length=1, max_length=256)
+
+
+@router.post("/change-password")
+def change_password(
+    body: ChangePasswordIn,
+    staff: Staff = Depends(require_roles(*ROLES)),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        staff_security.change_password(
+            db, staff, body.current_password, body.new_password, datetime.now(UTC)
+        )
+    except staff_security.SecurityError as e:
+        raise _fail(e) from e
+    # Every earlier token stops working; this one is the new session.
+    return {"token": make_token(staff.id, pv=password_version(staff)), "role": staff.role}
+
+
+@router.post("/mfa/setup")
+def mfa_setup(staff: Staff = Depends(require_roles(*ROLES)), db: Session = Depends(get_db)) -> dict:
+    try:
+        return staff_security.start_mfa_setup(db, staff)
+    except staff_security.SecurityError as e:
+        raise _fail(e) from e
+
+
+class MfaEnableIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    code: str = Field(min_length=6, max_length=12)
+
+
+@router.post("/mfa/enable")
+def mfa_enable(
+    body: MfaEnableIn,
+    staff: Staff = Depends(require_roles(*ROLES)),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        codes = staff_security.enable_mfa(db, staff, body.code, datetime.now(UTC))
+    except staff_security.SecurityError as e:
+        raise _fail(e) from e
+    # The recovery codes are shown once. The token stops being restricted to enrolment.
+    return {"recovery_codes": codes, "token": make_token(staff.id, pv=password_version(staff))}

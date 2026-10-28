@@ -46,6 +46,7 @@ test('out of cell: residents below the minimum surface on the dashboard and the 
 })
 
 test('schedule: a unit’s day can be changed and only that unit sees it', async ({
+  browser,
   context,
   page,
 }) => {
@@ -63,7 +64,9 @@ test('schedule: a unit’s day can be changed and only that unit sees it', async
   await openKiosk(page, 'uma', '/resident/feature/outdoor_rec')
   await expect(page.getByTestId('slot-20:15')).toContainText('Evening study')
   await expect(page.getByTestId('slot-20:15')).toHaveAttribute('data-kind', 'program')
-  const other = await context.newPage() // a device in unit A
+  // A device in unit A. It gets its own browser context: two kiosks in one context share storage
+  // and overwrite each other's device token, which made this test flaky.
+  const other = await (await browser.newContext()).newPage()
   await openKiosk(other, 'wren', '/resident/feature/outdoor_rec')
   await expect(other.getByTestId('slot-09:00')).toBeVisible()
   await expect(other.getByTestId('slot-20:15')).toHaveCount(0)
@@ -71,8 +74,7 @@ test('schedule: a unit’s day can be changed and only that unit sees it', async
   await sup.getByLabel('Reason for cancelling').fill('the teacher is ill today')
   await sup.getByTestId('block-20:15-program').getByRole('button', { name: 'Cancel' }).click()
   await expect(sup.getByTestId('notice')).toContainText('Block cancelled')
-  await openKiosk(page, 'uma', '/resident') // the other device shares this browser's storage
-  await page.goto('/resident/feature/outdoor_rec')
+  await page.reload()
   await expect(page.getByTestId('slot-20:15')).toContainText('cancelled')
 })
 

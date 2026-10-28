@@ -14,12 +14,16 @@ from isd.models import (
     Cell,
     Device,
     DeviceAssignment,
+    Floor,
+    Hub,
+    Line,
     PointEvent,
     Resident,
     Sanction,
     Staff,
     TierHistory,
 )
+from isd.services import facility_model as facility
 from isd.services import out_of_cell, welfare
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import (
@@ -63,33 +67,144 @@ def colleagues(session: Session) -> list[dict]:
     return [{"id": s.id, "username": s.username, "role": s.role} for s in rows]
 
 
-def roster(session: Session, now: datetime) -> list[dict]:
-    """One row per resident. A fixed number of queries however many residents there are."""
+def _placement_query(hub: str | None, line: str | None, floor: int | None, q: str | None):
+    """Resident ids on the unit now (released residents excluded), narrowed by where they live or
+    by a search on code or cell, in code order."""
+    stmt = (
+        select(Resident.id)
+        .select_from(Resident)
+        .outerjoin(
+            DeviceAssignment,
+            (DeviceAssignment.resident_id == Resident.id) & DeviceAssignment.ended_at.is_(None),
+        )
+        .outerjoin(Cell, Cell.id == DeviceAssignment.cell_id)
+        .where(Resident.released_at.is_(None))
+    )
+    if hub or line or floor:
+        stmt = stmt.join(Floor, Floor.id == Cell.floor_id).join(Line, Line.id == Floor.line_id)
+        if hub:
+            stmt = stmt.join(Hub, Hub.id == Line.hub_id).where(Hub.code == hub)
+        if line:
+            stmt = stmt.where(Line.code == line)
+        if floor:
+            stmt = stmt.where(Floor.level == floor)
+    if q:
+        like = f"%{q.strip()}%"
+        stmt = stmt.where(Resident.code.ilike(like) | Cell.code.ilike(like))
+    return stmt.order_by(Resident.code)
+
+
+def roster_page(
+    session: Session,
+    now: datetime,
+    *,
+    hub: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    q: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> dict:
+    """One page of the roster for a hub, line or floor. Entitlements are worked out only for the
+    residents on the page, so a facility of any size costs the same per page."""
+    ids_stmt = _placement_query(hub, line, floor, q)
+    total = session.execute(
+        select(func.count()).select_from(ids_stmt.order_by(None).subquery())
+    ).scalar()
+    ids = list(session.execute(ids_stmt.limit(limit).offset(offset)).scalars())
+    return {"total": total, "rows": roster(session, now, ids=ids)}
+
+
+def lookup(
+    session: Session,
+    *,
+    q: str | None = None,
+    unit: str | None = None,
+    line: str | None = None,
+    floor: int | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """A light list of residents to pick from: no entitlements, no sanctions."""
+    stmt = (
+        select(
+            Resident.id,
+            Resident.code,
+            Resident.display_name,
+            Cell.code,
+            Cell.unit,
+            Floor.level,
+            Device.code,
+        )
+        .select_from(Resident)
+        .outerjoin(
+            DeviceAssignment,
+            (DeviceAssignment.resident_id == Resident.id) & DeviceAssignment.ended_at.is_(None),
+        )
+        .outerjoin(Cell, Cell.id == DeviceAssignment.cell_id)
+        .outerjoin(Device, Device.id == DeviceAssignment.device_id)
+        .outerjoin(Floor, Floor.id == Cell.floor_id)
+        .where(Resident.released_at.is_(None))
+    )
+    if unit:
+        stmt = stmt.where(Cell.unit == unit)
+    if line:
+        stmt = stmt.join(Line, Line.id == Floor.line_id).where(Line.code == line)
+    if floor:
+        stmt = stmt.where(Floor.level == floor)
+    if q:
+        like = f"%{q.strip()}%"
+        stmt = stmt.where(Resident.code.ilike(like) | Cell.code.ilike(like))
+    rows = session.execute(stmt.order_by(Resident.code).limit(limit)).all()
+    return [
+        {
+            "resident_id": rid,
+            "code": code,
+            "display_name": name,
+            "cell": cell,
+            "unit": unit_,
+            "floor": level,
+            "device": device,
+        }
+        for rid, code, name, cell, unit_, level, device in rows
+    ]
+
+
+def roster(session: Session, now: datetime, ids: list[int] | None = None) -> list[dict]:
+    """One row per resident (or per id given). A fixed number of queries however many residents
+    there are."""
     cfg = load_engine_config(session)
     offline_after = timedelta(
         minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
     )
-    residents = session.execute(select(Resident).order_by(Resident.code)).scalars().all()
+    q = select(Resident).where(Resident.released_at.is_(None)).order_by(Resident.code)
+    if ids is not None:
+        q = q.where(Resident.id.in_(ids))
+    residents = session.execute(q).scalars().all()
     ids = [r.id for r in residents]
     placed = {
-        rid: (device, cell)
-        for rid, device, cell in session.execute(
-            select(DeviceAssignment.resident_id, Device, Cell)
+        rid: (device, cell, level, line_code, hub_code)
+        for rid, device, cell, level, line_code, hub_code in session.execute(
+            select(DeviceAssignment.resident_id, Device, Cell, Floor.level, Line.code, Hub.code)
             .join(Device, Device.id == DeviceAssignment.device_id)
             .join(Cell, Cell.id == DeviceAssignment.cell_id)
-            .where(DeviceAssignment.ended_at.is_(None))
+            .outerjoin(Floor, Floor.id == Cell.floor_id)
+            .outerjoin(Line, Line.id == Floor.line_id)
+            .outerjoin(Hub, Hub.id == Line.hub_id)
+            .where(DeviceAssignment.ended_at.is_(None), DeviceAssignment.resident_id.in_(ids))
         )
     }
     ents = get_entitlements_many(session, ids, now, cfg)
     active: dict[int, list[Sanction]] = {}
     for s in session.execute(
-        select(Sanction).where(Sanction.status == "active", Sanction.ends_at > now)
+        select(Sanction).where(
+            Sanction.status == "active", Sanction.ends_at > now, Sanction.resident_id.in_(ids)
+        )
     ).scalars():
         active.setdefault(s.resident_id, []).append(s)
     pending = dict(
         session.execute(
             select(Sanction.resident_id, func.count())
-            .where(Sanction.status == "pending")
+            .where(Sanction.status == "pending", Sanction.resident_id.in_(ids))
             .group_by(Sanction.resident_id)
         ).all()
     )
@@ -98,14 +213,14 @@ def roster(session: Session, now: datetime) -> list[dict]:
             select(Sanction.resident_id, func.count())
             .select_from(Appeal)
             .join(Sanction, Sanction.id == Appeal.sanction_id)
-            .where(Appeal.status == "open")
+            .where(Appeal.status == "open", Sanction.resident_id.in_(ids))
             .group_by(Sanction.resident_id)
         ).all()
     )
     points = total_points_many(session, ids, now)
     out = []
     for r in residents:
-        device, cell = placed.get(r.id, (None, None))
+        device, cell, level, line_code, hub_code = placed.get(r.id, (None,) * 5)
         ent = ents[r.id]
         last_sync = device.last_sync_at if device else None
         out.append(
@@ -114,6 +229,10 @@ def roster(session: Session, now: datetime) -> list[dict]:
                 "code": r.code,
                 "display_name": r.display_name,
                 "cell": cell.code if cell else None,
+                "unit": cell.unit if cell else None,
+                "hub": hub_code,
+                "line": line_code,
+                "floor": level,
                 "device": device.code if device else None,
                 "last_sync_at": last_sync.isoformat() if last_sync else None,
                 "offline": device is not None
@@ -166,6 +285,7 @@ def resident_detail(session: Session, resident_id: int, now: datetime) -> dict |
             "captions": r.captions,
         },
         "prior_returns": r.prior_returns,
+        "released_at": r.released_at.isoformat() if r.released_at else None,
         "device": asg[0] if asg else None,
         "cell": asg[1] if asg else None,
         "tier": {
@@ -380,19 +500,45 @@ def events(session: Session, limit: int = 40) -> list[dict]:
     ]
 
 
+def facility_overview(session: Session, now: datetime) -> dict:
+    after = timedelta(
+        minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
+    )
+    return facility.overview(session, now, after)
+
+
+def _offline_devices(session: Session, now: datetime) -> int:
+    after = timedelta(
+        minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
+    )
+    return session.execute(
+        select(func.count(DeviceAssignment.id))
+        .join(Device, Device.id == DeviceAssignment.device_id)
+        .join(Resident, Resident.id == DeviceAssignment.resident_id)
+        .where(
+            DeviceAssignment.ended_at.is_(None),
+            Resident.released_at.is_(None),
+            (Device.last_sync_at.is_(None)) | (Device.last_sync_at < now - after),
+        )
+    ).scalar()
+
+
 def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -> dict:
-    ro = roster(session, now)
+    """The dashboard numbers. Counts come from aggregate queries: nothing is worked out per
+    resident, so this costs about the same for 20 residents as for 2,000."""
     appeals = appeals_queue(session, viewer_id, viewer_role, now)
     show_outliers = viewer_role in ("supervisor", "admin", "auditor")
     flags = welfare.all_flags(session, now, max_age_seconds=300)  # polled: not every refresh
     return {
-        "residents": len(ro),
+        "residents": session.execute(
+            select(func.count()).select_from(Resident).where(Resident.released_at.is_(None))
+        ).scalar(),
         "pending_confirmations": session.execute(
             select(func.count()).where(Sanction.status == "pending")
         ).scalar(),
         "open_appeals": len(appeals),
         "overdue_appeals": sum(a["overdue"] for a in appeals),
-        "offline_devices": sum(r["offline"] for r in ro),
+        "offline_devices": _offline_devices(session, now),
         "outlier_flags": outliers(session, now)["flagged"] if show_outliers else None,
         "welfare_flags": len(flags),
         "welfare_escalated": sum(f["escalated"] for r in flags for f in r["flags"]),

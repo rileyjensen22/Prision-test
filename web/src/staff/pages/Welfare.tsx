@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import { errorText, post } from '../api'
@@ -39,6 +40,8 @@ function describe(f: Flag): string {
 }
 
 export default function Welfare() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Row[]>('/staff/welfare')
   const canAck = user && ['officer', 'supervisor', 'admin'].includes(user.role)
@@ -66,22 +69,19 @@ export default function Welfare() {
   }
 
   return (
-    <Page title="Welfare">
-      <p className="text-sm text-gray-600">
-        Each resident is compared with their own usual pattern. A flag means “please check in”, not
-        that something is wrong.
-      </p>
+    <Page title={t('staff.pages.Welfare.welfare')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.Welfare.eachResidentIsCompared')}</p>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {data?.length === 0 && (
         <Panel>
-          <p data-testid="welfare-clear">No welfare flags right now.</p>
+          <p data-testid="welfare-clear">{t('staff.pages.Welfare.noWelfareFlagsRight')}</p>
         </Panel>
       )}
       {(data ?? []).map((r) => (
         <Panel key={r.resident_id} data-testid={`welfare-${r.code}`}>
-          <h2 className="mb-2 text-lg font-semibold">
-            <Link className="text-blue-700 underline" to={`/staff/residents/${r.resident_id}`}>
+          <h2 className="mb-2 text-h3 font-semibold">
+            <Link className="text-primary underline" to={`/staff/residents/${r.resident_id}`}>
               {r.code}
             </Link>
           </h2>
@@ -91,47 +91,59 @@ export default function Welfare() {
                 <Badge tone={f.severity === 'attention' ? 'amber' : 'gray'}>{f.severity}</Badge>{' '}
                 {f.escalated && (
                   <Badge tone="red" data-testid="escalated">
-                    escalated to a supervisor
+                    {t('staff.pages.Welfare.escalatedToASupervisor')}
                   </Badge>
                 )}{' '}
                 <strong>{f.message}</strong>
-                <div className="text-sm text-gray-700">{describe(f)}</div>
+                <div className="text-sm text-ink-soft">{describe(f)}</div>
                 {f.escalated && !canHandleEscalated && (
-                  <p className="mt-1 text-sm text-gray-600">A supervisor must handle this flag.</p>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    {t('staff.pages.Welfare.aSupervisorMustHandle')}
+                  </p>
                 )}
                 {canAck &&
                   (f.escalated ? canHandleEscalated : true) &&
                   (open === `${r.code}:${f.type}` ? (
                     <div className="mt-2 flex flex-wrap gap-2">
                       <select
-                        aria-label="Action taken"
+                        aria-label={t('staff.pages.Welfare.actionTaken')}
                         value={action}
                         onChange={(e) => setAction(e.target.value)}
-                        className="rounded border px-2 py-1"
+                        className="rounded-ctl border px-2 py-1"
                       >
-                        <option value="checked_in">Checked in with the resident</option>
-                        <option value="referred_medical">Referred to medical</option>
-                        <option value="referred_mental_health">Referred to mental health</option>
-                        <option value="adjusted_schedule">Adjusted their schedule</option>
-                        <option value="no_concern">No concern after looking</option>
+                        <option value="checked_in">
+                          {t('staff.pages.Welfare.checkedInWithThe')}
+                        </option>
+                        <option value="referred_medical">
+                          {t('staff.pages.Welfare.referredToMedical')}
+                        </option>
+                        <option value="referred_mental_health">
+                          {t('staff.pages.Welfare.referredToMentalHealth')}
+                        </option>
+                        <option value="adjusted_schedule">
+                          {t('staff.pages.Welfare.adjustedTheirSchedule')}
+                        </option>
+                        <option value="no_concern">
+                          {t('staff.pages.Welfare.noConcernAfterLooking')}
+                        </option>
                       </select>
                       <input
-                        aria-label="What was done"
-                        placeholder="What was done?"
+                        aria-label={t('staff.pages.Welfare.whatWasDone')}
+                        placeholder={t('staff.pages.Welfare.whatWasDone2')}
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        className="min-w-64 rounded border px-2 py-1"
+                        className="min-w-64 rounded-ctl border px-2 py-1"
                       />
                       <Btn disabled={note.trim().length < 3} onClick={() => void ack(r, f)}>
-                        Record check-in
+                        {t('staff.pages.Welfare.recordCheckIn')}
                       </Btn>
                       <Btn kind="plain" onClick={() => setOpen(null)}>
-                        Cancel
+                        {t('staff.pages.Welfare.cancel')}
                       </Btn>
                     </div>
                   ) : (
                     <Btn kind="plain" onClick={() => setOpen(`${r.code}:${f.type}`)}>
-                      I checked in…
+                      {t('staff.pages.Welfare.iCheckedIn')}
                     </Btn>
                   ))}
               </li>

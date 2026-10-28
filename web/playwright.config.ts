@@ -16,7 +16,8 @@ export default defineConfig({
       command: `${PY} ../scripts/e2e-seed.py && ${PY} -m uvicorn isd.main:app --port 8001`,
       cwd: '../api',
       url: 'http://localhost:8001/health',
-      env: { DATABASE_URL: E2E_DB_URL },
+      // Many tests sign in from one address within a minute; slower machines hit the default limit.
+      env: { DATABASE_URL: E2E_DB_URL, LOGIN_MAX_PER_MINUTE_IP: '1000' },
       reuseExistingServer: false,
       timeout: 60_000,
     },

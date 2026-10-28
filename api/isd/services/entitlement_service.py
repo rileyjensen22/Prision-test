@@ -15,21 +15,27 @@ from isd.engine.entitlements import (
     compute_entitlements,
 )
 from isd.engine.sandbox import SandboxOverrides, apply_to_facts
-from isd.models import Contact, OffenseFlag, Resident, Sanction, TierHistory
-from isd.services.config_store import get_current
+from isd.models import (
+    Cell,
+    Contact,
+    DeviceAssignment,
+    OffenseFlag,
+    Resident,
+    Sanction,
+    TierHistory,
+)
+from isd.services.config_store import get_current, get_current_many
 from isd.services.device_locks import locks_for_residents
 
 ENGINE_SECTIONS = ("tiers", "points", "sanctions", "offenses")
 
 
 def load_engine_config(session: Session) -> EngineConfig:
-    sections = {}
+    rows = get_current_many(session, ENGINE_SECTIONS)
     for name in ENGINE_SECTIONS:
-        row = get_current(session, name)
-        if row is None:
+        if name not in rows:
             raise LookupError(f"config section {name!r} has not been seeded")
-        sections[name] = row.payload
-    return EngineConfig.from_sections(sections)
+    return EngineConfig.from_sections({name: rows[name].payload for name in ENGINE_SECTIONS})
 
 
 def earned_tier(session: Session, resident_id: int, at_time: datetime) -> int:
@@ -47,6 +53,30 @@ def earned_tiers(session: Session, resident_ids: list[int], at_time: datetime) -
     return {rid: found.get(rid) or 1 for rid in resident_ids}
 
 
+def _chess_off(session: Session, ids: list[int], own: dict[int, bool | None]) -> set[int]:
+    """Residents for whom staff have turned human chess off: facility-wide, by unit, or by name
+    (a resident switched on by name stays on when only their unit is off)."""
+    row = get_current(session, "chess")
+    settings = row.payload if row else {"human_enabled": True, "disabled_units": []}
+    if not settings.get("human_enabled", True):
+        return set(ids)
+    units = settings.get("disabled_units") or []
+    unit_of = {}
+    if units:
+        unit_of = dict(
+            session.execute(
+                select(DeviceAssignment.resident_id, Cell.unit)
+                .join(Cell, Cell.id == DeviceAssignment.cell_id)
+                .where(DeviceAssignment.resident_id.in_(ids), DeviceAssignment.ended_at.is_(None))
+            ).all()
+        )
+    off = set()
+    for rid in ids:
+        if own.get(rid) is False or (own.get(rid) is None and unit_of.get(rid) in units):
+            off.add(rid)
+    return off
+
+
 def load_facts_many(
     session: Session, resident_ids: list[int], at_time: datetime
 ) -> dict[int, ResidentFacts]:
@@ -55,12 +85,15 @@ def load_facts_many(
     ids = list(dict.fromkeys(resident_ids))
     if not ids:
         return {}
-    returns = {
-        rid: n
-        for rid, n in session.execute(
-            select(Resident.id, Resident.prior_returns).where(Resident.id.in_(ids))
+    own = {
+        rid: (n, switch)
+        for rid, n, switch in session.execute(
+            select(Resident.id, Resident.prior_returns, Resident.chess_human).where(
+                Resident.id.in_(ids)
+            )
         )
     }
+    returns = {rid: n for rid, (n, _) in own.items()}
     missing = [i for i in ids if i not in returns]
     if missing:
         raise LookupError(f"resident {missing[0]} not found")
@@ -88,6 +121,7 @@ def load_facts_many(
     ):
         blocked.setdefault(rid, []).append(cid)
     locks = locks_for_residents(session, ids)
+    chess_off = _chess_off(session, ids, {rid: sw for rid, (_, sw) in own.items()})
     return {
         rid: ResidentFacts(
             earned_tier=tiers[rid],
@@ -96,6 +130,7 @@ def load_facts_many(
             sanctions=tuple(sanctions.get(rid, ())),
             blocked_contact_ids=tuple(blocked.get(rid, ())),
             device_locks=tuple(DeviceLockFact(i, a, b) for i, a, b in locks.get(rid, ())),
+            chess_human_off=rid in chess_off,
         )
         for rid in ids
     }

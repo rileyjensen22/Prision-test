@@ -192,12 +192,27 @@ def test_a_paper_can_only_be_used_by_its_owner_once_and_before_it_expires(
 # ---------------- pacing: attempt limits and cooldowns ----------------
 def test_coming_back_to_an_open_paper_does_not_use_another_attempt(owner, seeded, make_resident):
     rid = make_resident()
-    learn(owner, rid, "MONEY101")
-    first = education.start_quiz(owner, rid, "MONEY101", NOW)
-    again = education.start_quiz(owner, rid, "MONEY101", NOW + timedelta(minutes=5))
+    finish(owner, rid, "NUM101")  # the prerequisite
+    give(owner, rid, 300)  # tier 3: advanced courses are open
+    learn(owner, rid, "TRADES101")
+    first = education.start_quiz(owner, rid, "TRADES101", NOW)
+    again = education.start_quiz(owner, rid, "TRADES101", NOW + timedelta(minutes=5))
     assert again["quiz_id"] == first["quiz_id"] and again["questions"] == first["questions"]
     assert owner.execute(select(func.count(QuizSession.id))).scalar() >= 1
-    assert education.attempts_view(owner, rid, "MONEY101", NOW)["attempts_left"] == 4
+    assert education.attempts_view(owner, rid, "TRADES101", NOW)["attempts_left"] == 4
+
+
+def test_basic_courses_have_no_daily_attempt_cap_but_keep_the_cooldown(
+    owner, seeded, make_resident
+):
+    rid = make_resident()
+    learn(owner, rid, "MONEY101")
+    for i in range(7):
+        take_quiz(owner, rid, "MONEY101", NOW + timedelta(minutes=11 * i), correct=False)
+    view = education.attempts_view(owner, rid, "MONEY101", NOW + timedelta(hours=2))
+    assert view["allowed"] and view["attempts_left"] is None
+    again = education.attempts_view(owner, rid, "MONEY101", NOW + timedelta(minutes=11 * 6 + 3))
+    assert again["code"] == "COOLDOWN"
 
 
 def test_a_failed_attempt_means_a_short_wait_that_says_when_it_ends(owner, seeded, make_resident):
@@ -216,34 +231,38 @@ def test_too_many_attempts_pause_the_quiz_until_the_oldest_ages_out_but_never_th
     owner, seeded, make_resident
 ):
     rid = make_resident()
-    learn(owner, rid, "MONEY101")
+    finish(owner, rid, "NUM101")  # the prerequisite
+    give(owner, rid, 300)  # tier 3: advanced courses are open
+    learn(owner, rid, "TRADES101")
     for i in range(5):
-        take_quiz(owner, rid, "MONEY101", NOW + timedelta(minutes=11 * i), correct=False)
+        take_quiz(owner, rid, "TRADES101", NOW + timedelta(minutes=11 * i), correct=False)
     soon = NOW + timedelta(hours=2)
     with pytest.raises(EducationError) as e:
-        education.start_quiz(owner, rid, "MONEY101", soon)
+        education.start_quiz(owner, rid, "TRADES101", soon)
     assert e.value.code == "ATTEMPTS_EXHAUSTED" and e.value.retry_at == NOW + timedelta(hours=24)
     # the lessons stay open the whole time, and review is always possible
-    assert education.get_course(owner, rid, "MONEY101", soon)["lessons"]
-    assert take_quiz(owner, rid, "MONEY101", NOW + timedelta(hours=24, minutes=1))["passed"]
+    assert education.get_course(owner, rid, "TRADES101", soon)["lessons"]
+    assert take_quiz(owner, rid, "TRADES101", NOW + timedelta(hours=24, minutes=1))["passed"]
 
 
 def test_limits_are_config_and_can_be_overridden_per_course(owner, seeded, make_resident):
     payload = json.loads(json.dumps(get_current(owner, "courses").payload))
     payload["quiz_defaults"]["max_attempts"] = 1
     for c in payload["courses"]:
-        if c["code"] == "NUM101":
+        if c["code"] == "WORKMATH":
             c["quiz"]["max_attempts"] = 3
     set_config(owner, SYSTEM, "courses", payload, "test: tighter attempts")
     rid = make_resident()
-    learn(owner, rid, "MONEY101")
-    learn(owner, rid, "NUM101")
-    take_quiz(owner, rid, "MONEY101", NOW, correct=False)
+    finish(owner, rid, "NUM101")  # the prerequisite
+    give(owner, rid, 300)  # tier 3: advanced courses are open
+    learn(owner, rid, "TRADES101")
+    learn(owner, rid, "WORKMATH")
+    take_quiz(owner, rid, "TRADES101", NOW, correct=False)
     with pytest.raises(EducationError) as e:
-        education.start_quiz(owner, rid, "MONEY101", NOW + timedelta(minutes=20))
+        education.start_quiz(owner, rid, "TRADES101", NOW + timedelta(minutes=20))
     assert e.value.code == "ATTEMPTS_EXHAUSTED"
-    take_quiz(owner, rid, "NUM101", NOW, correct=False)
-    education.start_quiz(owner, rid, "NUM101", NOW + timedelta(minutes=20))  # three are allowed
+    take_quiz(owner, rid, "WORKMATH", NOW, correct=False)
+    education.start_quiz(owner, rid, "WORKMATH", NOW + timedelta(minutes=20))  # three are allowed
 
 
 # ---------------- reading levels and languages ----------------

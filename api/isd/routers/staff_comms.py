@@ -24,7 +24,7 @@ def _now() -> datetime:
 
 
 def _status(code: str) -> int:
-    return {"NOT_FOUND": 404, "FORBIDDEN": 403}.get(code, 409)
+    return {"NOT_FOUND": 404, "FORBIDDEN": 403, "PRIVILEGED_DENIED": 403}.get(code, 409)
 
 
 # ---------------- contact requests ----------------
@@ -103,6 +103,8 @@ def read_monitored_message(
             db, Actor(staff.id, staff.role), message_id, body.reason, _now()
         )
     except monitoring.MonitoringDenied as e:
+        if e.code == "PRIVILEGED_DENIED":
+            db.commit()  # keep the "monitoring_denied" audit entry: get_db rolls back on errors
         raise HTTPException(_status(e.code), {"code": e.code, "message": str(e)}) from e
 
 
@@ -126,3 +128,26 @@ def review_flag(
     except monitoring.MonitoringDenied as e:
         raise HTTPException(_status(e.code), {"code": e.code, "message": str(e)}) from e
     return {"id": f.id, "status": f.status}
+
+
+# ---------------- monitored phone calls ----------------
+@router.get("/monitoring/calls")
+def monitored_calls(_: Staff = Depends(READERS), db: Session = Depends(get_db)) -> list[dict]:
+    """Metadata only. A recording is opened one call at a time, with a reason, by a supervisor
+    or admin. Attorney calls never appear."""
+    return monitoring.call_queue(db)
+
+
+@router.post("/monitoring/calls/{call_id}/review")
+def review_monitored_call(
+    call_id: int,
+    body: ReadIn,
+    staff: Staff = Depends(REVIEWERS),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        return monitoring.review_call(db, Actor(staff.id, staff.role), call_id, body.reason)
+    except monitoring.MonitoringDenied as e:
+        if e.code == "PRIVILEGED_DENIED":
+            db.commit()  # keep the "monitoring_denied" audit entry: get_db rolls back on errors
+        raise HTTPException(_status(e.code), {"code": e.code, "message": str(e)}) from e

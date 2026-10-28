@@ -1,4 +1,5 @@
 import { Badge, ErrorLine, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import { useTranslation } from 'react-i18next'
 
 interface Flag {
   metric: string
@@ -28,29 +29,33 @@ const LABEL: Record<string, string> = {
 }
 
 export default function Outliers() {
+  const { t } = useTranslation()
+
   const { data, error } = useLoad<Data>('/staff/outliers')
   return (
-    <Page title="Staff outlier view">
+    <Page title={t('staff.pages.Outliers.staffOutlierView')}>
       <ErrorLine error={error} />
       {data && (
         <>
-          <p className="text-sm text-gray-600" data-testid="outlier-settings">
-            Last {data.settings.window_days} days, compared with others in the same role. A person
-            is flagged when a number is at least {data.settings.z_threshold} standard deviations
-            above their peers (needs {data.settings.min_peers}+ peers and {data.settings.min_count}+
-            cases). A flag is a prompt to look, not a finding.
+          <p className="text-sm text-ink-soft" data-testid="outlier-settings">
+            {t('staff.msg.outlierSettings', {
+              days: data.settings.window_days,
+              z: data.settings.z_threshold,
+              peers: data.settings.min_peers,
+              cases: data.settings.min_count,
+            })}
           </p>
           {Object.entries(data.groups).map(([role, rows]) => (
             <Panel key={role} title={`${role[0].toUpperCase()}${role.slice(1)}s`}>
               <Table data-testid={`outliers-${role}`}>
                 <thead>
                   <tr>
-                    <Th>Who</Th>
-                    <Th>Recorded</Th>
-                    <Th>Applied</Th>
-                    <Th>Overturned</Th>
-                    <Th>Rejected</Th>
-                    <Th>Flags</Th>
+                    <Th>{t('staff.pages.Outliers.who')}</Th>
+                    <Th>{t('staff.pages.Outliers.recorded')}</Th>
+                    <Th>{t('staff.pages.Outliers.applied')}</Th>
+                    <Th>{t('staff.pages.Outliers.overturned')}</Th>
+                    <Th>{t('staff.pages.Outliers.rejected')}</Th>
+                    <Th>{t('staff.pages.Outliers.flags')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -64,7 +69,11 @@ export default function Outliers() {
                       <Td>
                         {r.flags.map((f) => (
                           <Badge key={f.metric} tone="red">
-                            {LABEL[f.metric]}: {f.value} vs peers {f.peer_mean}
+                            {t('staff.msg.vsPeers', {
+                              label: LABEL[f.metric],
+                              value: f.value,
+                              mean: f.peer_mean,
+                            })}
                           </Badge>
                         ))}
                       </Td>

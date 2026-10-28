@@ -5,13 +5,15 @@ never listed and never readable by any role (invariant 6). A keyword flag is a r
 nothing in this module creates a sanction (invariant 12).
 """
 
+import base64
 from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from isd.engine.monitoring import match_rules
-from isd.models import Contact, Message, MessageFlag, Resident
+from isd.interfaces.telephony import PrivilegedCommunicationError, TelephonyService
+from isd.models import CallRecord, Contact, Message, MessageFlag, Resident
 from isd.services.audit import Actor, append_audit
 from isd.services.config_store import get_current
 
@@ -138,3 +140,58 @@ def review_flag(
         payload={"outcome": outcome, "reason": reason.strip(), "rule_id": f.rule_id},
     )
     return f
+
+
+def call_queue(session: Session, limit: int = 100) -> list[dict]:
+    """Metadata of monitored phone calls: who, when, how long. Attorney (privileged) calls are
+    never listed, and no content is shown here (invariants 6 and 16)."""
+    rows = session.execute(
+        select(CallRecord, Resident.code)
+        .join(Resident, Resident.id == CallRecord.resident_id)
+        .where(
+            CallRecord.privileged.is_(False),
+            CallRecord.monitored.is_(True),
+            CallRecord.medium == "voice",
+        )
+        .order_by(CallRecord.id.desc())
+        .limit(limit)
+    ).all()
+    return [
+        {
+            "call_id": c.id,
+            "resident_id": c.resident_id,
+            "resident": code,
+            "contact_type": c.contact_type,
+            "at": c.started_at.isoformat(),
+            "duration_seconds": c.duration_seconds,
+            "status": c.status,
+            "recording_purged": c.recording_purged_at is not None,
+        }
+        for c, code in rows
+    ]
+
+
+def review_call(
+    session: Session,
+    actor: Actor,
+    call_id: int,
+    reason: str,
+    telephony: TelephonyService | None = None,
+) -> dict:
+    """Opens one monitored call's recording. Needs a stated reason and is audit-logged. An
+    attorney call is refused, and the refusal is logged too."""
+    from isd.services import calls
+
+    try:
+        audio = calls.fetch_recording(session, actor, call_id, reason, telephony)
+    except PrivilegedCommunicationError as e:
+        raise MonitoringDenied("PRIVILEGED_DENIED", "attorney calls are private") from e
+    except PermissionError as e:
+        raise MonitoringDenied("REASON_REQUIRED" if "why" in str(e) else "FORBIDDEN", str(e)) from e
+    except LookupError as e:
+        raise MonitoringDenied("NOT_FOUND", str(e)) from e
+    return {
+        "call_id": call_id,
+        "bytes": len(audio),
+        "audio_base64": base64.b64encode(audio).decode(),
+    }

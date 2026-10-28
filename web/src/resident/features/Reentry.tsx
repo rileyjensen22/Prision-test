@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { ErrorState, LoadingState } from '../../ui/States'
 import { BackLink, Card } from '../components'
 import { useResident } from '../ResidentContext'
 import { L } from './helpers'
 import type { Bi } from './helpers'
+import { countdownFrom, loadReentry, saveReentry } from './reentryCache'
 
 interface Data {
   countdown: { release_date: string; days_left: number; weeks_left: number } | null
@@ -20,26 +22,47 @@ export function Reentry() {
   const { request, online } = useResident()
   const [data, setData] = useState<Data | null>(null)
   const [error, setError] = useState(false)
+  const [savedAt, setSavedAt] = useState<string | null>(null)
   const lang = i18n.language
 
   useEffect(() => {
     request<Data>('/device/reentry')
-      .then(setData)
-      .catch(() => setError(true))
+      .then((d) => {
+        setData(d)
+        setSavedAt(null)
+        saveReentry(d)
+      })
+      .catch(() => {
+        // Offline: show the last copy saved on this device, with the countdown recomputed.
+        const saved = loadReentry<Data>()
+        if (!saved) return setError(true)
+        const d = saved.data
+        setData({
+          ...d,
+          countdown: d.countdown ? countdownFrom(d.countdown.release_date) : null,
+        })
+        setSavedAt(saved.saved_at)
+      })
   }, [request, online])
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
-      <h1 className="text-3xl font-bold">{t('reentry.title')}</h1>
-      {error && <p>{t('reentry.needsConnection')}</p>}
+      <h1 className="text-h1 font-bold">{t('reentry.title')}</h1>
+      {error && <ErrorState title={t('reentry.needsConnection')} />}
+      {!data && !error && <LoadingState />}
       {data && (
         <>
+          {savedAt && (
+            <p data-testid="reentry-saved" role="status" className="text-ink-soft">
+              {t('reentry.savedCopy', { when: new Date(savedAt).toLocaleString(lang) })}
+            </p>
+          )}
           <Card data-testid="reentry-countdown">
             {data.countdown ? (
               <>
-                <p className="text-lg">{t('reentry.countdownLabel')}</p>
-                <p className="text-4xl font-bold">
+                <p className="text-body">{t('reentry.countdownLabel')}</p>
+                <p className="text-display font-bold">
                   {t('reentry.daysLeft', { count: data.countdown.days_left })}
                 </p>
               </>
@@ -49,7 +72,7 @@ export function Reentry() {
           </Card>
 
           <Card>
-            <h2 className="text-2xl font-bold">{t('reentry.checklist')}</h2>
+            <h2 className="text-h2 font-bold">{t('reentry.checklist')}</h2>
             <p data-testid="reentry-progress">
               {t('reentry.progress', { done: data.progress.resolved, total: data.progress.total })}
             </p>
@@ -59,13 +82,15 @@ export function Reentry() {
                   key={i.code}
                   data-testid={`reentry-item-${i.code}`}
                   data-status={i.status}
-                  className="rounded-lg border-2 border-slate-500 p-4"
+                  className="rounded-card border border-line bg-surface p-4 shadow-card"
                 >
-                  <p className="text-xl font-semibold">
+                  <p className="text-label font-bold">
                     {i.status === 'done' ? '✓ ' : ''}
                     {L(i.title, lang)}
                   </p>
-                  <p className="text-sm uppercase">{t(`reentry.status.${i.status}`)}</p>
+                  <p className="text-sm font-bold text-ink-soft">
+                    {t(`reentry.status.${i.status}`)}
+                  </p>
                   <p className="mt-1">{L(i.detail, lang)}</p>
                 </li>
               ))}
@@ -75,13 +100,13 @@ export function Reentry() {
 
           {data.courses.length > 0 && (
             <Card>
-              <h2 className="text-2xl font-bold">{t('reentry.courses')}</h2>
+              <h2 className="text-h2 font-bold">{t('reentry.courses')}</h2>
               <ul className="mt-3 space-y-2">
                 {data.courses.map((c) => (
                   <li key={c.code}>
                     <Link
                       to={`/resident/course/${c.code}`}
-                      className="block min-h-14 rounded-lg border-2 border-slate-500 p-3 underline"
+                      className="block min-h-touch rounded-card border border-line bg-surface p-4 font-bold text-primary shadow-card hover:border-primary"
                     >
                       {L(c.title, lang)}{' '}
                       {c.completed
@@ -95,12 +120,15 @@ export function Reentry() {
           )}
 
           <Card data-testid="reentry-resources">
-            <h2 className="text-2xl font-bold">{t('reentry.resources')}</h2>
+            <h2 className="text-h2 font-bold">{t('reentry.resources')}</h2>
             <p className="text-sm">{t('reentry.resourcesNote')}</p>
             <ul className="mt-3 space-y-3">
               {data.resources.map((r) => (
-                <li key={r.code} className="rounded-lg border-2 border-slate-500 p-4">
-                  <p className="text-xl font-semibold">{L(r.title, lang)}</p>
+                <li
+                  key={r.code}
+                  className="rounded-card border border-line bg-surface p-4 shadow-card"
+                >
+                  <p className="text-label font-bold">{L(r.title, lang)}</p>
                   <p>{L(r.description, lang)}</p>
                   <p className="font-mono">{r.phone}</p>
                 </li>

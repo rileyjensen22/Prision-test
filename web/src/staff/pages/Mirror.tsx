@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { SimulatedResident } from '../../resident/SimulatedResident'
 import type { ResidentView } from '../../resident/types'
@@ -35,9 +36,11 @@ interface Hist {
 const POLL_MS = 2000
 
 export default function Mirror() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const canStart = user?.role === 'supervisor' || user?.role === 'admin'
-  const roster = useLoad<RosterRow[]>('/staff/roster')
+  const roster = useLoad<RosterRow[]>('/staff/residents/lookup?limit=500')
   const history = useLoad<Hist[]>('/staff/mirror/sessions')
   const [residentId, setResidentId] = useState('')
   const [reason, setReason] = useState('')
@@ -93,26 +96,22 @@ export default function Mirror() {
   }, [sessionId, stop])
 
   return (
-    <Page title="Live mirror">
-      <p className="text-sm text-gray-600">
-        A read-only view of where a resident is on their device. Every session is logged with who,
-        which resident, why, and for how long. Attorney calls and legal, grievance and health
-        screens are never shown. Sessions end after a time limit or when idle.
-      </p>
+    <Page title={t('staff.pages.Mirror.liveMirror')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.Mirror.aReadOnlyView')}</p>
       {message && <Notice kind={message.kind}>{message.text}</Notice>}
 
       {sessionId === null && canStart && (
-        <Panel title="Start a session">
+        <Panel title={t('staff.pages.Mirror.startASession')}>
           <div className="grid gap-3 md:grid-cols-[1fr_2fr_auto] md:items-end">
             <label className="text-sm">
-              Resident
+              {t('staff.pages.Mirror.resident')}
               <select
-                aria-label="Resident"
+                aria-label={t('staff.pages.Mirror.resident')}
                 value={residentId}
                 onChange={(e) => setResidentId(e.target.value)}
-                className="mt-1 block w-full rounded border px-2 py-2"
+                className="mt-1 block w-full rounded-ctl border px-2 py-2"
               >
-                <option value="">Choose…</option>
+                <option value="">{t('staff.pages.Mirror.choose')}</option>
                 {(roster.data ?? [])
                   .filter((r) => r.device)
                   .map((r) => (
@@ -123,16 +122,16 @@ export default function Mirror() {
               </select>
             </label>
             <label className="text-sm">
-              Why are you watching?
+              {t('staff.pages.Mirror.whyAreYouWatching')}
               <input
-                aria-label="Reason for mirroring"
+                aria-label={t('staff.pages.Mirror.reasonForMirroring')}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="mt-1 block w-full rounded border px-2 py-2"
+                className="mt-1 block w-full rounded-ctl border px-2 py-2"
               />
             </label>
             <Btn onClick={() => void start()} disabled={!residentId || reason.trim().length < 5}>
-              Start mirror
+              {t('staff.pages.Mirror.startMirror')}
             </Btn>
           </div>
         </Panel>
@@ -141,34 +140,35 @@ export default function Mirror() {
       {sessionId !== null && (
         <div className="space-y-3" data-testid="mirror-live">
           <div
-            className="flex flex-wrap items-center gap-3 rounded bg-amber-100 px-3 py-2 text-amber-950"
+            className="flex flex-wrap items-center gap-3 rounded-ctl bg-notice-soft px-3 py-2 text-ink"
             role="status"
           >
-            <strong>LIVE MIRROR · read-only</strong>
+            <strong>{t('staff.pages.Mirror.liveMirrorReadOnly')}</strong>
             <span data-testid="mirror-target">{frame?.resident_code ?? '…'}</span>
-            {frame && <span>until {fmt(frame.expires_at)}</span>}
+            {frame && <span>{t('staff.msg.until', { at: fmt(frame.expires_at) })}</span>}
             <span className="ml-auto">
               <Btn kind="danger" onClick={() => void stop()}>
-                End mirror
+                {t('staff.pages.Mirror.endMirror')}
               </Btn>
             </span>
           </div>
           {frame?.redacted && (
             <Panel data-testid="mirror-redacted">
-              <p className="font-medium">Private screen</p>
-              <p className="text-sm text-gray-700">
+              <p className="font-medium">{t('staff.pages.Mirror.privateScreen')}</p>
+              <p className="text-sm text-ink-soft">
                 {frame.redacted === 'PRIVILEGED_CALL'
-                  ? 'A private attorney call is in progress.'
-                  : 'The resident is on a private service (legal, grievance or health).'}{' '}
-                Its contents are never shown.
+                  ? t('staff.msg.mirrorAttorney')
+                  : t('staff.msg.mirrorPrivate')}{' '}
+                {t('staff.msg.neverShown')}
               </p>
             </Panel>
           )}
           {frame?.view && (
             <div className="max-w-xl">
-              <p className="mb-1 text-xs text-gray-600" data-testid="mirror-screen">
-                Screen: {frame.screen?.path ?? 'unknown'}
-                {frame.screen?.age_seconds != null && ` (updated ${frame.screen.age_seconds}s ago)`}
+              <p className="mb-1 text-sm text-ink-soft" data-testid="mirror-screen">
+                {t('staff.msg.screen', { path: frame.screen?.path ?? t('staff.msg.unknown') })}
+                {frame.screen?.age_seconds != null &&
+                  ` ${t('staff.msg.updatedAgo', { n: frame.screen.age_seconds })}`}
               </p>
               <SimulatedResident
                 view={{ ...frame.view, simulation: false }}
@@ -180,17 +180,17 @@ export default function Mirror() {
         </div>
       )}
 
-      <Panel title="Session history">
+      <Panel title={t('staff.pages.Mirror.sessionHistory')}>
         <ErrorLine error={history.error} />
         <Table data-testid="mirror-history">
           <thead>
             <tr>
-              <Th>Started</Th>
-              <Th>Staff</Th>
-              <Th>Resident</Th>
-              <Th>Reason</Th>
-              <Th>Length</Th>
-              <Th>Ended</Th>
+              <Th>{t('staff.pages.Mirror.started')}</Th>
+              <Th>{t('staff.pages.Mirror.staff')}</Th>
+              <Th>{t('staff.pages.Mirror.resident')}</Th>
+              <Th>{t('staff.pages.Mirror.reason')}</Th>
+              <Th>{t('staff.pages.Mirror.length')}</Th>
+              <Th>{t('staff.pages.Mirror.ended')}</Th>
             </tr>
           </thead>
           <tbody>

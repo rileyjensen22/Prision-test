@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: kiosk-check demo-smoke demo demo-scenario demo-down demo-reset demo-logs seed-full load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -13,8 +13,29 @@ $(VENV)/.installed: api/pyproject.toml
 install: $(VENV)/.installed
 	cd web && npm ci
 
-dev:  ## run api + web + postgres
-	docker compose up --build
+demo:  ## start Postgres, API and web in Docker with demo data and print the addresses and logins
+	./scripts/demo.sh
+
+demo-scenario:  ## play the demo story against the running demo (education -> tier, a lock, an appeal, the audit chain)
+	python3 scripts/demo-scenario.py --base http://localhost:$${ISD_WEB_PORT:-8080}/api
+
+kiosk-check:  ## check the kiosk provisioning in a Debian container (packages, firewall syntax, systemd units, browser policy)
+	./scripts/kiosk-check.sh
+
+demo-smoke:  ## open the running demo in a real browser and check the main screens load
+	cd web && node smoke/demo-smoke.mjs http://localhost:$${ISD_WEB_PORT:-8080}
+
+demo-down:  ## stop the demo (data is kept)
+	docker compose down
+
+demo-reset:  ## stop the demo and delete its data
+	docker compose down -v
+
+demo-logs:  ## follow the demo's logs
+	docker compose logs -f --tail=50
+
+dev:  ## the demo stack with hot reload: API reloads on change, web on http://localhost:5173
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 test: $(VENV)/.installed  ## pytest + vitest + playwright
 	cd api && ../$(PY) -m pytest -q
@@ -29,6 +50,9 @@ migrate: $(VENV)/.installed
 
 seed: $(VENV)/.installed migrate
 	$(PY) scripts/seed.py
+
+seed-full: $(VENV)/.installed migrate  ## the full 1,920-cell facility with synthetic residents (needs an empty database)
+	$(PY) scripts/seed-full.py
 
 lint: $(VENV)/.installed
 	$(VENV)/bin/ruff check api scripts
@@ -54,6 +78,9 @@ courses-check: $(VENV)/.installed  ## validate every course folder under content
 
 secrets-check:  ## fail if the repository contains anything that looks like a secret
 	$(PY) scripts/check-secrets.py
+
+load-test: $(VENV)/.installed  ## the full 1,920-cell facility (one kiosk per occupied cell) plus staff screens against a real API; exit 1 if a budget is missed
+	$(PY) scripts/load-test.py --scale full
 
 simulate-week: $(VENV)/.installed
 	$(PY) scripts/simulate-week.py

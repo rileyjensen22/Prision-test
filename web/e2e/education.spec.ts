@@ -41,6 +41,8 @@ test('progress survives going offline in the middle of a lesson', async ({ page,
   await expect(page.getByTestId('lesson')).toContainText('Lesson 3 of')
 
   await context.setOffline(false)
+  // Let the queue drain on its own: reloading the page every few seconds would keep interrupting it.
+  await expect(page.getByTestId('pending-count')).toHaveCount(0, { timeout: 30_000 })
   await expect(async () => {
     await page.goto('/resident/feature/basic_education')
     await expect(page.getByTestId('course-LIT101')).toContainText('2 of 3 lessons', {

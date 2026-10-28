@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { HandHelping, Tablet } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
@@ -13,15 +14,20 @@ import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
 import { Video } from './features/Video'
 import { Pairing } from './Pairing'
+import { Chess } from './features/Chess'
 import { Reentry } from './features/Reentry'
 import { CertificateView, Certificates, Course, Education } from './features/Education'
 import { Appeal, FeaturePage, Home, Locks, TierScreen } from './screens'
+import { Banner } from '../ui/Banner'
+import { Button } from '../ui/Button'
+import { LoadingState } from '../ui/States'
+import { DEFAULT_NIGHT, isNight, type NightWindow } from './nightMode'
 import { TEXT_SIZE } from './theme'
 import { useInactivity } from './useInactivity'
 
 function Shell() {
   const { t } = useTranslation()
-  const { status, view, online, stale, pending, request } = useResident()
+  const { status, view, online, stale, pending, request, now } = useResident()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const [dialog, setDialog] = useState(false)
@@ -53,6 +59,7 @@ function Shell() {
   }, [])
 
   const size = TEXT_SIZE[view?.settings.text_size ?? 'normal']
+  const night = useNight(view?.ui.night_mode, now)
   const message =
     status === 'no-device'
       ? t('app.notSetUp')
@@ -63,21 +70,32 @@ function Shell() {
           : null
 
   return (
-    <div className={`min-h-screen bg-slate-950 pb-32 text-white ${size}`} data-testid="kiosk">
-      {view?.simulation && (
-        <div className="bg-red-700 p-2 text-center font-bold">{t('app.simulation')}</div>
-      )}
+    <div
+      className={`theme-resident flex min-h-screen flex-col bg-bg text-body text-ink ${size}`}
+      data-mode={night ? 'night' : 'day'}
+      data-testid="kiosk"
+    >
+      {view?.simulation && <Banner tone="simulation">{t('app.simulation')}</Banner>}
       {(!online || stale) && view && (
-        <div role="status" data-testid="connection-banner" className="bg-amber-400 p-3 text-black">
+        <Banner tone="offline" role="status" data-testid="connection-banner">
           {stale ? t('app.stale') : t('app.offline')}
-        </div>
+        </Banner>
       )}
-      <main className="mx-auto max-w-3xl space-y-6 p-6">
+      <main className="flex-1 px-6 py-6 lg:px-10">
         {message ? (
-          <>
-            <p data-testid="status-message">{message}</p>
+          <div className="mx-auto max-w-2xl space-y-6 pt-12">
+            {status === 'loading' ? (
+              <LoadingState title={message} />
+            ) : (
+              <div className="flex flex-col items-center gap-4 rounded-card border border-line bg-surface px-8 py-12 text-center shadow-card">
+                <Tablet aria-hidden="true" className="size-14 text-primary" strokeWidth={1.5} />
+                <p data-testid="status-message" className="text-h3 font-bold">
+                  {message}
+                </p>
+              </div>
+            )}
             {status === 'no-device' && <Pairing />}
-          </>
+          </div>
         ) : (
           <Routes>
             <Route index element={<Home />} />
@@ -89,6 +107,8 @@ function Shell() {
             <Route path="feature/basic_education" element={<Education />} />
             <Route path="feature/advanced_education" element={<Education />} />
             <Route path="feature/texting" element={<Texting />} />
+            <Route path="feature/chess_engine" element={<Chess />} />
+            <Route path="feature/chess_human" element={<Chess />} />
             <Route path="feature/video" element={<Video />} />
             <Route path="feature/contact_requests" element={<Contacts />} />
             <Route path="feature/reading_general" element={<Reading />} />
@@ -104,23 +124,36 @@ function Shell() {
           </Routes>
         )}
       </main>
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t-2 border-white bg-slate-900 p-4">
-        <div className="mx-auto flex max-w-3xl items-center gap-4">
-          <button
+      <footer className="sticky bottom-0 z-10 border-t-2 border-line bg-surface px-6 py-3 lg:px-10">
+        <div className="mx-auto flex max-w-[1500px] items-center gap-4">
+          {pending > 0 && (
+            <span data-testid="pending-count" className="text-sm text-ink-soft">
+              {t('app.pending', { count: pending })}
+            </span>
+          )}
+          <Button
+            variant="secondary"
+            icon={HandHelping}
             onClick={() => setDialog(true)}
             disabled={status === 'no-device'}
-            className="min-h-16 flex-1 rounded-xl bg-blue-700 px-6 py-4 text-xl font-bold"
+            className="ml-auto border-primary bg-primary text-primary-ink hover:bg-primary hover:brightness-110"
           >
             {t('request.button')}
-          </button>
-          {pending > 0 && (
-            <span data-testid="pending-count">{t('app.pending', { count: pending })}</span>
-          )}
+          </Button>
         </div>
       </footer>
       {dialog && <RequestStaffDialog onClose={() => setDialog(false)} />}
     </div>
   )
+}
+
+/** Day or night: ?mode= wins (for screenshots and tests), then the schedule, then the default. */
+function useNight(schedule: NightWindow | undefined, nowMs: number): boolean {
+  // ?mode= forces a mode, for screenshots and tests. A real kiosk follows the schedule.
+  const forced = new URLSearchParams(useLocation().search).get('mode')
+  if (forced === 'night') return true
+  if (forced === 'day') return false
+  return isNight(new Date(nowMs), schedule ?? DEFAULT_NIGHT)
 }
 
 export default function ResidentApp() {

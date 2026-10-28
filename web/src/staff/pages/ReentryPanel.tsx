@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post, put } from '../api'
 import { Badge, Btn, ErrorLine, Notice, Panel, Table, Td, Th, useLoad } from '../ui'
@@ -20,6 +21,8 @@ export default function ReentryPanel({
   canRecord: boolean
   canSetDate: boolean
 }) {
+  const { t } = useTranslation()
+
   const path = `/staff/residents/${residentId}/reentry`
   const { data, error, reload } = useLoad<View>(path)
   const [date, setDate] = useState('')
@@ -55,46 +58,51 @@ export default function ReentryPanel({
   }
 
   return (
-    <Panel title="Release and reentry" data-testid="reentry-panel">
+    <Panel title={t('staff.pages.ReentryPanel.releaseAndReentry')} data-testid="reentry-panel">
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {data && (
         <>
-          <p data-testid="release-date">Release date: {data.release_date ?? 'not set'}</p>
+          <p data-testid="release-date">
+            {t('staff.msg.releaseDate', { date: data.release_date ?? t('staff.msg.notSet') })}
+          </p>
           {canSetDate && (
             <div className="my-2 flex flex-wrap items-center gap-2">
               <input
-                aria-label="Release date"
+                aria-label={t('staff.pages.ReentryPanel.releaseDate')}
                 type="date"
-                className="rounded border px-2 py-1"
+                className="rounded-ctl border px-2 py-1"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
               <input
-                aria-label="Reason for the date"
-                placeholder="Reason"
-                className="rounded border px-2 py-1"
+                aria-label={t('staff.pages.ReentryPanel.reasonForTheDate')}
+                placeholder={t('staff.pages.ReentryPanel.reason')}
+                className="rounded-ctl border px-2 py-1"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
               <Btn disabled={!date} onClick={() => void saveDate()}>
-                Save date
+                {t('staff.pages.ReentryPanel.saveDate')}
               </Btn>
               <Btn kind="plain" onClick={() => void saveDate(true)}>
-                Clear
+                {t('staff.pages.ReentryPanel.clear')}
               </Btn>
             </div>
           )}
           <p className="text-sm">
-            Checklist: {data.progress.resolved} of {data.progress.total} resolved
+            {t('staff.msg.checklistProgress', {
+              done: data.progress.resolved,
+              total: data.progress.total,
+            })}
           </p>
           <Table>
             <thead>
               <tr>
-                <Th>Item</Th>
-                <Th>Status</Th>
-                <Th>Last note</Th>
-                {canRecord && <Th>Update</Th>}
+                <Th>{t('staff.pages.ReentryPanel.item')}</Th>
+                <Th>{t('staff.pages.ReentryPanel.status')}</Th>
+                <Th>{t('staff.pages.ReentryPanel.lastNote')}</Th>
+                {canRecord && <Th>{t('staff.pages.ReentryPanel.update')}</Th>}
               </tr>
             </thead>
             <tbody>
@@ -109,14 +117,14 @@ export default function ReentryPanel({
                     <Td>
                       <input
                         aria-label={`Note for ${i.code}`}
-                        placeholder="Note"
-                        className="mr-2 rounded border px-2 py-1"
+                        placeholder={t('staff.pages.ReentryPanel.note')}
+                        className="mr-2 rounded-ctl border px-2 py-1"
                         value={notes[i.code] ?? ''}
                         onChange={(e) => setNotes({ ...notes, [i.code]: e.target.value })}
                       />
                       <select
                         aria-label={`Status for ${i.code}`}
-                        className="rounded border px-2 py-1"
+                        className="rounded-ctl border px-2 py-1"
                         value={i.status}
                         onChange={(e) => void setStatus(i.code, e.target.value)}
                       >

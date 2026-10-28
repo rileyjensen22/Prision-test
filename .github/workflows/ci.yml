@@ -20,6 +20,8 @@ jobs:
       - run: PGPASSWORD=postgres_dev_only psql -h localhost -U postgres -q -f scripts/db-init.sql
       - run: ruff check api scripts && ruff format --check api scripts
       - run: cd api && pytest -q
+      - name: Course folders are valid
+        run: python scripts/courses.py validate
       - name: No secrets in the repository
         run: python scripts/check-secrets.py
       - name: Dependency audit (Python)
@@ -49,3 +51,40 @@ jobs:
       - name: Dependency audit (production dependencies)
         run: cd web && npm audit --omit=dev
       - run: cd web && npx playwright install --with-deps chromium && npm run e2e
+
+  # The demo stack, built and started exactly as `make demo` does it, then the whole story played
+  # against it and a real browser pointed at it.
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Build and start the stack (make demo)
+        run: ./scripts/demo.sh
+      - name: Play the demo story (make demo-scenario)
+        run: python3 scripts/demo-scenario.py --base http://localhost:8080/api
+      - name: Look at it in a browser (make demo-smoke)
+        run: |
+          cd web
+          npm ci
+          npx playwright install --with-deps chromium
+          node smoke/demo-smoke.mjs http://localhost:8080
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+      - name: Stop
+        if: always()
+        run: docker compose down -v
+
+  # The kiosk provisioning, checked in a throwaway Debian container: package names, generated
+  # files, shellcheck, the firewall ruleset, the systemd units and the browser policy. What a
+  # container cannot show (real display, touch, camera, booting under systemd) is listed at the top
+  # of deploy/kiosk/container-check.sh and in docs/kiosk.md.
+  kiosk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/kiosk-check.sh

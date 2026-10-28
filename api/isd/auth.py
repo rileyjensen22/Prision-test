@@ -34,13 +34,22 @@ def _sign(body: str) -> str:
     return hmac.new(settings.SECRET_KEY.encode(), body.encode(), hashlib.sha256).hexdigest()
 
 
-def make_token(staff_id: int, ttl: int | None = None) -> str:
-    claims = {"sub": staff_id, "exp": int(time.time()) + (ttl or settings.TOKEN_TTL_SECONDS)}
+def password_version(staff: Staff) -> int:
+    """Changes whenever the password does, so tokens issued before a change stop working."""
+    return int(staff.password_changed_at.timestamp()) if staff.password_changed_at else 0
+
+
+def make_token(staff_id: int, ttl: int | None = None, scope: str | None = None, pv: int = 0) -> str:
+    claims: dict = {"sub": staff_id, "exp": int(time.time()) + (ttl or settings.TOKEN_TTL_SECONDS)}
+    if scope:
+        claims["scope"] = scope  # "enroll": may only set up MFA or change the password
+    if pv:
+        claims["pv"] = pv
     body = base64.urlsafe_b64encode(json.dumps(claims).encode()).decode()
     return f"{body}.{_sign(body)}"
 
 
-def parse_token(token: str) -> int | None:
+def parse_claims(token: str) -> dict | None:
     body, _, sig = token.partition(".")
     if not body or not hmac.compare_digest(sig, _sign(body)):
         return None
@@ -48,7 +57,17 @@ def parse_token(token: str) -> int | None:
         claims = json.loads(base64.urlsafe_b64decode(body))
     except ValueError:
         return None
-    return claims["sub"] if claims.get("exp", 0) > time.time() else None
+    return claims if claims.get("exp", 0) > time.time() else None
+
+
+def parse_token(token: str) -> int | None:
+    claims = parse_claims(token)
+    return claims["sub"] if claims else None
+
+
+# What a restricted token may still reach: set up MFA, change the password, see who it is.
+_ENROLL_PATHS = ("/auth/mfa/", "/auth/change-password", "/auth/me")
+_CHANGE_PASSWORD_PATHS = ("/auth/change-password", "/auth/me")
 
 
 _DUMMY_HASH = _hasher.hash("not-a-real-password")
@@ -67,10 +86,21 @@ def current_staff(
     db: Session = Depends(get_db),
 ) -> Staff:
     scheme, _, token = (authorization or "").partition(" ")
-    staff_id = parse_token(token) if scheme.lower() == "bearer" else None
-    staff = db.get(Staff, staff_id) if staff_id else None
+    claims = parse_claims(token) if scheme.lower() == "bearer" else None
+    staff = db.get(Staff, claims["sub"]) if claims else None
     if not staff or not staff.active:
         raise HTTPException(401, "not authenticated")
+    if claims.get("pv", 0) != password_version(staff):
+        raise HTTPException(401, "not authenticated")  # issued before the password changed
+    path = request.url.path
+    if claims.get("scope") == "enroll" and not path.startswith(_ENROLL_PATHS):
+        raise HTTPException(
+            403, {"code": "ENROLLMENT_REQUIRED", "message": "set up your authenticator app first"}
+        )
+    if staff.must_change_password and not path.startswith(_CHANGE_PASSWORD_PATHS):
+        raise HTTPException(
+            403, {"code": "PASSWORD_CHANGE_REQUIRED", "message": "choose a new password first"}
+        )
     limits.enforce("staff", f"staff:{staff.id}")
     return staff
 

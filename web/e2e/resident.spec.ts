@@ -67,7 +67,7 @@ test('resident files an appeal from the device', async ({ page }) => {
   await page.getByTestId('lock').getByRole('link', { name: 'Appeal' }).click()
   await page.getByRole('button', { name: 'Send appeal' }).click()
   await expect(page.getByTestId('appeal-result')).toContainText('Your appeal was sent')
-  await page.getByRole('link', { name: '← Back' }).click()
+  await page.getByRole('link', { name: 'Back' }).click()
   await expect(page.getByTestId('appeal-sent')).toBeVisible()
 })
 

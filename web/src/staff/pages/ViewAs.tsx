@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { SimulatedResident } from '../../resident/SimulatedResident'
 import type { ResidentView } from '../../resident/types'
 import { errorText, post } from '../api'
-import { Btn, ErrorLine, Page, Panel, useLoad } from '../ui'
+import { Btn, ErrorLine, Page, Panel, SimulationBanner, useLoad } from '../ui'
 
 interface RosterRow {
   resident_id: number
   code: string
-  tier: { effective: number }
+  cell: string | null
 }
 interface Infraction {
   code: string
@@ -23,10 +24,12 @@ interface Sanc {
   hours: string
 }
 
-const sel = 'mt-1 block w-full rounded border px-2 py-1.5'
+const sel = 'mt-1 block w-full rounded-ctl border px-2 py-1.5'
 
 export default function ViewAs() {
-  const roster = useLoad<RosterRow[]>('/staff/roster')
+  const { t } = useTranslation()
+
+  const roster = useLoad<RosterRow[]>('/staff/residents/lookup?limit=500')
   const infractions = useLoad<Infraction[]>('/staff/infractions')
   const offenses = useLoad<Offenses>('/config/offenses')
   const [residentId, setResidentId] = useState('')
@@ -97,23 +100,17 @@ export default function ViewAs() {
   }
 
   return (
-    <Page title="View as resident">
-      <p
-        role="note"
-        className="rounded bg-red-50 px-3 py-2 text-sm text-red-900"
-        data-testid="sandbox-note"
-      >
-        SIMULATION: a read-only dry run. Nothing here is saved, sent, or visible to the resident,
-        and the database refuses writes while it runs. Buttons inside the simulated screen do
-        nothing.
-      </p>
+    <Page title={t('staff.pages.ViewAs.viewAsResident')}>
+      <SimulationBanner testId="sandbox-note">
+        {t('staff.pages.ViewAs.simulationAReadOnly')}
+      </SimulationBanner>
       <div className="grid gap-4 lg:grid-cols-[22rem_1fr]">
-        <Panel title="What to simulate">
+        <Panel title={t('staff.pages.ViewAs.whatToSimulate')}>
           <div className="space-y-3 text-sm">
             <label className="block">
-              Resident
+              {t('staff.pages.ViewAs.resident')}
               <select
-                aria-label="Resident"
+                aria-label={t('staff.pages.ViewAs.resident')}
                 className={sel}
                 value={residentId}
                 onChange={(e) => {
@@ -121,81 +118,82 @@ export default function ViewAs() {
                   setView(null)
                 }}
               >
-                <option value="">Choose…</option>
+                <option value="">{t('staff.pages.ViewAs.choose')}</option>
                 {(roster.data ?? []).map((r) => (
                   <option key={r.resident_id} value={r.resident_id}>
-                    {r.code} (tier {r.tier.effective})
+                    {r.code}
+                    {r.cell ? ` (${r.cell})` : ''}
                   </option>
                 ))}
               </select>
             </label>
             <label className="block">
-              Tier
+              {t('staff.pages.ViewAs.tier')}
               <select
-                aria-label="Tier"
+                aria-label={t('staff.pages.ViewAs.tier')}
                 className={sel}
                 value={tier}
                 onChange={(e) => setTier(e.target.value)}
               >
-                <option value="">Real tier</option>
+                <option value="">{t('staff.pages.ViewAs.realTier')}</option>
                 {Array.from({ length: 10 }, (_, i) => (
                   <option key={i + 1} value={i + 1}>
-                    Tier {i + 1}
+                    {t('staff.msg.tierN', { n: i + 1 })}
                   </option>
                 ))}
               </select>
             </label>
             <label className="block">
-              Prior returns (changes the ceiling)
+              {t('staff.pages.ViewAs.priorReturnsChangesThe')}
               <input
-                aria-label="Prior returns"
+                aria-label={t('staff.pages.ViewAs.priorReturns')}
                 type="number"
                 min={0}
                 max={60}
                 className={sel}
                 value={priorReturns}
-                placeholder="Real value"
+                placeholder={t('staff.pages.ViewAs.realValue')}
                 onChange={(e) => setPriorReturns(e.target.value)}
               />
             </label>
             <div className="grid grid-cols-2 gap-2">
               <label className="block">
-                Language
+                {t('staff.pages.ViewAs.language')}
                 <select
-                  aria-label="Language"
+                  aria-label={t('staff.pages.ViewAs.language')}
                   className={sel}
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                 >
-                  <option value="">Real</option>
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
+                  <option value="">{t('staff.pages.ViewAs.real')}</option>
+                  <option value="en">{t('staff.pages.ViewAs.english')}</option>
+                  <option value="es">{t('staff.pages.ViewAs.spanish')}</option>
                 </select>
               </label>
               <label className="block">
-                Text size
+                {t('staff.pages.ViewAs.textSize')}
                 <select
-                  aria-label="Text size"
+                  aria-label={t('staff.pages.ViewAs.textSize')}
                   className={sel}
                   value={textSize}
                   onChange={(e) => setTextSize(e.target.value)}
                 >
-                  <option value="">Real</option>
-                  <option>normal</option>
-                  <option>large</option>
-                  <option>xlarge</option>
+                  <option value="">{t('staff.pages.ViewAs.real')}</option>
+                  <option>{t('staff.pages.ViewAs.normal')}</option>
+                  <option>{t('staff.pages.ViewAs.large')}</option>
+                  <option>{t('staff.pages.ViewAs.xlarge')}</option>
                 </select>
               </label>
             </div>
-            <fieldset className="rounded border p-2">
-              <legend className="px-1">Offense restrictions</legend>
+            <fieldset className="rounded-ctl border p-2">
+              <legend className="px-1">{t('staff.pages.ViewAs.offenseRestrictions')}</legend>
               <label className="block">
                 <input
                   type="checkbox"
                   checked={overrideOffenses}
                   onChange={(e) => setOverrideOffenses(e.target.checked)}
                 />{' '}
-                Replace the real ones
+                {t('staff.msg.replaceReal')}
               </label>
               {overrideOffenses &&
                 (offenses.data?.payload.offense_restrictions ?? []).map((o) => (
@@ -215,24 +213,24 @@ export default function ViewAs() {
                   </label>
                 ))}
             </fieldset>
-            <fieldset className="rounded border p-2">
-              <legend className="px-1">Sanctions</legend>
+            <fieldset className="rounded-ctl border p-2">
+              <legend className="px-1">{t('staff.pages.ViewAs.sanctions')}</legend>
               <label className="block">
                 <input
                   type="checkbox"
                   checked={clearReal}
                   onChange={(e) => setClearReal(e.target.checked)}
                 />{' '}
-                Ignore the real ones
+                {t('staff.msg.ignoreReal')}
               </label>
               <div className="mt-2 flex gap-2">
                 <select
-                  aria-label="Add sanction"
-                  className="w-full rounded border px-2 py-1.5"
+                  aria-label={t('staff.pages.ViewAs.addSanction')}
+                  className="w-full rounded-ctl border px-2 py-1.5"
                   value={newCode}
                   onChange={(e) => setNewCode(e.target.value)}
                 >
-                  <option value="">Add a sanction…</option>
+                  <option value="">{t('staff.pages.ViewAs.addASanction')}</option>
                   {(infractions.data ?? []).map((i) => (
                     <option key={i.code} value={i.code}>
                       {i.code} ({i.duration_hours}h)
@@ -240,11 +238,11 @@ export default function ViewAs() {
                   ))}
                 </select>
                 <input
-                  aria-label="Hours left"
+                  aria-label={t('staff.pages.ViewAs.hoursLeft')}
                   type="number"
                   min={1}
-                  placeholder="hrs left"
-                  className="w-24 rounded border px-2 py-1.5"
+                  placeholder={t('staff.pages.ViewAs.hrsLeft')}
+                  className="w-24 rounded-ctl border px-2 py-1.5"
                   value={newHours}
                   onChange={(e) => setNewHours(e.target.value)}
                 />
@@ -258,7 +256,7 @@ export default function ViewAs() {
                   setNewHours('')
                 }}
               >
-                Add
+                {t('staff.pages.ViewAs.add')}
               </Btn>
               <ul className="mt-2" data-testid="added-sanctions">
                 {added.map((s, i) => (
@@ -277,9 +275,9 @@ export default function ViewAs() {
               </ul>
             </fieldset>
             <label className="block">
-              Time travel (the view as of…)
+              {t('staff.pages.ViewAs.timeTravelTheView')}
               <input
-                aria-label="View as of"
+                aria-label={t('staff.pages.ViewAs.viewAsOf')}
                 type="datetime-local"
                 className={sel}
                 value={when}
@@ -287,13 +285,15 @@ export default function ViewAs() {
               />
             </label>
             <Btn kind="plain" onClick={reset}>
-              Reset overrides
+              {t('staff.pages.ViewAs.resetOverrides')}
             </Btn>
           </div>
         </Panel>
         <div>
           <ErrorLine error={error} />
-          {!residentId && <p className="text-gray-600">Choose a resident to see their screen.</p>}
+          {!residentId && (
+            <p className="text-ink-soft">{t('staff.pages.ViewAs.chooseAResidentTo')}</p>
+          )}
           {view && (
             <div className="max-w-xl">
               <SimulatedResident view={view} mode="sandbox" />

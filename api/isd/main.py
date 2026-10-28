@@ -13,11 +13,14 @@ from isd.routers import (
     device_extras,
     device_features,
     mock,
+    staff_accounts,
+    staff_chess,
     staff_comms,
     staff_extras,
     staff_fleet,
     staff_floor,
     staff_intake,
+    staff_lifecycle,
     staff_ops,
     staff_outcomes,
     staff_residents,
@@ -46,7 +49,8 @@ app.include_router(device.router)
 app.include_router(device_features.router)
 app.include_router(device_extras.router)
 app.include_router(staff_residents.router)
-app.include_router(mock.router)
+if settings.ENV != "production":  # simulated deposits and facility events are demo-only
+    app.include_router(mock.router)
 app.include_router(staff_ops.router)
 app.include_router(staff_extras.router)
 app.include_router(staff_floor.router)
@@ -54,6 +58,9 @@ app.include_router(staff_comms.router)
 app.include_router(view_as.router)
 app.include_router(staff_fleet.router)
 app.include_router(staff_intake.router)
+app.include_router(staff_accounts.router)
+app.include_router(staff_chess.router)
+app.include_router(staff_lifecycle.router)
 app.include_router(staff_outcomes.router)
 
 

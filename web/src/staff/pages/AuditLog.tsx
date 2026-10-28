@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { api, errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
@@ -19,6 +20,8 @@ interface Entry {
 }
 
 export default function AuditLog() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Entry[]>('/audit?limit=500')
   const [verify, setVerify] = useState<string | null>(null)
@@ -62,13 +65,10 @@ export default function AuditLog() {
   }
 
   return (
-    <Page title="Audit log">
-      <p className="text-sm text-gray-600">
-        Append-only and hash-chained. Entries are never edited or deleted; mistakes are fixed by
-        adding a correcting entry.
-      </p>
+    <Page title={t('staff.pages.AuditLog.auditLog')}>
+      <p className="text-sm text-ink-soft">{t('staff.pages.AuditLog.appendOnlyAndHash')}</p>
       <div className="flex items-center gap-3">
-        <Btn onClick={() => void check()}>Verify chain</Btn>
+        <Btn onClick={() => void check()}>{t('staff.pages.AuditLog.verifyChain')}</Btn>
         {verify && (
           <span role="status" data-testid="verify-result">
             {verify}
@@ -82,12 +82,12 @@ export default function AuditLog() {
           <thead>
             <tr>
               <Th>#</Th>
-              <Th>When</Th>
-              <Th>Who</Th>
-              <Th>Action</Th>
-              <Th>Target</Th>
-              <Th>Reason</Th>
-              <Th>Refers to</Th>
+              <Th>{t('staff.pages.AuditLog.when')}</Th>
+              <Th>{t('staff.pages.AuditLog.who')}</Th>
+              <Th>{t('staff.pages.AuditLog.action')}</Th>
+              <Th>{t('staff.pages.AuditLog.target')}</Th>
+              <Th>{t('staff.pages.AuditLog.reason')}</Th>
+              <Th>{t('staff.pages.AuditLog.refersTo')}</Th>
               <Th></Th>
             </tr>
           </thead>
@@ -114,29 +114,29 @@ export default function AuditLog() {
                       (fixing === e.seq ? (
                         <span className="flex flex-wrap gap-2">
                           <input
-                            aria-label="Correction reason code"
-                            placeholder="Reason code"
+                            aria-label={t('staff.pages.AuditLog.correctionReasonCode')}
+                            placeholder={t('staff.pages.AuditLog.reasonCode')}
                             value={reasonCode}
                             onChange={(ev) => setReasonCode(ev.target.value)}
-                            className="w-32 rounded border px-2 py-1"
+                            className="w-32 rounded-ctl border px-2 py-1"
                           />
                           <input
-                            aria-label="Correction note"
-                            placeholder="What is wrong"
+                            aria-label={t('staff.pages.AuditLog.correctionNote')}
+                            placeholder={t('staff.pages.AuditLog.whatIsWrong')}
                             value={note}
                             onChange={(ev) => setNote(ev.target.value)}
-                            className="rounded border px-2 py-1"
+                            className="rounded-ctl border px-2 py-1"
                           />
                           <Btn
                             disabled={!reasonCode.trim() || !note.trim()}
                             onClick={() => void correct(e.seq)}
                           >
-                            Add correction
+                            {t('staff.pages.AuditLog.addCorrection')}
                           </Btn>
                         </span>
                       ) : (
                         <Btn kind="plain" onClick={() => setFixing(e.seq)}>
-                          Correct…
+                          {t('staff.pages.AuditLog.correct')}
                         </Btn>
                       ))}
                   </Td>

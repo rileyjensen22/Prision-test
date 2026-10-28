@@ -42,11 +42,14 @@ from isd.models import (
     Base,
     CallRecord,
     Cell,
+    ChessGame,
+    ChessMove,
     Contact,
     Device,
     DeviceAssignment,
     JobEnrollment,
     JobTask,
+    KeepSeparate,
     Message,
     MessageFlag,
     OffenseFlag,
@@ -272,7 +275,10 @@ class Simulation:
                 language=rng.choice(["en", "es"]),
                 prior_returns=rng.choice([0, 0, 0, 1, 2, 4, 7]),
             )
-            cell, dev = Cell(code=f"SIM-CELL-{i:03d}"), Device(code=f"SIM-DEV-{i:03d}")
+            cell, dev = (
+                Cell(code=f"SIM-CELL-{i:03d}", line_code=f"L{i % 4}"),
+                Device(code=f"SIM-DEV-{i:03d}"),
+            )
             s.add_all([r, cell, dev])
             s.flush()
             s.add(
@@ -466,11 +472,29 @@ class Simulation:
             if self.attempt("reading", reading.read_item, s, rid, text, now):
                 self.attempt("reading", reading.save_progress, s, rid, text, rng.randrange(4), now)
         elif what == "chess":
-            game = self.attempt(
-                "chess_game", chess.new_game, s, rid, rng.choice(["engine", "human"]), now
-            )
-            if game and game.status == "active":
-                self.attempt("chess_move", chess.play, s, rid, game.id, "e2e4", now)
+            if rng.random() < 0.5:
+                game = self.attempt("chess_game", chess.new_engine_game, s, rid, 1, now)
+                if game:
+                    self.attempt(
+                        "chess_move",
+                        chess.finish_engine_game,
+                        s,
+                        rid,
+                        game.id,
+                        rng.choice(["white", "black", "draw"]),
+                        "resigned",
+                        now,
+                    )
+            else:
+                game = self.attempt("chess_game", chess.find_match, s, rid, now)
+                if game and game.status == "active":
+                    mine_white = game.resident_id == rid
+                    first = "e2e4" if mine_white else "e7e5"
+                    played = self.attempt(
+                        "chess_move", chess.play_move, s, rid, game.id, first, now
+                    )
+                    if played and rng.random() < 0.5:
+                        self.attempt("chess_move", chess.leave, s, rid, game.id, now)
         elif what == "rec":
             cfg = get_current(s, "rec").payload
             self.attempt(
@@ -805,6 +829,46 @@ class Simulation:
         )
 
     # ---------- the checks ----------
+    def verify_chess(self) -> None:
+        """Invariant 13 over the simulated week: nobody was paired with a keep-separate partner or
+        a resident on the same line, and no chat-like column exists."""
+        s = self.s
+        line = {
+            rid: ln
+            for rid, ln in s.execute(
+                select(DeviceAssignment.resident_id, Cell.line_code).join(
+                    Cell, Cell.id == DeviceAssignment.cell_id
+                )
+            ).all()
+        }
+        sep = {
+            (a, b)
+            for a, b in s.execute(select(KeepSeparate.resident_a_id, KeepSeparate.resident_b_id))
+        }
+        bad = []
+        paired = 0
+        for g in s.execute(
+            select(ChessGame).where(ChessGame.black_resident_id.isnot(None))
+        ).scalars():
+            paired += 1
+            a, b = sorted((g.resident_id, g.black_resident_id))
+            if (a, b) in sep or not line.get(a) or line.get(a) == line.get(b):
+                bad.append(g.id)
+        add = self.report.checks.append
+        add(
+            Check(
+                "chess never paired kept-apart or same-line residents", not bad, f"{paired} matches"
+            )
+        )
+        cols = {c.name for t in (ChessGame, ChessMove) for c in t.__table__.columns}
+        banned = ("chat", "message", "text", "note", "comment", "stake", "wager", "bet", "item")
+        add(
+            Check(
+                "chess tables hold no chat or stake column",
+                not any(w in c for c in cols for w in banned),
+            )
+        )
+
     def verify_phase15(self, end: datetime) -> None:
         s, add = self.s, self.report.checks.append
         trail = {a for a in s.execute(select(AuditLog.action)).scalars()}
@@ -1188,6 +1252,7 @@ class Simulation:
         add(Check("audit chain still verifies after the export", verify_chain(s).ok))
 
         self.verify_phase15(end)
+        self.verify_chess()
         s.commit()
 
         # summary

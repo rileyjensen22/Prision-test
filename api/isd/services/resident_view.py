@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from isd.engine.calls import minutes_used
 from isd.engine.features import BASELINE_FEATURES
 from isd.engine.sandbox import SandboxOverrides, apply_to_settings
-from isd.models import Appeal, Resident
+from isd.models import Appeal, Resident, Sanction
 from isd.schemas import (
     AllowanceOut,
     FeatureOut,
@@ -72,7 +72,11 @@ def build_resident_view(
         for name, fe in sorted(ent.features.items())
     }
     open_appeals = set(
-        session.execute(select(Appeal.sanction_id).where(Appeal.status == "open")).scalars()
+        session.execute(
+            select(Appeal.sanction_id)
+            .join(Sanction, Sanction.id == Appeal.sanction_id)
+            .where(Appeal.status == "open", Sanction.resident_id == resident_id)
+        ).scalars()
     )
     used = {
         "calls": minutes_used(call_seconds_today(session, resident_id, at_time)),

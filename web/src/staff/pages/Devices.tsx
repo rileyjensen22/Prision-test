@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
 import { useAuth } from '../auth'
-import { Badge, Btn, ErrorLine, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import { Badge, Btn, ErrorLine, FIELD, Notice, Page, Panel, Table, Td, Th, useLoad } from '../ui'
+import type { Overview } from './FacilityOverview'
 
 interface Row {
   device: string
@@ -23,10 +25,22 @@ interface Row {
 }
 
 const mb = (n?: number) => (n === undefined ? '—' : `${n} MB`)
+const LIMIT = 200
 
 export default function Devices() {
+  const { t } = useTranslation()
+
   const { user } = useAuth()
-  const { data, error, reload } = useLoad<Row[]>('/staff/devices')
+  const [hub, setHub] = useState('')
+  const [line, setLine] = useState('')
+  const [offlineOnly, setOfflineOnly] = useState(false)
+  const query = new URLSearchParams({ limit: String(LIMIT) })
+  if (hub) query.set('hub', hub)
+  if (line) query.set('line', line)
+  if (offlineOnly) query.set('offline_only', 'true')
+  const { data, error, reload } = useLoad<Row[]>(`/staff/devices?${query}`)
+  const hubs = useLoad<Overview>('/staff/facility/overview').data?.hubs ?? []
+  const lines = hubs.filter((h) => !hub || h.code === hub).flatMap((h) => h.lines)
   const isAdmin = user?.role === 'admin'
   const canPair = !!user && ['supervisor', 'admin'].includes(user.role)
   const [newCode, setNewCode] = useState('')
@@ -50,27 +64,68 @@ export default function Devices() {
   }
 
   return (
-    <Page title="Devices">
+    <Page title={t('staff.pages.Devices.devices')}>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {pairing && (
         <Panel title={`Setup code for ${pairing.device}`}>
-          <p className="font-mono text-3xl" data-testid="pairing-code">
+          <p className="font-mono text-h1" data-testid="pairing-code">
             {pairing.code}
           </p>
-          <p className="text-sm">
-            Type it on the device. It works once and expires at {fmt(pairing.expires_at)}. It is not
-            shown again.
-          </p>
+          <p className="text-sm">{t('staff.msg.pairingHelp', { at: fmt(pairing.expires_at) })}</p>
         </Panel>
       )}
+      <div className="flex flex-wrap items-end gap-3" data-testid="device-filters">
+        {hubs.length > 0 && (
+          <>
+            <label className="text-sm">
+              {t('staff.roster.hub')}
+              <select
+                className={FIELD}
+                value={hub}
+                onChange={(e) => {
+                  setHub(e.target.value)
+                  setLine('')
+                }}
+              >
+                <option value="">{t('staff.roster.all')}</option>
+                {hubs.map((h) => (
+                  <option key={h.code}>{h.code}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-sm">
+              {t('staff.roster.line')}
+              <select className={FIELD} value={line} onChange={(e) => setLine(e.target.value)}>
+                <option value="">{t('staff.roster.all')}</option>
+                {lines.map((l) => (
+                  <option key={l.code}>{l.code}</option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
+        <label className="flex min-h-touch items-center gap-2">
+          <input
+            type="checkbox"
+            checked={offlineOnly}
+            onChange={(e) => setOfflineOnly(e.target.checked)}
+          />
+          {t('staff.devicesPage.offlineOnly')}
+        </label>
+        {(data?.length ?? 0) >= LIMIT && (
+          <span className="text-sm text-ink-soft">
+            {t('staff.devicesPage.capped', { n: LIMIT })}
+          </span>
+        )}
+      </div>
       {isAdmin && (
-        <Panel title="Enroll a device">
+        <Panel title={t('staff.pages.Devices.enrollADevice')}>
           <div className="flex flex-wrap gap-2">
             <input
-              aria-label="New device code"
-              placeholder="Device code"
-              className="rounded border px-2 py-1"
+              aria-label={t('staff.pages.Devices.newDeviceCode')}
+              placeholder={t('staff.pages.Devices.deviceCode')}
+              className="rounded-ctl border px-2 py-1"
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
             />
@@ -83,34 +138,34 @@ export default function Devices() {
                 })
               }
             >
-              Enroll
+              {t('staff.pages.Devices.enroll')}
             </Btn>
           </div>
         </Panel>
       )}
       {isAdmin && (
-        <Panel title="Pause or restart (needs a reason)">
+        <Panel title={t('staff.pages.Devices.pauseOrRestartNeeds')}>
           <div className="flex flex-wrap gap-2 text-sm">
             <input
-              aria-label="Reason"
-              placeholder="Reason"
-              className="rounded border px-2 py-1"
+              aria-label={t('staff.pages.Devices.reason')}
+              placeholder={t('staff.pages.Devices.reason')}
+              className="rounded-ctl border px-2 py-1"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
             <label>
-              Pause for
+              {t('staff.pages.Devices.pauseFor')}
               <input
-                aria-label="Pause hours"
+                aria-label={t('staff.pages.Devices.pauseHours')}
                 type="number"
                 min={0.5}
                 max={24}
                 step={0.5}
-                className="mx-2 w-20 rounded border px-2 py-1"
+                className="mx-2 w-20 rounded-ctl border px-2 py-1"
                 value={hours}
                 onChange={(e) => setHours(Number(e.target.value))}
               />
-              hours
+              {t('staff.pages.Devices.hours')}
             </label>
           </div>
         </Panel>
@@ -118,36 +173,46 @@ export default function Devices() {
       <Table data-testid="device-table">
         <thead>
           <tr>
-            <Th>Device</Th>
-            <Th>Cell</Th>
-            <Th>Resident</Th>
-            <Th>Last seen</Th>
-            <Th>Health</Th>
-            <Th>Actions</Th>
+            <Th>{t('staff.pages.Devices.device')}</Th>
+            <Th>{t('staff.pages.Devices.cell')}</Th>
+            <Th>{t('staff.pages.Devices.resident')}</Th>
+            <Th>{t('staff.pages.Devices.lastSeen')}</Th>
+            <Th>{t('staff.pages.Devices.health')}</Th>
+            <Th>{t('staff.pages.Devices.actions')}</Th>
           </tr>
         </thead>
         <tbody>
           {(data ?? []).map((d) => (
             <tr key={d.device} data-testid={`device-${d.device}`}>
               <Td>
-                {d.device} {!d.paired && <Badge tone="gray">not paired</Badge>}
+                {d.device}{' '}
+                {!d.paired && <Badge tone="gray">{t('staff.pages.Devices.notPaired')}</Badge>}
               </Td>
               <Td>{d.cell ?? '—'}</Td>
               <Td>{d.resident ?? '—'}</Td>
               <Td>
-                {fmt(d.last_seen)} {d.offline && <Badge tone="red">offline</Badge>}
+                {fmt(d.last_seen)}{' '}
+                {d.offline && <Badge tone="red">{t('staff.pages.Devices.offline')}</Badge>}
               </Td>
               <Td>
                 {d.health ? (
                   <span className="text-sm">
-                    storage {mb(d.health.storage_used_mb)} of {mb(d.health.storage_quota_mb)} ·
-                    camera {d.health.camera} · mic {d.health.microphone} · queue{' '}
-                    {d.health.queue_pending ?? 0}
+                    {t('staff.msg.health', {
+                      used: mb(d.health.storage_used_mb),
+                      quota: mb(d.health.storage_quota_mb),
+                      camera: d.health.camera,
+                      mic: d.health.microphone,
+                      queue: d.health.queue_pending ?? 0,
+                    })}
                   </span>
                 ) : (
                   '—'
                 )}
-                {d.locked_until && <Badge tone="amber">paused until {fmt(d.locked_until)}</Badge>}
+                {d.locked_until && (
+                  <Badge tone="amber">
+                    {t('staff.msg.pausedUntil', { at: fmt(d.locked_until) })}
+                  </Badge>
+                )}
               </Td>
               <Td>
                 <div className="flex flex-wrap gap-1">
@@ -160,7 +225,7 @@ export default function Devices() {
                         )
                       }
                     >
-                      Setup code
+                      {t('staff.pages.Devices.setupCode')}
                     </Btn>
                   )}
                   {isAdmin && (
@@ -174,7 +239,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Pause
+                        {t('staff.pages.Devices.pause')}
                       </Btn>
                       <Btn
                         kind="plain"
@@ -185,7 +250,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Resume
+                        {t('staff.pages.Devices.resume')}
                       </Btn>
                       <Btn
                         kind="plain"
@@ -196,7 +261,7 @@ export default function Devices() {
                           )
                         }
                       >
-                        Restart
+                        {t('staff.pages.Devices.restart')}
                       </Btn>
                     </>
                   )}

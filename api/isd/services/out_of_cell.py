@@ -82,6 +82,7 @@ def below_minimum(session: Session, now: datetime, within_days: int = 3) -> list
     residents = session.execute(
         select(Resident.id, Resident.code)
         .join(DeviceAssignment, DeviceAssignment.resident_id == Resident.id)
+        .where(DeviceAssignment.ended_at.is_(None))
         .group_by(Resident.id, Resident.code)
         .order_by(Resident.code)
     ).all()
