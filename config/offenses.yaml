@@ -1,6 +1,19 @@
-# PLACEHOLDER rows only. Real categories come from the customer.
+# Sample rows only — confirm with facility counsel before deployment.
+# Real offense categories come from the customer.
 version: 1
 offense_restrictions:
-  - {offense_category: PLACEHOLDER_CATEGORY_A, blocked_features: [video], reason_text: "Video calls are restricted for this offense category.", required_reviewer_role: supervisor, review_interval_days: 90}
-  - {offense_category: PLACEHOLDER_CATEGORY_B, blocked_features: [texting], reason_text: "Texting is restricted for this offense category.", required_reviewer_role: supervisor, review_interval_days: 90}
-  - {offense_category: PLACEHOLDER_CATEGORY_C, blocked_features: [chess_human], reason_text: "Human chess opponents are restricted for this offense category.", required_reviewer_role: admin, review_interval_days: 180}
+  - offense_category: SEX_OFFENSE
+    blocked_features: [video]
+    reason_text: "Video calls are restricted for this offense type. Sample — confirm with facility counsel."
+    required_reviewer_role: supervisor
+    review_interval_days: 180
+  - offense_category: VIOLENCE
+    blocked_features: [chess]
+    reason_text: "Competitive play is restricted for this offense type. Sample — confirm with facility counsel."
+    required_reviewer_role: supervisor
+    review_interval_days: 90
+  - offense_category: ESCAPE_RISK
+    blocked_features: [video, texting]
+    reason_text: "Video and text messaging are restricted for this offense type. Sample — confirm with facility counsel."
+    required_reviewer_role: admin
+    review_interval_days: 90

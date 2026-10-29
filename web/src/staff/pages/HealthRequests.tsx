@@ -35,7 +35,10 @@ export default function HealthRequests() {
 
   async function save(id: number) {
     try {
-      await patch(`/staff/health-requests/${id}`, { status: newStatus || undefined, staff_note: note || undefined })
+      await patch(`/staff/health-requests/${id}`, {
+        status: newStatus || undefined,
+        staff_note: note || undefined,
+      })
       setMsg({ kind: 'ok', text: 'Updated.' })
       setEditing(null)
       await reload()
@@ -53,7 +56,10 @@ export default function HealthRequests() {
         {STATUS_TABS.map((s) => (
           <button
             key={s}
-            onClick={() => { setTab(s); setMsg(null) }}
+            onClick={() => {
+              setTab(s)
+              setMsg(null)
+            }}
             className={`rounded-ctl px-4 py-1.5 text-sm font-medium border ${tab === s ? 'bg-primary text-primary-ink border-primary' : 'border-line hover:bg-surface-2'}`}
           >
             {s}
@@ -62,7 +68,11 @@ export default function HealthRequests() {
       </div>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {data?.length === 0 && <Panel><p>No {tab} requests.</p></Panel>}
+      {data?.length === 0 && (
+        <Panel>
+          <p>No {tab} requests.</p>
+        </Panel>
+      )}
       {(data ?? []).map((r) => (
         <Panel key={r.id} data-testid={`hr-${r.id}`}>
           <div className="flex items-start justify-between gap-4">
@@ -78,9 +88,7 @@ export default function HealthRequests() {
               </p>
               {r.description && <p className="text-sm">{r.description}</p>}
               {r.staff_note && <p className="text-sm text-ink-soft">Note: {r.staff_note}</p>}
-              <p className="text-xs text-ink-soft">
-                {new Date(r.created_at).toLocaleString()}
-              </p>
+              <p className="text-xs text-ink-soft">{new Date(r.created_at).toLocaleString()}</p>
             </div>
             <Badge tone="gray">{r.status}</Badge>
           </div>
@@ -93,7 +101,11 @@ export default function HealthRequests() {
                 className="rounded-ctl border px-2 py-1 text-sm"
               >
                 <option value="">— keep status —</option>
-                {STATUS_TABS.map((s) => <option key={s} value={s}>{s}</option>)}
+                {STATUS_TABS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
               <input
                 aria-label="Staff note"
@@ -103,10 +115,20 @@ export default function HealthRequests() {
                 className="min-w-48 rounded-ctl border px-2 py-1 text-sm"
               />
               <Btn onClick={() => void save(r.id)}>Save</Btn>
-              <Btn kind="plain" onClick={() => setEditing(null)}>Cancel</Btn>
+              <Btn kind="plain" onClick={() => setEditing(null)}>
+                Cancel
+              </Btn>
             </div>
           ) : canWrite ? (
-            <Btn kind="plain" className="mt-2" onClick={() => { setEditing(r.id); setNote(r.staff_note); setNewStatus(r.status) }}>
+            <Btn
+              kind="plain"
+              className="mt-2"
+              onClick={() => {
+                setEditing(r.id)
+                setNote(r.staff_note)
+                setNewStatus(r.status)
+              }}
+            >
               Update
             </Btn>
           ) : null}

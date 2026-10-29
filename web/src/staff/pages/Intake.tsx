@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { errorText, post } from '../api'
+import { api, errorText, post } from '../api'
 import { Btn, ErrorLine, Notice, Page, Panel, useLoad } from '../ui'
 
 interface Options {
@@ -35,6 +35,7 @@ export default function Intake() {
   const [readingLevel, setReadingLevel] = useState('standard')
   const [captions, setCaptions] = useState(false)
   const [prior, setPrior] = useState(0)
+  const [ceilingTier, setCeilingTier] = useState<number | null>(null)
   const [source, setSource] = useState('')
   const [release, setRelease] = useState('')
   const [categories, setCategories] = useState<string[]>([])
@@ -42,6 +43,16 @@ export default function Intake() {
   const [separate, setSeparate] = useState<SeparateRow[]>([])
   const [reason, setReason] = useState('')
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string; id?: number } | null>(null)
+
+  useEffect(() => {
+    if (prior > 0) {
+      api<{ ceiling_tier: number }>(`/staff/intake/ceiling?prior_returns=${prior}`)
+        .then((r) => setCeilingTier(r.ceiling_tier))
+        .catch(() => setCeilingTier(null))
+    } else {
+      setCeilingTier(10)
+    }
+  }, [prior])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -191,6 +202,11 @@ export default function Intake() {
                   onChange={(e) => setSource(e.target.value)}
                 />
               </label>
+            )}
+            {ceilingTier !== null && (
+              <p className="text-sm text-ink-soft">
+                {tr('staff.pages.Intake.tierCeilingPreview', { tier: ceilingTier })}
+              </p>
             )}
             <label>
               {tr('staff.pages.Intake.releaseDate')}

@@ -2,16 +2,14 @@ import { useTranslation } from 'react-i18next'
 import { HeartPulse } from 'lucide-react'
 import { ScreenFrame } from '../components'
 import { useResident } from '../ResidentContext'
-import { featureIcon } from '../icons'
 
 export function HealthRequests() {
   const { t } = useTranslation()
   const { features } = useResident()
   const f = features['health_requests']
   if (!f) return null
-  const Icon = featureIcon('health_requests')
   return (
-    <ScreenFrame title={t('feature.health_requests')} icon={Icon}>
+    <ScreenFrame title={t('feature.health_requests')}>
       <p className="text-body text-ink-soft">{t('stub.text')}</p>
       <div className="mt-6 space-y-3">
         <RequestCard label={t('request.medical')} icon={HeartPulse} />

@@ -94,19 +94,35 @@ def below_minimum(session: Session, now: datetime, within_days: int = 3) -> list
         .order_by(OutOfCellLog.id)
     ):
         logged.setdefault(rid, {})[day] = minutes  # latest entry per day wins
+    yesterday = today - timedelta(days=1)
     for rid, code in residents:
         got = logged.get(rid, {})
         recorded = [
             (d, got[d]) for d in (first + timedelta(days=i) for i in range(within_days)) if d in got
         ]
-        if recorded and recorded[-1][1] < minimum:
+        if recorded:
+            last_day, last_min = recorded[-1]
+            if last_min < minimum:
+                out.append(
+                    {
+                        "resident_id": rid,
+                        "resident": code,
+                        "day": last_day.isoformat(),
+                        "minutes": last_min,
+                        "minimum": minimum,
+                        "not_recorded": False,
+                    }
+                )
+        else:
+            # No records at all — treat as 0 minutes (below minimum)
             out.append(
                 {
                     "resident_id": rid,
                     "resident": code,
-                    "day": recorded[-1][0].isoformat(),
-                    "minutes": recorded[-1][1],
+                    "day": yesterday.isoformat(),
+                    "minutes": 0,
                     "minimum": minimum,
+                    "not_recorded": True,
                 }
             )
     return out

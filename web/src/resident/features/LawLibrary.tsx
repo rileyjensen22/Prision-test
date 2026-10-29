@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
-import { featureIcon } from '../icons'
 import { ScreenFrame } from '../components'
 
 const SOURCES = [
@@ -14,9 +13,8 @@ const SOURCES = [
 export function LawLibrary() {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
-  const Icon = featureIcon('legal_materials')
   return (
-    <ScreenFrame title={t('feature.legal_materials')} icon={Icon}>
+    <ScreenFrame title={t('feature.legal_materials')}>
       <div className="relative">
         <Search
           aria-hidden="true"

@@ -52,9 +52,7 @@ export function Rec() {
     await load()
   }
 
-  const visibleSlots = (day?.slots ?? []).filter(
-    (s) => s.kind !== 'outdoor' || outdoorAllowed
-  )
+  const visibleSlots = (day?.slots ?? []).filter((s) => s.kind !== 'outdoor' || outdoorAllowed)
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">

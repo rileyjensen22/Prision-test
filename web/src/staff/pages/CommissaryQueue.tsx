@@ -48,7 +48,10 @@ export default function CommissaryQueue() {
   async function refund(id: number) {
     if (!refundReason.trim()) return
     try {
-      await patch(`/staff/commissary/orders/${id}`, { status: 'refunded', refund_reason: refundReason })
+      await patch(`/staff/commissary/orders/${id}`, {
+        status: 'refunded',
+        refund_reason: refundReason,
+      })
       setMsg({ kind: 'ok', text: 'Refund posted to resident ledger.' })
       setRefunding(null)
       setRefundReason('')
@@ -64,7 +67,10 @@ export default function CommissaryQueue() {
         {STATUS_TABS.map((s) => (
           <button
             key={s}
-            onClick={() => { setTab(s); setMsg(null) }}
+            onClick={() => {
+              setTab(s)
+              setMsg(null)
+            }}
             className={`rounded-ctl px-4 py-1.5 text-sm font-medium border ${tab === s ? 'bg-primary text-primary-ink border-primary' : 'border-line hover:bg-surface-2'}`}
           >
             {s}
@@ -73,7 +79,11 @@ export default function CommissaryQueue() {
       </div>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {data?.length === 0 && <Panel><p>No {tab} orders.</p></Panel>}
+      {data?.length === 0 && (
+        <Panel>
+          <p>No {tab} orders.</p>
+        </Panel>
+      )}
       {(data ?? []).map((o) => (
         <Panel key={o.id} data-testid={`order-${o.id}`}>
           <div className="flex items-start justify-between gap-4">
@@ -85,7 +95,9 @@ export default function CommissaryQueue() {
                 </Link>
               </p>
               <p className="text-sm font-medium">{fmt(o.total_cents)}</p>
-              {o.refund_reason && <p className="text-sm text-ink-soft">Refund reason: {o.refund_reason}</p>}
+              {o.refund_reason && (
+                <p className="text-sm text-ink-soft">Refund reason: {o.refund_reason}</p>
+              )}
               <p className="text-xs text-ink-soft">{new Date(o.created_at).toLocaleString()}</p>
             </div>
             <Badge tone="gray">{o.status}</Badge>
@@ -97,8 +109,9 @@ export default function CommissaryQueue() {
                   Mark {NEXT_STATUS[o.status]}
                 </Btn>
               )}
-              {o.status !== 'refunded' && o.status !== 'delivered' && (
-                refunding === o.id ? (
+              {o.status !== 'refunded' &&
+                o.status !== 'delivered' &&
+                (refunding === o.id ? (
                   <div className="flex flex-wrap gap-2">
                     <input
                       aria-label="Refund reason"
@@ -110,12 +123,21 @@ export default function CommissaryQueue() {
                     <Btn disabled={!refundReason.trim()} onClick={() => void refund(o.id)}>
                       Confirm refund
                     </Btn>
-                    <Btn kind="plain" onClick={() => { setRefunding(null); setRefundReason('') }}>Cancel</Btn>
+                    <Btn
+                      kind="plain"
+                      onClick={() => {
+                        setRefunding(null)
+                        setRefundReason('')
+                      }}
+                    >
+                      Cancel
+                    </Btn>
                   </div>
                 ) : (
-                  <Btn kind="plain" onClick={() => setRefunding(o.id)}>Refund</Btn>
-                )
-              )}
+                  <Btn kind="plain" onClick={() => setRefunding(o.id)}>
+                    Refund
+                  </Btn>
+                ))}
             </div>
           )}
         </Panel>

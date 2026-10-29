@@ -738,7 +738,7 @@ class Simulation:
                 prior_returns=n,
                 prior_returns_source="simulation" if n else None,
                 release_date=(now + timedelta(days=30 + n)).date(),
-                offense_categories=["PLACEHOLDER_CATEGORY_A"] if n else [],
+                offense_categories=["SEX_OFFENSE"] if n else [],
                 contacts=[IntakeContact(f"Synthetic Kin {tag}", "family", "555-0150")],
                 keep_separate=[(s.get(Resident, rng.choice(self.residents)).code, "simulated")]
                 if n

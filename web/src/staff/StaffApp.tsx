@@ -78,7 +78,15 @@ interface NavItem {
   icon: LucideIcon
   roles?: Role[]
   /** Which summary count to show as a badge. */
-  badge?: 'pending_confirmations' | 'open_appeals' | 'welfare_flags' | 'offline_devices' | 'open_health_requests' | 'open_grievances' | 'pending_attorney_calls' | 'commissary_orders_waiting'
+  badge?:
+    | 'pending_confirmations'
+    | 'open_appeals'
+    | 'welfare_flags'
+    | 'offline_devices'
+    | 'open_health_requests'
+    | 'open_grievances'
+    | 'pending_attorney_calls'
+    | 'commissary_orders_waiting'
 }
 const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
   {

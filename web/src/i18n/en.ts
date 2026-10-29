@@ -329,7 +329,8 @@ const en = {
   },
   jobs: {
     title: 'Optional jobs',
-    comingSoon: 'Work in progress — coming soon. Jobs will be voluntary and will never affect your tier or privileges.',
+    comingSoon:
+      'Work in progress — coming soon. Jobs will be voluntary and will never affect your tier or privileges.',
     voluntary:
       'Jobs are your choice. Not joining, or leaving later, never changes your tier, points, or privileges.',
     split:
@@ -800,6 +801,7 @@ const en = {
         reasonStaffOnly: 'Reason (staff only)',
         addEntry: 'Add entry',
         admitResident: 'Admit resident',
+        tierCeilingPreview: 'With {{prior}} prior return(s), max starting tier: T{{tier}}.',
       },
       Mirror: {
         whyAreYouWatching: 'Why are you watching?',
@@ -873,6 +875,7 @@ const en = {
         notes: 'Notes',
         belowMinimum: 'below minimum',
         shortOfSchedule: 'short of schedule',
+        notRecorded: 'not recorded',
       },
       Outcomes: {
         '6Months': '6 months',
@@ -1034,6 +1037,13 @@ const en = {
         recordCheckIn: 'Record check-in',
         cancel: 'Cancel',
         iCheckedIn: 'I checked in…',
+        howThisWorks: 'How this works',
+        howDetail1:
+          "Flags are raised when a resident's recent activity or contact drops sharply versus their own baseline, or when they have had no contact for several days.",
+        howDetail2:
+          'Health staff see only health-triggered flags. Officers and supervisors see all flags.',
+        howDetail3:
+          'Acknowledging a flag means you checked in. The flag quiets for a few days, but reappears if the pattern continues.',
       },
     },
     lifecycle: {

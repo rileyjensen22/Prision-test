@@ -14,7 +14,7 @@ from isd.engine.entitlements import (
 from isd.engine.features import BASELINE_FEATURES, NON_BASELINE_FEATURES, SCOPES
 from tests.engine.conftest import T0
 
-OFFENSES = ["PLACEHOLDER_CATEGORY_A", "PLACEHOLDER_CATEGORY_B", "PLACEHOLDER_CATEGORY_C", "UNKNOWN"]
+OFFENSES = ["SEX_OFFENSE", "VIOLENCE", "ESCAPE_RISK", "UNKNOWN"]
 
 
 @st.composite
@@ -100,12 +100,13 @@ def test_effective_tier_respects_ceiling(cfg, f):
 def test_seed_matrix(cfg):
     t1 = compute_entitlements(ResidentFacts(1, 0), cfg, T0)
     assert t1.features["calls"].limits == {"minutes_per_day": 15}
-    assert not t1.allowed("texting") and not t1.allowed("chess")
+    assert not t1.allowed("texting")
     assert t1.features["texting"].reasons[0].code == "TIER_LOCKED"
+    assert t1.allowed("chess")  # chess available at all tiers
     t10 = compute_entitlements(ResidentFacts(10, 0), cfg, T0)
     assert t10.features["calls"].limits == {"minutes_per_day": 90}
-    assert t10.features["outdoor_rec"].limits == {"minutes_per_day": 120}
-    assert t10.features["video"].limits == {"minutes_per_week": 180}
+    assert t10.features["outdoor_rec"].limits == {"minutes_per_day": 60}
+    assert t10.features["video"].limits == {"minutes_per_day": 75}
 
 
 def test_ceiling_reason_and_sanction_reason_with_end_time(cfg):

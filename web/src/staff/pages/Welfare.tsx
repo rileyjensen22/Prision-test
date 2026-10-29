@@ -20,6 +20,8 @@ interface Row {
   flags: Flag[]
 }
 
+const HEALTH_TRIGGERED_TYPES = new Set(['health_triggered', 'health_request_pending'])
+
 function describe(f: Flag): string {
   const d = f.detail
   switch (f.type) {
@@ -34,6 +36,8 @@ function describe(f: Flag): string {
       return `Lowest recent day: ${d.lowest} minutes (minimum ${d.minimum}).`
     case 'out_of_cell_unrecorded':
       return `Nothing recorded for the last ${d.days} days.`
+    case 'health_triggered':
+      return `Health request flagged for follow-up.`
     default:
       return ''
   }
@@ -44,6 +48,7 @@ export default function Welfare() {
 
   const { user } = useAuth()
   const { data, error, reload } = useLoad<Row[]>('/staff/welfare')
+  const isHealthStaff = user?.role === 'health_staff'
   const canAck = user && ['officer', 'supervisor', 'admin'].includes(user.role)
   const canHandleEscalated = !!user && ['supervisor', 'admin'].includes(user.role)
   const [open, setOpen] = useState<string | null>(null)
@@ -68,17 +73,43 @@ export default function Welfare() {
     }
   }
 
+  const [howOpen, setHowOpen] = useState(false)
+
+  // health_staff only sees health-triggered flags; other roles see all flags
+  const filteredData = isHealthStaff
+    ? (data ?? [])
+        .map((r) => ({ ...r, flags: r.flags.filter((f) => HEALTH_TRIGGERED_TYPES.has(f.type)) }))
+        .filter((r) => r.flags.length > 0)
+    : (data ?? [])
+
   return (
     <Page title={t('staff.pages.Welfare.welfare')}>
       <p className="text-sm text-ink-soft">{t('staff.pages.Welfare.eachResidentIsCompared')}</p>
+      <Panel>
+        <button
+          className="flex w-full items-center justify-between text-sm font-medium"
+          onClick={() => setHowOpen((o) => !o)}
+          aria-expanded={howOpen}
+        >
+          <span>{t('staff.pages.Welfare.howThisWorks')}</span>
+          <span aria-hidden="true">{howOpen ? '▲' : '▼'}</span>
+        </button>
+        {howOpen && (
+          <div className="mt-2 space-y-1 text-sm text-ink-soft">
+            <p>{t('staff.pages.Welfare.howDetail1')}</p>
+            <p>{t('staff.pages.Welfare.howDetail2')}</p>
+            <p>{t('staff.pages.Welfare.howDetail3')}</p>
+          </div>
+        )}
+      </Panel>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {data?.length === 0 && (
+      {filteredData.length === 0 && (
         <Panel>
           <p data-testid="welfare-clear">{t('staff.pages.Welfare.noWelfareFlagsRight')}</p>
         </Panel>
       )}
-      {(data ?? []).map((r) => (
+      {filteredData.map((r) => (
         <Panel key={r.resident_id} data-testid={`welfare-${r.code}`}>
           <h2 className="mb-2 text-h3 font-semibold">
             <Link className="text-primary underline" to={`/staff/residents/${r.resident_id}`}>

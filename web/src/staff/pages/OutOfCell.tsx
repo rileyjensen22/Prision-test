@@ -49,6 +49,7 @@ interface Below {
   day: string
   minutes: number
   minimum: number
+  not_recorded?: boolean
 }
 
 const yesterday = () => new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
@@ -227,7 +228,13 @@ export default function OutOfCell() {
                 <tr key={b.resident_id} data-testid={`below-${b.resident}`}>
                   <Td>{b.resident}</Td>
                   <Td>{b.day}</Td>
-                  <Td>{b.minutes}</Td>
+                  <Td>
+                    {b.not_recorded ? (
+                      <Badge tone="amber">{t('staff.pages.OutOfCell.notRecorded')}</Badge>
+                    ) : (
+                      b.minutes
+                    )}
+                  </Td>
                   <Td>{b.minimum}</Td>
                 </tr>
               ))}

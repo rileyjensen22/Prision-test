@@ -53,7 +53,7 @@ def populate(owner, make_staff, n):
             owner.add(
                 OffenseFlag(
                     resident_id=r.id,
-                    offense_category="PLACEHOLDER_CATEGORY_A",
+                    offense_category="SEX_OFFENSE",
                     added_at=NOW - timedelta(days=9),
                 )
             )

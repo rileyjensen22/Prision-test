@@ -24,7 +24,7 @@ from tests.engine.conftest import T0
 REAL = ResidentFacts(
     earned_tier=3,
     prior_returns=2,
-    offenses=(OffenseFact("PLACEHOLDER_CATEGORY_A"),),
+    offenses=(OffenseFact("SEX_OFFENSE"),),
     sanctions=(
         SanctionFact(
             9, "DISRUPT", "communication", T0 - timedelta(hours=1), T0 + timedelta(hours=5)
@@ -46,14 +46,14 @@ def test_overrides_replace_only_what_was_asked(cfg):
 def test_clear_and_add_sanctions_and_offenses(cfg):
     ov = SandboxOverrides(
         clear_sanctions=True,
-        offense_categories=("PLACEHOLDER_CATEGORY_B",),
+        offense_categories=("VIOLENCE",),
         add_sanctions=(SandboxSanction("CAM_BLOCK", hours_remaining=10),),
     )
     out = apply_to_facts(REAL, ov, cfg, T0)
     (s,) = out.sanctions
     assert s.id < 0 and s.ends_at == T0 + timedelta(hours=10)
     assert s.starts_at == s.ends_at - timedelta(hours=48) and s.starts_at <= T0 < s.ends_at
-    assert [o.category for o in out.offenses] == ["PLACEHOLDER_CATEGORY_B"]
+    assert [o.category for o in out.offenses] == ["VIOLENCE"]
     e = compute_entitlements(out, cfg, T0)
     assert not e.allowed("calls") and e.allowed("legal_materials")
     assert e.features["calls"].reasons[0].code == "CAM_BLOCK"
@@ -90,7 +90,7 @@ def overrides(draw):
             st.none()
             | st.lists(
                 st.sampled_from(
-                    ["PLACEHOLDER_CATEGORY_A", "PLACEHOLDER_CATEGORY_B", "PLACEHOLDER_CATEGORY_C"]
+                    ["SEX_OFFENSE", "VIOLENCE", "ESCAPE_RISK"]
                 ),
                 max_size=3,
             ).map(tuple)

@@ -56,7 +56,10 @@ export default function Grievances() {
         {STATUS_TABS.map((s) => (
           <button
             key={s}
-            onClick={() => { setTab(s); setMsg(null) }}
+            onClick={() => {
+              setTab(s)
+              setMsg(null)
+            }}
             className={`rounded-ctl px-4 py-1.5 text-sm font-medium border ${tab === s ? 'bg-primary text-primary-ink border-primary' : 'border-line hover:bg-surface-2'}`}
           >
             {s.replace('_', ' ')}
@@ -65,7 +68,11 @@ export default function Grievances() {
       </div>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {data?.length === 0 && <Panel><p>No {tab.replace('_', ' ')} grievances.</p></Panel>}
+      {data?.length === 0 && (
+        <Panel>
+          <p>No {tab.replace('_', ' ')} grievances.</p>
+        </Panel>
+      )}
       {(data ?? []).map((g) => (
         <Panel key={g.id} data-testid={`grievance-${g.id}`}>
           <div className="flex items-start justify-between gap-4">
@@ -97,7 +104,11 @@ export default function Grievances() {
                 className="w-full rounded-ctl border px-2 py-1 text-sm"
               >
                 <option value="">— keep status —</option>
-                {STATUS_TABS.map((s) => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                {STATUS_TABS.map((s) => (
+                  <option key={s} value={s}>
+                    {s.replace('_', ' ')}
+                  </option>
+                ))}
               </select>
               <textarea
                 aria-label="Response"
@@ -109,11 +120,21 @@ export default function Grievances() {
               />
               <div className="flex gap-2">
                 <Btn onClick={() => void save(g.id)}>Save</Btn>
-                <Btn kind="plain" onClick={() => setEditing(null)}>Cancel</Btn>
+                <Btn kind="plain" onClick={() => setEditing(null)}>
+                  Cancel
+                </Btn>
               </div>
             </div>
           ) : canWrite ? (
-            <Btn kind="plain" className="mt-2" onClick={() => { setEditing(g.id); setResponse(g.response); setNewStatus(g.status) }}>
+            <Btn
+              kind="plain"
+              className="mt-2"
+              onClick={() => {
+                setEditing(g.id)
+                setResponse(g.response)
+                setNewStatus(g.status)
+              }}
+            >
               Respond
             </Btn>
           ) : null}

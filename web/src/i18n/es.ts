@@ -286,7 +286,8 @@ const es: Dict = {
     title: 'Cantina',
     balance: 'Fondos depositados: {{amount}}',
     weekly: 'Límite de gasto: quedan {{left}} de {{limit}} esta semana',
-    noFunds: 'No tiene fondos en su cuenta. Pida a un miembro del personal o familiar que haga un depósito.',
+    noFunds:
+      'No tiene fondos en su cuenta. Pida a un miembro del personal o familiar que haga un depósito.',
     add: 'Agregar',
     remove: 'Quitar',
     cart: 'Su pedido',
@@ -386,7 +387,8 @@ const es: Dict = {
       ERROR: 'Algo salió mal.',
     },
     title: 'Trabajos opcionales',
-    comingSoon: 'En desarrollo — próximamente. Los trabajos serán voluntarios y nunca afectarán su nivel ni sus privilegios.',
+    comingSoon:
+      'En desarrollo — próximamente. Los trabajos serán voluntarios y nunca afectarán su nivel ni sus privilegios.',
     voluntary:
       'Los trabajos son su decisión. No unirse, o salir después, nunca cambia su nivel, puntos ni privilegios.',
     split:
@@ -825,6 +827,8 @@ const es: Dict = {
         reasonStaffOnly: 'Motivo (solo personal)',
         addEntry: 'Añadir entrada',
         admitResident: 'Admitir al residente',
+        tierCeilingPreview:
+          'Con {{prior}} reingreso(s) previo(s), nivel máximo inicial: T{{tier}}.',
       },
       Mirror: {
         whyAreYouWatching: '¿Por qué lo observa?',
@@ -898,6 +902,7 @@ const es: Dict = {
         notes: 'Notas',
         belowMinimum: 'por debajo del mínimo',
         shortOfSchedule: 'menos de lo programado',
+        notRecorded: 'sin registro',
       },
       Outcomes: {
         '6Months': '6 meses',
@@ -1059,6 +1064,13 @@ const es: Dict = {
         recordCheckIn: 'Registrar la revisión',
         cancel: 'Cancelar',
         iCheckedIn: 'Ya revisé…',
+        howThisWorks: 'Cómo funciona esto',
+        howDetail1:
+          'Se generan alertas cuando la actividad reciente o los contactos de un residente bajan mucho respecto a su propio patrón habitual, o cuando no ha tenido contacto en varios días.',
+        howDetail2:
+          'El personal de salud solo ve alertas generadas por solicitudes de salud. Los oficiales y supervisores ven todas las alertas.',
+        howDetail3:
+          'Reconocer una alerta significa que se revisó al residente. La alerta queda silenciosa por unos días, pero reaparece si el patrón continúa.',
       },
     },
     lifecycle: {

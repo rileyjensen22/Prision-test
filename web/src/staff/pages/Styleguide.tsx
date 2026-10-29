@@ -50,6 +50,7 @@ const TIER: Tier = {
   next_tier: 5,
   points_to_next: 180,
   capped_by_ceiling: false,
+  max_tier_override: null,
 }
 const OPEN: Feature = { allowed: true, baseline: false, limits: {}, reasons: [] }
 const LOCKED: Feature = {

@@ -16,6 +16,7 @@ from isd.models import (
     JobListing,
     JobPartner,
     Resident,
+    ReentryResource,
     Staff,
 )
 from isd.services import commissary, facility_model, points
@@ -45,6 +46,59 @@ def ensure_config(session: Session, config: dict) -> None:
                 "CONFIG_SEED",
                 payload={"version": 1},
             )
+
+
+_REENTRY_SEED = [
+    {
+        "title": "Georgia Department of Labor – Reentry Services",
+        "description": "Sample — replace with real local resource. Job placement, resume help, and career counseling for people returning from incarceration.",
+        "phone": "404-555-0100",
+        "address": "148 Andrew Young International Blvd NE, Atlanta, GA 30303",
+        "category": "employment",
+    },
+    {
+        "title": "Georgia Legal Services – Prisoner Reentry Project",
+        "description": "Sample — replace with real local resource. Free civil legal aid for returning citizens on housing, expungement, and benefits.",
+        "phone": "404-555-0101",
+        "address": "104 Marietta St NW, Atlanta, GA 30303",
+        "category": "legal",
+    },
+    {
+        "title": "Salvation Army – Adult Rehabilitation Center",
+        "description": "Sample — replace with real local resource. Transitional housing and substance-use recovery support.",
+        "phone": "404-555-0102",
+        "address": "1000 Salvation Place, Atlanta, GA",
+        "category": "housing",
+    },
+    {
+        "title": "Georgia Gateway – Benefits Enrollment",
+        "description": "Sample — replace with real local resource. Apply for SNAP, Medicaid, and other state benefits.",
+        "phone": "877-555-0103",
+        "address": "Online at gateway.ga.gov",
+        "category": "benefits",
+    },
+    {
+        "title": "Behavioral Health – Crisis Line",
+        "description": "Sample — replace with real local resource. 24/7 crisis support; can connect to local mental-health services.",
+        "phone": "800-555-0104",
+        "address": "",
+        "category": "mental_health",
+    },
+    {
+        "title": "GA Dept. of Driver Services – ID Restoration",
+        "description": "Sample — replace with real local resource. Help obtaining a state ID or driver's license after release.",
+        "phone": "678-555-0105",
+        "address": "2206 Eastview Pkwy, Conyers, GA 30013",
+        "category": "id_documents",
+    },
+    {
+        "title": "Reentry Council – Housing Assistance List",
+        "description": "Sample — replace with real local resource. Curated list of landlords and shelters accepting returning citizens.",
+        "phone": "404-555-0106",
+        "address": "Contact facility case manager for current list",
+        "category": "housing",
+    },
+]
 
 
 def ensure_reference_data(session: Session) -> None:
@@ -106,6 +160,10 @@ def ensure_reference_data(session: Session) -> None:
                     pay_per_task_cents=pay,
                 )
             )
+    # Reentry resources — seed once if table is empty
+    if not session.execute(select(ReentryResource.id).limit(1)).first():
+        for row in _REENTRY_SEED:
+            session.add(ReentryResource(**row))
     session.flush()
 
 

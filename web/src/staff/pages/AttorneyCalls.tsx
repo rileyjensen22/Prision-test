@@ -22,7 +22,11 @@ interface AttorneyCallRequest {
 
 const STATUS_TABS = ['pending', 'approved', 'scheduled', 'completed', 'denied'] as const
 const TONE: Record<string, 'amber' | 'green' | 'gray' | 'red'> = {
-  pending: 'amber', approved: 'green', scheduled: 'green', completed: 'gray', denied: 'red',
+  pending: 'amber',
+  approved: 'green',
+  scheduled: 'green',
+  completed: 'gray',
+  denied: 'red',
 }
 
 export default function AttorneyCalls() {
@@ -31,7 +35,9 @@ export default function AttorneyCalls() {
   const canWrite = !!user && ['legal_liaison', 'supervisor', 'admin'].includes(user.role)
 
   const [tab, setTab] = useState<string>('pending')
-  const { data, error, reload } = useLoad<AttorneyCallRequest[]>(`/staff/attorney-calls?status=${tab}`)
+  const { data, error, reload } = useLoad<AttorneyCallRequest[]>(
+    `/staff/attorney-calls?status=${tab}`,
+  )
   const [editing, setEditing] = useState<number | null>(null)
   const [newStatus, setNewStatus] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
@@ -56,14 +62,17 @@ export default function AttorneyCalls() {
   return (
     <Page title={t('staff.pages.AttorneyCalls.title', 'Attorney Call Requests')}>
       <Panel className="border-primary bg-primary/5 text-sm">
-        Attorney calls are privileged. No content is ever recorded, transcribed, or logged —
-        only that a call occurred and its duration.
+        Attorney calls are privileged. No content is ever recorded, transcribed, or logged — only
+        that a call occurred and its duration.
       </Panel>
       <div className="flex gap-2 flex-wrap">
         {STATUS_TABS.map((s) => (
           <button
             key={s}
-            onClick={() => { setTab(s); setMsg(null) }}
+            onClick={() => {
+              setTab(s)
+              setMsg(null)
+            }}
             className={`rounded-ctl px-4 py-1.5 text-sm font-medium border ${tab === s ? 'bg-primary text-primary-ink border-primary' : 'border-line hover:bg-surface-2'}`}
           >
             {s}
@@ -72,7 +81,11 @@ export default function AttorneyCalls() {
       </div>
       <ErrorLine error={error} />
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {data?.length === 0 && <Panel><p>No {tab} requests.</p></Panel>}
+      {data?.length === 0 && (
+        <Panel>
+          <p>No {tab} requests.</p>
+        </Panel>
+      )}
       {(data ?? []).map((r) => (
         <Panel key={r.id} data-testid={`acr-${r.id}`}>
           <div className="flex items-start justify-between gap-4">
@@ -103,7 +116,11 @@ export default function AttorneyCalls() {
                 className="w-full rounded-ctl border px-2 py-1 text-sm"
               >
                 <option value="">— keep status —</option>
-                {STATUS_TABS.map((s) => <option key={s} value={s}>{s}</option>)}
+                {STATUS_TABS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
               <div>
                 <label className="text-sm font-medium">Schedule date/time</label>
@@ -123,11 +140,22 @@ export default function AttorneyCalls() {
               />
               <div className="flex gap-2">
                 <Btn onClick={() => void save(r.id)}>Save</Btn>
-                <Btn kind="plain" onClick={() => setEditing(null)}>Cancel</Btn>
+                <Btn kind="plain" onClick={() => setEditing(null)}>
+                  Cancel
+                </Btn>
               </div>
             </div>
           ) : canWrite ? (
-            <Btn kind="plain" className="mt-2" onClick={() => { setEditing(r.id); setNewStatus(r.status); setNote(r.staff_note); setScheduledAt(r.scheduled_at ?? '') }}>
+            <Btn
+              kind="plain"
+              className="mt-2"
+              onClick={() => {
+                setEditing(r.id)
+                setNewStatus(r.status)
+                setNote(r.staff_note)
+                setScheduledAt(r.scheduled_at ?? '')
+              }}
+            >
               Update
             </Btn>
           ) : null}

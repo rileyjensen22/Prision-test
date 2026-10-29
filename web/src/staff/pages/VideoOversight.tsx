@@ -28,11 +28,15 @@ export default function VideoOversight() {
   return (
     <Page title={t('staff.pages.VideoOversight.title', 'Video Call Oversight')}>
       <Panel className="border-primary bg-primary/5 text-sm">
-        Attorney video calls are excluded from this view. They are privileged and no content
-        is ever recorded (invariant 6).
+        Attorney video calls are excluded from this view. They are privileged and no content is ever
+        recorded (invariant 6).
       </Panel>
       <ErrorLine error={error} />
-      {data?.length === 0 && <Panel><p>No video sessions on record.</p></Panel>}
+      {data?.length === 0 && (
+        <Panel>
+          <p>No video sessions on record.</p>
+        </Panel>
+      )}
       {(data ?? []).map((s) => (
         <Panel key={s.id} data-testid={`video-${s.id}`}>
           <div className="flex items-start justify-between gap-4">
@@ -49,7 +53,9 @@ export default function VideoOversight() {
                 {s.ended_at ? ` – ${new Date(s.ended_at).toLocaleString()}` : ' (active)'}
               </p>
             </div>
-            <span className="text-sm text-ink-soft">{s.monitored ? 'Monitored' : 'Not monitored'}</span>
+            <span className="text-sm text-ink-soft">
+              {s.monitored ? 'Monitored' : 'Not monitored'}
+            </span>
           </div>
         </Panel>
       ))}

@@ -16,6 +16,7 @@ export function makeView(over: Partial<ResidentView> = {}): ResidentView {
       next_tier: 4,
       points_to_next: 50,
       capped_by_ceiling: false,
+      max_tier_override: null,
     },
     features: {
       calls: {

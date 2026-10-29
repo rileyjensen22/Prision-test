@@ -59,7 +59,7 @@ def test_intake_creates_everything_and_audits_each_part(owner, seeded, make_staf
         prior_returns=3,
         prior_returns_source="state records, synthetic",
         release_date=date(2027, 1, 1),
-        offense_categories=["PLACEHOLDER_CATEGORY_A"],
+        offense_categories=["SEX_OFFENSE"],
         contacts=[
             IntakeContact("Pat Family", "family", "555-0142"),
             IntakeContact("Counsel", "attorney", "555-0143"),
@@ -83,7 +83,7 @@ def test_intake_creates_everything_and_audits_each_part(owner, seeded, make_staf
     assert {c.type for c in contacts} == {"family", "attorney"}
     assert all(c.approved and c.status == "approved" for c in contacts)
     flag = owner.execute(select(OffenseFlag).where(OffenseFlag.resident_id == r.id)).scalar()
-    assert flag.offense_category == "PLACEHOLDER_CATEGORY_A"
+    assert flag.offense_category == "SEX_OFFENSE"
     assert (flag.next_review_at - flag.added_at).days == 90
     ks = owner.execute(select(KeepSeparate)).scalar()
     assert ks.resident_a_id < ks.resident_b_id
@@ -107,7 +107,7 @@ def test_the_offense_category_restricts_through_the_engine(owner, seeded, make_s
     r = svc.intake(
         owner,
         make_staff("admin"),
-        request(place, offense_categories=["PLACEHOLDER_CATEGORY_A"]),
+        request(place, offense_categories=["SEX_OFFENSE"]),
         NOW,
     )
     ent = get_entitlements(owner, r.id, NOW, seeded)
@@ -134,7 +134,7 @@ def test_audit_entries_do_not_carry_names_or_numbers(owner, seeded, make_staff, 
         ({"prior_returns": -1}, "BAD_PRIOR_RETURNS"),
         ({"release_date": date(2020, 1, 1)}, "BAD_RELEASE_DATE"),
         ({"offense_categories": ["NOT_A_CATEGORY"]}, "UNKNOWN_OFFENSE_CATEGORY"),
-        ({"offense_categories": ["PLACEHOLDER_CATEGORY_A"] * 2}, "DUPLICATE_OFFENSE_CATEGORY"),
+        ({"offense_categories": ["SEX_OFFENSE"] * 2}, "DUPLICATE_OFFENSE_CATEGORY"),
         ({"contacts": [IntakeContact("Pat", "cousin", "555-0142")]}, "BAD_TYPE"),
         ({"contacts": [IntakeContact("Pat", "family", "abc")]}, "BAD_NUMBER"),
         (
@@ -205,7 +205,7 @@ def test_intake_api_roles_and_flow(client, staff_tokens, free_place):
         "cell_code": free_place[0],
         "device_code": free_place[1],
         "reason": "new admission",
-        "offense_categories": ["PLACEHOLDER_CATEGORY_B"],
+        "offense_categories": ["VIOLENCE"],
         "contacts": [{"name": "Pat Family", "type": "family", "phone": "555-0142"}],
     }
     assert (
