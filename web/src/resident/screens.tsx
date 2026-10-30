@@ -17,7 +17,6 @@ import { LinkButton, Button } from '../ui/Button'
 import { Card, EndTime, ScreenFrame, Time, reasonTitle } from './components'
 import { featureIcon } from './icons'
 import { LockNotice, ProgressMeter, Tile, TierStaircase, unlockedByNext } from './parts'
-import { money } from './features/helpers'
 import { useResident } from './ResidentContext'
 import type { Tier } from './types'
 
@@ -28,19 +27,33 @@ const ALWAYS_ORDER = [
   'grievances_appeals',
   'health_requests',
   'basic_education',
-  'religious_texts',
   'reentry',
 ] // request_staff is the persistent button; emergency_contact / out_of_cell_minimum are not tiled
 
+// Display order for services (lower tier = earlier in list)
+const SERVICE_ORDER = [
+  'calls', 'commissary', 'reading_general', 'chess', 'advanced_education',
+  'texting', 'video', 'outdoor_rec',
+]
+
 export function Home() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { view, features } = useResident()
   if (!view) return null
   const { tier } = view
   const pct = tier.next_tier
     ? Math.min(100, Math.round((tier.points / (tier.points + (tier.points_to_next ?? 1))) * 100))
     : 100
-  const services = Object.entries(features).filter(([, f]) => !f.baseline)
+  const services = Object.entries(features)
+    .filter(([, f]) => !f.baseline)
+    .sort(([a], [b]) => {
+      const ai = SERVICE_ORDER.indexOf(a)
+      const bi = SERVICE_ORDER.indexOf(b)
+      if (ai === -1 && bi === -1) return 0
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    })
   const next = tier.capped_by_ceiling ? null : tier.next_tier
   const nextUnlocks = unlockedByNext(features, next)
 
@@ -136,48 +149,6 @@ export function Home() {
             ))}
           </ul>
         </section>
-
-        {view.allowances.length > 0 && (
-          <section data-testid="allowances" aria-labelledby="h-allow" className="space-y-3">
-            <h2 id="h-allow" className="text-h2 font-bold">
-              {t('home.allowances')}
-            </h2>
-            <ul className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]">
-              {view.allowances.map((a) => {
-                const Icon = featureIcon(a.feature)
-                return (
-                  <li
-                    key={`${a.feature}-${a.unit}`}
-                    data-testid={`allowance-${a.feature}`}
-                    className="flex items-center gap-3 rounded-card border border-line bg-surface p-4 shadow-card"
-                  >
-                    <Icon
-                      aria-hidden="true"
-                      className="size-8 shrink-0 text-primary"
-                      strokeWidth={1.75}
-                    />
-                    <span>
-                      <span className="block font-bold">{t(`feature.${a.feature}`)}:</span>
-                      <span className="block">
-                        {a.unit === 'dollars'
-                          ? t('home.leftMoney', {
-                              left: money(Math.round((a.limit - a.used) * 100), i18n.language),
-                              limit: money(a.limit * 100, i18n.language),
-                            })
-                          : t('home.left', {
-                              left: a.limit - a.used,
-                              limit: a.limit,
-                              unit: t(`units.${a.unit}`),
-                            })}{' '}
-                        {a.period === 'day' ? t('home.perDay') : t('home.perWeek')}
-                      </span>
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        )}
 
         <section aria-labelledby="h-services" className="space-y-3">
           <h2 id="h-services" className="text-h2 font-bold">
@@ -341,13 +312,48 @@ export function Appeal() {
   )
 }
 
+// Tier feature data — matches tiers.yaml
+const TIER_DATA = [
+  { calls: 15, texts: 0, video: 0, commissary: 20, chess: 'none', rec: 0 },
+  { calls: 20, texts: 0, video: 0, commissary: 30, chess: 'engine', rec: 0 },
+  { calls: 30, texts: 0, video: 0, commissary: 40, chess: 'engine', rec: 0 },
+  { calls: 30, texts: 10, video: 0, commissary: 50, chess: 'engine', rec: 0 },
+  { calls: 40, texts: 20, video: 0, commissary: 60, chess: 'human', rec: 0 },
+  { calls: 45, texts: 30, video: 30, commissary: 70, chess: 'human', rec: 0 },
+  { calls: 60, texts: 40, video: 60, commissary: 70, chess: 'human', rec: 0 },
+  { calls: 60, texts: 50, video: 75, commissary: 70, chess: 'human', rec: 60 },
+  { calls: 75, texts: 60, video: 75, commissary: 70, chess: 'human', rec: 60 },
+  { calls: 90, texts: 75, video: 75, commissary: 70, chess: 'human', rec: 60 },
+]
+
+const POINT_EVENTS = [
+  { label: 'Clean day (no infractions)', points: '+2' },
+  { label: 'Basic course completed', points: '+50' },
+  { label: 'Advanced course completed', points: '+100' },
+  { label: 'Program / certificate completed', points: '+200' },
+  { label: 'Staff commendation', points: '+10' },
+]
+
+const POINT_LOSSES = [
+  { label: 'Minor infraction confirmed', points: '−25' },
+  { label: 'Major infraction confirmed', points: '−100' },
+]
+
+const THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200]
+
 export function TierScreen() {
   const { t } = useTranslation()
   const { view } = useResident()
   if (!view) return null
   const { tier } = view
+  const [selected, setSelected] = useState(tier.effective)
+
+  const td = TIER_DATA[selected - 1]
+  const chessLabel =
+    td.chess === 'none' ? 'No chess' : td.chess === 'engine' ? 'vs. computer' : 'vs. people or computer'
+
   return (
-    <ScreenFrame title={t('tier.label', { n: tier.effective })} narrow>
+    <ScreenFrame title={t('tier.details')}>
       <Card className="space-y-4">
         <TierRail tier={tier} />
         <p className="text-label font-bold">{t('tier.points', { count: tier.points })}</p>
@@ -359,6 +365,7 @@ export function TierScreen() {
           </p>
         )}
       </Card>
+
       {tier.ceiling < 10 && (
         <Card data-testid="ceiling-card" className="space-y-2">
           <h2 className="text-h3 font-bold" data-testid="ceiling-title">
@@ -368,6 +375,95 @@ export function TierScreen() {
           {tier.capped_by_ceiling && <p>{t('tier.cappedNote', { n: tier.ceiling })}</p>}
         </Card>
       )}
+
+      <Card className="space-y-4">
+        <h2 className="text-h3 font-bold">What each tier includes</h2>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+            <button
+              key={n}
+              onClick={() => setSelected(n)}
+              className={`min-h-touch min-w-[3rem] rounded-ctl border-2 px-3 py-2 text-label font-bold transition-colors ${
+                n === selected
+                  ? 'border-primary bg-primary text-primary-ink'
+                  : n === tier.effective
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-line bg-surface hover:border-primary'
+              }`}
+              aria-pressed={n === selected}
+            >
+              T{n}
+            </button>
+          ))}
+        </div>
+        {selected === tier.effective && (
+          <p className="text-sm font-bold text-ok">← Your current tier</p>
+        )}
+        {selected > tier.ceiling && (
+          <p className="text-sm text-lock">Above your current ceiling (T{tier.ceiling})</p>
+        )}
+        <table className="w-full text-body">
+          <tbody className="divide-y divide-line">
+            <tr>
+              <td className="py-2 text-ink-soft">Phone calls</td>
+              <td className="py-2 font-bold">{td.calls} min/day</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-ink-soft">Text messages</td>
+              <td className="py-2 font-bold">{td.texts === 0 ? 'Not available' : `${td.texts}/day`}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-ink-soft">Video calls</td>
+              <td className="py-2 font-bold">{td.video === 0 ? 'Not available' : `${td.video} min/day`}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-ink-soft">Commissary</td>
+              <td className="py-2 font-bold">${td.commissary}/week</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-ink-soft">Chess</td>
+              <td className="py-2 font-bold">{chessLabel}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-ink-soft">Outdoor rec</td>
+              <td className="py-2 font-bold">{td.rec === 0 ? 'Not available' : `${td.rec} min/day`}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="text-sm text-ink-soft">
+          Points needed to reach T{selected}: {THRESHOLDS[selected - 1].toLocaleString()}
+          {selected < 10 && ` · T${selected + 1} requires ${THRESHOLDS[selected].toLocaleString()}`}
+        </p>
+      </Card>
+
+      <Card className="space-y-3">
+        <h2 className="text-h3 font-bold">How you earn points</h2>
+        <table className="w-full text-body">
+          <tbody className="divide-y divide-line">
+            {POINT_EVENTS.map((e) => (
+              <tr key={e.label}>
+                <td className="py-2">{e.label}</td>
+                <td className="py-2 font-bold text-ok">{e.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      <Card className="space-y-3">
+        <h2 className="text-h3 font-bold">How you lose points</h2>
+        <table className="w-full text-body">
+          <tbody className="divide-y divide-line">
+            {POINT_LOSSES.map((e) => (
+              <tr key={e.label}>
+                <td className="py-2">{e.label}</td>
+                <td className="py-2 font-bold text-lock">{e.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="text-sm text-ink-soft">Points never go below 0. Tier can drop at most one level per week.</p>
+      </Card>
     </ScreenFrame>
   )
 }
@@ -390,7 +486,7 @@ export function FeaturePage() {
   if (f && !f.allowed) navigate(`/resident/locks?feature=${name}`, { replace: true })
   const Icon = featureIcon(name)
   return (
-    <ScreenFrame title={t(`feature.${name}`)} intro={t('stub.text')} narrow>
+    <ScreenFrame title={t(`feature.${name}`)} narrow>
       <Card className="flex items-center gap-4">
         <Icon aria-hidden="true" className="size-12 text-primary" strokeWidth={1.5} />
         {f && Object.keys(f.limits).length > 0 ? (
@@ -405,7 +501,7 @@ export function FeaturePage() {
             </ul>
           </div>
         ) : (
-          <p>{t('stub.text')}</p>
+          <p>This feature is available from this device. Please speak with staff if you have questions.</p>
         )}
       </Card>
       <p className="hidden">

@@ -112,7 +112,7 @@ export function Tile({
   const reason = feature.reasons[0]
   return (
     <Link
-      to={open ? `/resident/feature/${name}` : `/resident/locks?feature=${name}`}
+      to={open ? (name === 'reentry' ? '/resident/reentry' : `/resident/feature/${name}`) : `/resident/locks?feature=${name}`}
       data-testid={`tile-${name}`}
       data-allowed={open}
       className={cn(

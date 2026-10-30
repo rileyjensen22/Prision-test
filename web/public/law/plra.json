@@ -1,0 +1,41 @@
+{
+  "id": "plra",
+  "title": "Prison Litigation Reform Act (PLRA)",
+  "sections": [
+    {
+      "id": "overview",
+      "title": "Overview",
+      "text": "The Prison Litigation Reform Act (PLRA), 42 U.S.C. § 1997e, was enacted in 1996. It governs civil rights lawsuits filed by incarcerated people in federal court. The PLRA imposes several requirements that must be met before a court will hear a case. This is a plain-language summary. The actual statute controls; consult an attorney for advice about your specific situation."
+    },
+    {
+      "id": "exhaustion",
+      "title": "Exhaustion of Administrative Remedies (§ 1997e(a))",
+      "text": "42 U.S.C. § 1997e(a) — Exhaustion of Remedies\n\nNo action shall be brought with respect to prison conditions under section 1983 of this title, or any other Federal law, by a prisoner confined in any jail, prison, or other correctional facility until such administrative remedies as are available are exhausted.\n\nWhat this means in plain language:\nBefore you can file a federal lawsuit about prison conditions, you must first complete all of the grievance procedures that are available to you at your facility. This includes filing the grievance, any required appeals within the facility, and any other steps the facility's grievance process requires.\n\nKey court interpretations:\n- You must complete every step of the available grievance process, even if you believe it will be futile.\n- If you do not properly exhaust, a court can dismiss your case.\n- If a grievance procedure is not actually available to you (e.g., staff refuse to provide forms), exhaustion may be excused.\n- The Supreme Court has held that the PLRA requires \"proper exhaustion\" — meaning you must follow the rules of the grievance process.\n\nPractical advice: Keep copies of all grievances you file and all responses you receive. Note the dates. Follow the instructions provided by your facility exactly."
+    },
+    {
+      "id": "filing-fees",
+      "title": "Filing Fees (§ 1915)",
+      "text": "28 U.S.C. § 1915 — Proceedings in forma pauperis\n\nThe PLRA amended the in forma pauperis (IFP) statute to require incarcerated people to pay the full filing fee for federal civil lawsuits, even if they cannot afford it all at once.\n\nHow it works:\n- When you file a federal civil lawsuit, the filing fee is $350 (plus a $55 administrative fee in most courts).\n- If you cannot pay the full fee at once, you may apply to proceed in forma pauperis (IFP).\n- If the court grants IFP status, you must still pay the full filing fee over time. 20% of your deposits from the previous month will be taken from your prison trust account each month until the full fee is paid.\n- This applies even if you lose the case.\n\nException: If you have had 3 or more cases dismissed as frivolous, malicious, or for failure to state a claim, you generally cannot proceed IFP in a new case unless you are in imminent danger of serious physical injury (the 'three-strikes rule,' see below)."
+    },
+    {
+      "id": "three-strikes",
+      "title": "Three-Strikes Rule (§ 1915(g))",
+      "text": "28 U.S.C. § 1915(g) — Three Strikes\n\nIn no event shall a prisoner bring a civil action or appeal a judgment in a civil action or proceeding under this section if the prisoner has, on 3 or more prior occasions, while incarcerated or detained in any facility, brought an action or appeal in a court of the United States that was dismissed on the grounds that it is frivolous, malicious, or fails to state a claim upon which relief may be granted, unless the prisoner is under imminent danger of serious physical injury.\n\nWhat this means:\nIf you have had 3 or more federal lawsuits or appeals dismissed as frivolous, malicious, or for failure to state a claim, you may not file future federal civil suits without paying the full filing fee upfront, UNLESS you are in immediate danger of serious physical injury at the time you file.\n\nThe 'imminent danger' exception is narrow. It must be:\n- Ongoing at the time of filing (not past danger)\n- Serious physical injury, not emotional distress or property loss\n- Imminent — happening now or about to happen"
+    },
+    {
+      "id": "physical-injury",
+      "title": "Physical Injury Requirement (§ 1997e(e))",
+      "text": "42 U.S.C. § 1997e(e) — Limitation on Recovery\n\nNo Federal civil action may be brought by a prisoner confined in a jail, prison, or other correctional facility, for mental or emotional injury suffered while in custody without a prior showing of physical injury or the commission of a sexual act.\n\nWhat this means:\nIf you are seeking money damages for mental or emotional distress only — with no physical injury — federal courts generally cannot award those damages under the PLRA. You may still seek other relief, such as a court order (injunction) requiring the facility to change its practices.\n\nNote: This limitation applies only to damages for mental or emotional injury. Claims for physical injury, injunctive relief, or nominal damages may still proceed."
+    },
+    {
+      "id": "attorneys-fees",
+      "title": "Attorney Fees (§ 1997e(d))",
+      "text": "42 U.S.C. § 1997e(d) — Attorney Fees\n\nThe PLRA limits attorney fees in successful prisoner civil rights cases. Fees must be directly and reasonably incurred in proving the actual violation of the plaintiff's rights. Fees may not exceed 150% of the judgment. If a monetary judgment is awarded, 25% of the judgment must be used to satisfy the attorney fees award.\n\nThis is a significant limit compared to other civil rights cases, and it affects the ability of attorneys to take cases on contingency."
+    },
+    {
+      "id": "consent-decrees",
+      "title": "Prospective Relief and Consent Decrees (§ 3626)",
+      "text": "18 U.S.C. § 3626 — Appropriate Remedies with Respect to Prison Conditions\n\nThe PLRA also limits court orders (consent decrees and injunctions) in prison condition cases. Key rules include:\n\n- Any court order must be 'narrowly drawn, extend no further than necessary to correct the violation of the Federal right, and be the least intrusive means necessary.'\n- Prospective relief (ongoing court supervision) must be reviewed every two years.\n- Either party can seek termination of prospective relief after 2 years.\n- Prisoner releases ordered by courts must meet special standards and be approved by a three-judge court.\n\nThis section has been used to end or limit many long-standing court orders over prison conditions."
+    }
+  ]
+}

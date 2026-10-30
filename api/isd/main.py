@@ -12,6 +12,8 @@ from isd.routers import (
     device,
     device_extras,
     device_features,
+    device_grievances,
+    device_health,
     mock,
     staff_accounts,
     staff_attorney,
@@ -55,6 +57,8 @@ app.include_router(config.router)
 app.include_router(device.router)
 app.include_router(device_features.router)
 app.include_router(device_extras.router)
+app.include_router(device_health.router)
+app.include_router(device_grievances.router)
 app.include_router(staff_residents.router)
 if settings.ENV != "production":  # simulated deposits and facility events are demo-only
     app.include_router(mock.router)

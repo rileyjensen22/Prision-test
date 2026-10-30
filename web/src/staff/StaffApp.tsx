@@ -1,5 +1,4 @@
 import {
-  Crown,
   BarChart3,
   BookOpen,
   CalendarDays,
@@ -18,7 +17,6 @@ import {
   Package,
   Palette,
   Phone,
-  Radio,
   Scale,
   ScrollText,
   Settings,
@@ -28,7 +26,6 @@ import {
   UserCog,
   UserX,
   Users,
-  Video,
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -52,6 +49,7 @@ import Finance from './pages/Finance'
 import Grievances from './pages/Grievances'
 import HealthRequests from './pages/HealthRequests'
 import Mirror from './pages/Mirror'
+import MonitoringHub from './pages/MonitoringHub'
 import Monitoring from './pages/Monitoring'
 import OutOfCell from './pages/OutOfCell'
 import Outliers from './pages/Outliers'
@@ -124,9 +122,8 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
         icon: Contact,
         roles: ['officer', 'supervisor', 'admin'],
       },
-      { to: '/staff/monitoring', key: 'monitoring', icon: Eye, roles: SUPERVISION },
+      { to: '/staff/monitoring-hub', key: 'monitoringHub', icon: Eye, roles: SUPERVISION },
       { to: '/staff/keep-separate', key: 'keepSeparate', icon: UserX, roles: SUPERVISION },
-      { to: '/staff/chess', key: 'chess', icon: Crown, roles: SUPERVISION },
       {
         to: '/staff/health-requests',
         key: 'healthRequests',
@@ -155,19 +152,12 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
         roles: ['commissary_clerk', 'supervisor', 'admin', 'auditor'],
         badge: 'commissary_orders_waiting' as const,
       },
-      {
-        to: '/staff/video',
-        key: 'video',
-        icon: Video,
-        roles: SUPERVISION,
-      },
     ],
   },
   {
     key: 'tools',
     items: [
       { to: '/staff/view-as', key: 'viewAs', icon: MonitorPlay },
-      { to: '/staff/mirror', key: 'mirror', icon: Radio, roles: SUPERVISION },
       { to: '/staff/intake', key: 'intake', icon: ClipboardList, roles: ['supervisor', 'admin'] },
       { to: '/staff/content', key: 'content', icon: BookOpen },
     ],
@@ -359,11 +349,7 @@ function Shell() {
               <Route path="view-as" element={<ViewAs />} />
               <Route
                 path="mirror"
-                element={
-                  <Guard roles={SUPERVISION}>
-                    <Mirror />
-                  </Guard>
-                }
+                element={<Navigate to="/staff/monitoring-hub" replace />}
               />
               <Route path="out-of-cell" element={<OutOfCell />} />
               <Route path="schedule" element={<Schedule />} />
@@ -378,9 +364,13 @@ function Shell() {
               />
               <Route
                 path="monitoring"
+                element={<Navigate to="/staff/monitoring-hub" replace />}
+              />
+              <Route
+                path="monitoring-hub"
                 element={
                   <Guard roles={SUPERVISION}>
-                    <Monitoring />
+                    <MonitoringHub />
                   </Guard>
                 }
               />
@@ -461,11 +451,7 @@ function Shell() {
               />
               <Route
                 path="video"
-                element={
-                  <Guard roles={SUPERVISION}>
-                    <VideoOversight />
-                  </Guard>
-                }
+                element={<Navigate to="/staff/monitoring-hub" replace />}
               />
               <Route path="styleguide" element={<Styleguide />} />
               <Route path="*" element={<Navigate to="/staff" replace />} />

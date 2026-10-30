@@ -5,6 +5,7 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import { RequestStaffDialog } from './RequestStaff'
 import { ResidentProvider, useResident } from './ResidentContext'
+import { AttorneyCalls } from './features/AttorneyCalls'
 import { Calls } from './features/Calls'
 import { Commissary } from './features/Commissary'
 import { Contacts } from './features/Contacts'
@@ -119,7 +120,7 @@ function Shell() {
             <Route path="feature/legal_materials" element={<LawLibrary />} />
             <Route path="feature/grievances_appeals" element={<Grievances />} />
             <Route path="feature/health_requests" element={<HealthRequests />} />
-            <Route path="feature/attorney_calls" element={<Calls />} />
+            <Route path="feature/attorney_calls" element={<AttorneyCalls />} />
             <Route path="jobs" element={<Jobs />} />
             <Route path="course/:code" element={<Course />} />
             <Route path="reentry" element={<Reentry />} />

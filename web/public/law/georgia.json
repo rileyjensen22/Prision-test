@@ -1,0 +1,41 @@
+{
+  "id": "georgia",
+  "title": "Georgia Law — Corrections",
+  "sections": [
+    {
+      "id": "notice",
+      "title": "Notice — Summaries Only",
+      "text": "This document contains plain-language summaries of selected Georgia laws relevant to incarcerated people. These are summaries only, not the full text of the law, and are for informational purposes only. They are not legal advice. Laws change; always verify with an attorney or legal aid organization. The official Georgia Code is available at law.georgia.gov."
+    },
+    {
+      "id": "title42-overview",
+      "title": "Title 42 — Penal Institutions (Overview)",
+      "text": "Georgia Title 42 governs the state's correctional system. Key provisions include:\n\nO.C.G.A. § 42-1-1 — Purpose\nThe purpose of Georgia's correctional system is to protect the public, provide for the rehabilitation and reintegration of offenders, and manage correctional facilities in a safe, humane, and cost-effective manner.\n\nO.C.G.A. § 42-4-1 — County correctional institutions\nCounties may establish jails and correctional institutions to house those convicted of criminal offenses.\n\nO.C.G.A. § 42-5-2 — Duties of Department of Corrections\nThe Department of Corrections is responsible for the custody, supervision, and management of all people committed to state custody, including providing food, clothing, shelter, medical care, educational and vocational training, and work opportunities.\n\nO.C.G.A. § 42-5-51 — Medical and health care\nThe Department of Corrections shall provide necessary medical, dental, and mental health care to all persons committed to its custody. Emergency care must be provided immediately."
+    },
+    {
+      "id": "title42-rights",
+      "title": "Title 42 — Rights of Incarcerated People",
+      "text": "O.C.G.A. § 42-4-6 — Standards for conditions of confinement\nFacilities must provide adequate sleeping space, bedding, food, sanitation, and medical care. The state Board of Corrections sets minimum standards.\n\nO.C.G.A. § 42-5-53 — Access to courts and counsel\nPersons committed to the Department of Corrections have the right to access the courts and to have access to counsel for purposes of their legal representation. Facilities must provide reasonable access to legal materials.\n\nO.C.G.A. § 42-5-54 — Mail and communications\nIncarcerated people have the right to send and receive mail, subject to reasonable security regulations. Mail to and from attorneys is confidential and may not be read by facility staff except in limited circumstances.\n\nO.C.G.A. § 42-5-57 — Grievance procedures\nThe Department of Corrections must maintain an internal grievance procedure through which incarcerated people may complain about their conditions of confinement. The procedure must include a means of appeal. Filing a grievance is a protected activity."
+    },
+    {
+      "id": "title42-discipline",
+      "title": "Title 42 — Disciplinary Procedures",
+      "text": "O.C.G.A. § 42-5-58 — Due process in disciplinary proceedings\nBefore a serious disciplinary sanction is imposed, the incarcerated person is entitled to:\n- Notice of the alleged violation\n- An opportunity to be heard\n- A written statement of the reasons for the decision\n\nMinor disciplinary sanctions may be imposed more summarily, but must still be documented.\n\nO.C.G.A. § 42-5-59 — Prohibited punishments\nThe following are prohibited as disciplinary measures:\n- Corporal punishment\n- Denial of food, water, or medical care\n- Denial of access to toilet facilities\n- Placement in conditions that pose a substantial risk to health or safety\n\nAny discipline must be proportional to the violation and consistent with Department of Corrections policies."
+    },
+    {
+      "id": "title42-records",
+      "title": "Title 42 — Records and Good Time",
+      "text": "O.C.G.A. § 17-10-11 — Earned time credit\nPeople serving sentences in Georgia may earn 'good time' credits that reduce the time they must serve. The Department of Corrections calculates these credits. Credits can be forfeited for serious disciplinary violations.\n\nO.C.G.A. § 42-9-39 — Parole consideration\nThe State Board of Pardons and Paroles considers all persons serving indeterminate sentences for possible parole. Factors considered include the nature of the offense, prior record, institutional conduct, and readiness for reintegration.\n\nO.C.G.A. § 42-1-12 — Sex offender registry\nPersons convicted of certain offenses must register with the state sex offender registry. Non-compliance is a separate felony offense. An attorney can explain your specific registration obligations."
+    },
+    {
+      "id": "title17-rights",
+      "title": "Title 17 — Criminal Procedure — Key Rights",
+      "text": "O.C.G.A. § 17-7-28 — Right to counsel\nEvery defendant in a criminal case has the right to be represented by an attorney. If a defendant cannot afford an attorney, the court must appoint one at no cost. This right continues through appeal.\n\nO.C.G.A. § 17-7-170 — Demand for speedy trial\nA person charged with a felony or misdemeanor may file a demand for speedy trial. If not tried within the required time after the demand is filed, the person may be discharged from the charges.\n\nO.C.G.A. § 17-9-4 — Motion for new trial\nA defendant may file a motion for new trial within 30 days after the verdict or judgment. A new trial may be granted on grounds including newly discovered evidence, juror misconduct, or errors of law.\n\nO.C.G.A. § 17-10-6.1 — Mandatory minimum sentences\nCertain crimes in Georgia carry mandatory minimum sentences. A judge cannot sentence below the minimum for these offenses, even considering mitigating factors. An attorney can tell you whether a mandatory minimum applies to your case."
+    },
+    {
+      "id": "eighth-amendment",
+      "title": "Eighth Amendment Rights (Federal)",
+      "text": "The Eighth Amendment to the U.S. Constitution prohibits cruel and unusual punishment. Federal courts have interpreted this to require that prisons and jails:\n\n1. Provide adequate medical and mental health care. Deliberate indifference to serious medical needs violates the Eighth Amendment. (Estelle v. Gamble, 1976)\n\n2. Protect incarcerated people from substantial risk of serious harm, including violence from other residents. (Farmer v. Brennan, 1994)\n\n3. Not use excessive force. Force is excessive when it is applied maliciously and sadistically to cause harm, rather than in a good-faith effort to maintain order. (Hudson v. McMillian, 1992)\n\n4. Provide humane conditions — adequate food, clothing, shelter, sanitation, and safety. Conditions that deprive someone of the minimal civilized measure of life's necessities may violate the Eighth Amendment.\n\nTo bring a federal lawsuit based on Eighth Amendment violations, you must first exhaust the facility's grievance process (see the PLRA section)."
+    }
+  ]
+}

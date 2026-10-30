@@ -512,6 +512,16 @@ def facility_overview(session: Session, now: datetime) -> dict:
     return facility.overview(session, now, after)
 
 
+def _safe_count(session: Session, query) -> int:
+    """Run a count query; return 0 if the table doesn't exist yet (migration not applied)."""
+    try:
+        result = session.execute(query).scalar()
+        return result or 0
+    except Exception:
+        session.rollback()
+        return 0
+
+
 def _offline_devices(session: Session, now: datetime) -> int:
     after = timedelta(
         minutes=int(get_current(session, "compliance").payload["offline_alert_minutes"])
@@ -550,22 +560,22 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
         "below_minimum": len(out_of_cell.below_minimum(session, now)),
         # None until a reconciliation has run (or for roles that do not see finance)
         "ledger_ok": _ledger_ok(session) if show_outliers else None,
-        # New queue counts
-        "open_health_requests": session.execute(
-            select(func.count()).select_from(HealthRequest).where(HealthRequest.status == "open")
-        ).scalar(),
-        "open_grievances": session.execute(
-            select(func.count()).select_from(Grievance).where(Grievance.status == "open")
-        ).scalar(),
-        "pending_attorney_calls": session.execute(
-            select(func.count()).select_from(AttorneyCallRequest).where(AttorneyCallRequest.status == "pending")
-        ).scalar(),
-        "commissary_orders_waiting": session.execute(
-            select(func.count()).select_from(CommissaryOrder).where(CommissaryOrder.status == "new")
-        ).scalar(),
-        "deposit_imports_pending": session.execute(
-            select(func.count()).select_from(DepositImport).where(DepositImport.status == "pending")
-        ).scalar(),
+        # New queue counts — wrapped in try/except in case migration hasn't run yet
+        "open_health_requests": _safe_count(
+            session, select(func.count()).select_from(HealthRequest).where(HealthRequest.status == "open")
+        ),
+        "open_grievances": _safe_count(
+            session, select(func.count()).select_from(Grievance).where(Grievance.status == "open")
+        ),
+        "pending_attorney_calls": _safe_count(
+            session, select(func.count()).select_from(AttorneyCallRequest).where(AttorneyCallRequest.status == "pending")
+        ),
+        "commissary_orders_waiting": _safe_count(
+            session, select(func.count()).select_from(CommissaryOrder).where(CommissaryOrder.status == "new")
+        ),
+        "deposit_imports_pending": _safe_count(
+            session, select(func.count()).select_from(DepositImport).where(DepositImport.status == "pending")
+        ),
     }
 
 

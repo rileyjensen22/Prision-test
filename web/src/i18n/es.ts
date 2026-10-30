@@ -581,6 +581,7 @@ const es: Dict = {
       attorneyCalls: 'Llamadas de abogado',
       commissary: 'Pedidos de comisaría',
       video: 'Supervisión de video',
+      monitoringHub: 'Monitoreo',
       reentryResources: 'Recursos de reinserción',
     },
     table: {

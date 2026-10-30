@@ -560,6 +560,7 @@ const en = {
       attorneyCalls: 'Attorney calls',
       commissary: 'Commissary orders',
       video: 'Video oversight',
+      monitoringHub: 'Monitoring',
       reentryResources: 'Reentry resources',
     },
     table: {
