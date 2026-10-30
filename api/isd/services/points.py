@@ -18,13 +18,14 @@ RESERVED_KINDS = ("confirmed_minor_infraction", "confirmed_major_infraction")
 
 
 def total_points(session: Session, resident_id: int, at_time: datetime) -> int:
-    return (
+    return max(
+        0,
         session.execute(
             select(func.coalesce(func.sum(PointEvent.points), 0)).where(
                 PointEvent.resident_id == resident_id, PointEvent.created_at <= at_time
             )
         ).scalar()
-        or 0
+        or 0,
     )
 
 
@@ -36,7 +37,7 @@ def total_points_many(
         .where(PointEvent.resident_id.in_(resident_ids), PointEvent.created_at <= at_time)
         .group_by(PointEvent.resident_id)
     ).all()
-    found = {rid: int(total or 0) for rid, total in rows}
+    found = {rid: max(0, int(total or 0)) for rid, total in rows}
     return {rid: found.get(rid, 0) for rid in resident_ids}
 
 

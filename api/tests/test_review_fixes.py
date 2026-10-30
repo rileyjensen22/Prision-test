@@ -14,7 +14,7 @@ from tests.conftest import NOW
 # Pinned from CLAUDE.md section 1/2 (plus the owner-approved reentry): the test must not just
 # compare the code with itself.
 PINNED_BASELINE = {
-    "legal_materials", "grievances_appeals", "medical_requests", "mental_health_requests",
+    "legal_materials", "grievances_appeals", "health_requests",
     "request_staff", "emergency_contact", "religious_texts", "basic_education", "attorney_calls",
     "contact_requests", "out_of_cell_minimum", "reentry",
 }  # fmt: skip

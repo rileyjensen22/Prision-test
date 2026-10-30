@@ -99,16 +99,14 @@ const es: Dict = {
     texting: 'Mensajes de texto',
     video: 'Videollamadas',
     commissary: 'Cantina',
-    chess_engine: 'Ajedrez contra la computadora',
+    chess: 'Ajedrez',
     chess_human: 'Ajedrez contra personas',
     reading_general: 'Biblioteca de lectura',
-    reading_expanded: 'Lectura ampliada',
     advanced_education: 'Clases avanzadas',
     outdoor_rec: 'Recreación al aire libre',
     legal_materials: 'Biblioteca legal',
     grievances_appeals: 'Quejas y apelaciones',
-    medical_requests: 'Solicitudes médicas',
-    mental_health_requests: 'Solicitudes de salud mental',
+    health_requests: 'Salud y salud mental',
     request_staff: 'Solicitar personal',
     emergency_contact: 'Contacto de emergencia',
     religious_texts: 'Textos religiosos',
@@ -286,8 +284,10 @@ const es: Dict = {
   },
   commissary: {
     title: 'Cantina',
-    balance: 'Su saldo: {{amount}}',
-    weekly: 'Esta semana: quedan {{left}} de {{limit}}',
+    balance: 'Fondos depositados: {{amount}}',
+    weekly: 'Límite de gasto: quedan {{left}} de {{limit}} esta semana',
+    noFunds:
+      'No tiene fondos en su cuenta. Pida a un miembro del personal o familiar que haga un depósito.',
     add: 'Agregar',
     remove: 'Quitar',
     cart: 'Su pedido',
@@ -387,6 +387,8 @@ const es: Dict = {
       ERROR: 'Algo salió mal.',
     },
     title: 'Trabajos opcionales',
+    comingSoon:
+      'En desarrollo — próximamente. Los trabajos serán voluntarios y nunca afectarán su nivel ni sus privilegios.',
     voluntary:
       'Los trabajos son su decisión. No unirse, o salir después, nunca cambia su nivel, puntos ni privilegios.',
     split:
@@ -428,7 +430,7 @@ const es: Dict = {
   },
   video: {
     title: 'Videollamadas',
-    left: 'Le quedan {{n}} minutos de video esta semana',
+    left: 'Le quedan {{n}} minutos de video hoy',
     tab: { now: 'Llamar ahora', schedule: 'Programar' },
     start: 'Iniciar videollamada',
     inCall: 'Videollamada en curso',
@@ -574,6 +576,12 @@ const es: Dict = {
       config: 'Configuración',
       audit: 'Registro de auditoría',
       styleguide: 'Guía de estilo',
+      healthRequests: 'Solicitudes de salud',
+      grievances: 'Quejas',
+      attorneyCalls: 'Llamadas de abogado',
+      commissary: 'Pedidos de comisaría',
+      video: 'Supervisión de video',
+      reentryResources: 'Recursos de reinserción',
     },
     table: {
       region: 'Tabla desplazable',
@@ -819,6 +827,8 @@ const es: Dict = {
         reasonStaffOnly: 'Motivo (solo personal)',
         addEntry: 'Añadir entrada',
         admitResident: 'Admitir al residente',
+        tierCeilingPreview:
+          'Con {{prior}} reingreso(s) previo(s), nivel máximo inicial: T{{tier}}.',
       },
       Mirror: {
         whyAreYouWatching: '¿Por qué lo observa?',
@@ -892,6 +902,7 @@ const es: Dict = {
         notes: 'Notas',
         belowMinimum: 'por debajo del mínimo',
         shortOfSchedule: 'menos de lo programado',
+        notRecorded: 'sin registro',
       },
       Outcomes: {
         '6Months': '6 meses',
@@ -982,7 +993,7 @@ const es: Dict = {
       Schedule: {
         unitSchedule: 'Horario de la unidad',
         eachUnitHasIts:
-          'Cada unidad tiene su propio día: recreo en interiores y al aire libre, programas y visitas. Un día sin cambios usa la plantilla predeterminada. Quién puede inscribirse lo determinan las reglas de acceso (por ejemplo, el tiempo al aire libre en los niveles 9 y 10), no esta página.',
+          'Cada unidad tiene su propio día: recreo en interiores y al aire libre, programas y visitas. Un día sin cambios usa la plantilla predeterminada. Quién puede inscribirse lo determinan las reglas de acceso (por ejemplo, el tiempo al aire libre en el nivel 8 o superior), no esta página.',
         unit: 'Unidad',
         day: 'Día',
         makeTheNextWeek: 'Crear la semana siguiente',
@@ -1053,6 +1064,13 @@ const es: Dict = {
         recordCheckIn: 'Registrar la revisión',
         cancel: 'Cancelar',
         iCheckedIn: 'Ya revisé…',
+        howThisWorks: 'Cómo funciona esto',
+        howDetail1:
+          'Se generan alertas cuando la actividad reciente o los contactos de un residente bajan mucho respecto a su propio patrón habitual, o cuando no ha tenido contacto en varios días.',
+        howDetail2:
+          'El personal de salud solo ve alertas generadas por solicitudes de salud. Los oficiales y supervisores ven todas las alertas.',
+        howDetail3:
+          'Reconocer una alerta significa que se revisó al residente. La alerta queda silenciosa por unos días, pero reaparece si el patrón continúa.',
       },
     },
     lifecycle: {

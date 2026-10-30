@@ -14,7 +14,7 @@ from isd.providers import get_telephony, get_video
 from isd.services.audit import SYSTEM, Actor, append_audit
 from isd.services.config_store import get_current
 from isd.services.entitlement_service import get_entitlements
-from isd.services.usage import call_seconds_today, video_seconds_this_week
+from isd.services.usage import call_seconds_today, video_seconds_today
 
 
 def privileged_types(session: Session) -> set[str]:
@@ -117,7 +117,7 @@ def start_call(
     ent = get_entitlements(session, resident_id, now)
     if medium == "video":
         feature, limit_key = ent.features["video"], "minutes_per_week"
-        used = video_seconds_this_week(session, resident_id, now)
+        used = video_seconds_today(session, resident_id, now)
         if not privileged:  # minutes booked for other calls are spoken for
             used += reserved_video_seconds(session, resident_id, now, except_booking=booking)
         if privileged and not feature.allowed:

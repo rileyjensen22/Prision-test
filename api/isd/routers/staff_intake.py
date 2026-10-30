@@ -66,6 +66,23 @@ def intake_options(
     return intake_service.options(db)
 
 
+@router.get("/intake/ceiling")
+def intake_ceiling(
+    prior_returns: int = 0,
+    staff: Staff = Depends(require_roles("supervisor", "admin")),
+    db: Session = Depends(get_db),
+):
+    """Return the repeat-return tier ceiling for a given prior_returns count."""
+    from isd.engine.ceiling import ceiling_tier
+    from isd.services.config import get_current
+
+    cfg = get_current(db, "repeat_return")
+    N = float(cfg.payload.get("N", 12))
+    p = float(cfg.payload.get("p", 1.5))
+    ceiling = ceiling_tier(prior_returns, N=N, p=p)
+    return {"prior_returns": prior_returns, "ceiling_tier": ceiling, "N": N, "p": p}
+
+
 @router.post("/intake", status_code=201)
 def intake(
     body: IntakeIn,

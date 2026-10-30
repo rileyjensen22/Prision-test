@@ -65,7 +65,7 @@ def test_sandbox_makes_zero_writes_across_many_requests(
         {},
         {"tier": 9, "language": "es", "text_size": "xlarge"},
         {"prior_returns": 12},
-        {"offense_categories": ["PLACEHOLDER_CATEGORY_A", "PLACEHOLDER_CATEGORY_B"]},
+        {"offense_categories": ["SEX_OFFENSE", "VIOLENCE"]},
         {"add_sanctions": [{"code": "CAM_BLOCK", "hours_remaining": 5}, {"code": "DISRUPT"}]},
         {"clear_sanctions": True, "tier": 3, "captions": True},
         {"tier": 99},  # invalid -> 422
@@ -132,7 +132,7 @@ def test_sandbox_applies_overrides_through_the_real_engine(client, kiosk, accoun
     assert timedelta(hours=2.9) < ends - datetime.now(UTC) < timedelta(hours=3.1)
 
     v = sandbox(
-        client, officer, rid, {"offense_categories": ["PLACEHOLDER_CATEGORY_A"], "tier": 8}
+        client, officer, rid, {"offense_categories": ["SEX_OFFENSE"], "tier": 8}
     ).json()
     assert v["features"]["video"]["reasons"][0]["code"] == "OFFENSE_RESTRICTION"
 
@@ -287,7 +287,7 @@ def test_private_screens_are_never_mirrored(client, kiosk, account):
     sid = start(client, sup, rid).json()["session_id"]
     for path in (
         "/resident/feature/legal_materials",
-        "/resident/feature/medical_requests",
+        "/resident/feature/health_requests",
         "/resident/feature/grievances_appeals/new",
     ):
         client.post("/device/screen", json={"path": path}, headers=dh(token))

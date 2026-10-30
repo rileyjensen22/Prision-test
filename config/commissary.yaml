@@ -9,4 +9,4 @@ items:
   - {code: STAMPS, name: {en: "Postage stamps (book)", es: "Sellos postales (libreta)"}, price_cents: 800, category: writing, min_tier: 1, blocked_offense_categories: []}
   - {code: SNACK, name: {en: "Snack pack", es: "Paquete de bocadillos"}, price_cents: 350, category: food, min_tier: 2, blocked_offense_categories: []}
   - {code: COFFEE, name: {en: "Instant coffee", es: "Café instantáneo"}, price_cents: 450, category: food, min_tier: 3, blocked_offense_categories: []}
-  - {code: HEADPHONES, name: {en: "Headphones", es: "Audífonos"}, price_cents: 1200, category: electronics, min_tier: 4, blocked_offense_categories: [PLACEHOLDER_CATEGORY_A]}
+  - {code: HEADPHONES, name: {en: "Headphones", es: "Audífonos"}, price_cents: 1200, category: electronics, min_tier: 4, blocked_offense_categories: [SEX_OFFENSE]}

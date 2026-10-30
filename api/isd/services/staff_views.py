@@ -10,11 +10,16 @@ from isd.engine.authority import needs_supervisor
 from isd.engine.outliers import StaffStats, find_outliers
 from isd.models import (
     Appeal,
+    AttorneyCallRequest,
     AuditLog,
     Cell,
+    CommissaryOrder,
+    DepositImport,
     Device,
     DeviceAssignment,
     Floor,
+    Grievance,
+    HealthRequest,
     Hub,
     Line,
     PointEvent,
@@ -545,6 +550,22 @@ def summary(session: Session, viewer_id: int, viewer_role: str, now: datetime) -
         "below_minimum": len(out_of_cell.below_minimum(session, now)),
         # None until a reconciliation has run (or for roles that do not see finance)
         "ledger_ok": _ledger_ok(session) if show_outliers else None,
+        # New queue counts
+        "open_health_requests": session.execute(
+            select(func.count()).select_from(HealthRequest).where(HealthRequest.status == "open")
+        ).scalar(),
+        "open_grievances": session.execute(
+            select(func.count()).select_from(Grievance).where(Grievance.status == "open")
+        ).scalar(),
+        "pending_attorney_calls": session.execute(
+            select(func.count()).select_from(AttorneyCallRequest).where(AttorneyCallRequest.status == "pending")
+        ).scalar(),
+        "commissary_orders_waiting": session.execute(
+            select(func.count()).select_from(CommissaryOrder).where(CommissaryOrder.status == "new")
+        ).scalar(),
+        "deposit_imports_pending": session.execute(
+            select(func.count()).select_from(DepositImport).where(DepositImport.status == "pending")
+        ).scalar(),
     }
 
 

@@ -40,7 +40,7 @@ function show(
 }
 
 test('the menu offers the computer, and locked human play is a disabled button with a reason', () => {
-  show({ chess_engine: open, chess_human: shut }, () => ({}))
+  show({ chess: open, chess_human: shut }, () => ({}))
   expect(screen.getByTestId('play-engine')).toBeEnabled()
   expect(screen.getByTestId('play-human')).toBeDisabled()
   expect(screen.getByTestId('play-human')).toHaveTextContent('Not available right now')
@@ -48,7 +48,7 @@ test('the menu offers the computer, and locked human play is a disabled button w
 
 test('against the computer: a move is answered, and the game is logged without a network need', async () => {
   const calls: string[] = []
-  show({ chess_engine: open }, (path) => {
+  show({ chess: open }, (path) => {
     calls.push(path)
     if (path === '/device/chess/config')
       return { levels: [{ level: 1, depth: 1, mistake_rate: 0 }] }
@@ -68,7 +68,7 @@ test('against the computer: a move is answered, and the game is logged without a
 })
 
 test('against the computer with no connection: the game still works', async () => {
-  show({ chess_engine: open }, () => {
+  show({ chess: open }, () => {
     throw new Error('offline')
   })
   fireEvent.click(screen.getByTestId('play-engine'))
@@ -95,7 +95,7 @@ const match = (over: object) => ({
 
 test('against a resident: only handles are shown, a move is sent as coordinates, and nothing else is sendable', async () => {
   const sent: { path: string; body: string }[] = []
-  show({ chess_human: open, chess_engine: open }, (path, init) => {
+  show({ chess_human: open, chess: open }, (path, init) => {
     if (init?.method === 'POST') sent.push({ path, body: String(init.body) })
     return match({})
   })
@@ -117,7 +117,7 @@ test('against a resident: only handles are shown, a move is sent as coordinates,
 })
 
 test('while waiting for an opponent the resident can stop waiting', async () => {
-  show({ chess_human: open, chess_engine: open }, () => match({ status: 'waiting', fen: null }))
+  show({ chess_human: open, chess: open }, () => match({ status: 'waiting', fen: null }))
   fireEvent.click(screen.getByTestId('play-human'))
   expect(await screen.findByTestId('cancel-wait')).toBeInTheDocument()
   expect(screen.getByTestId('chess-status')).toHaveTextContent('Waiting for another player')
@@ -125,7 +125,7 @@ test('while waiting for an opponent the resident can stop waiting', async () => 
 
 test('a draw offer from the other player can be accepted or declined', async () => {
   vi.useRealTimers()
-  show({ chess_human: open, chess_engine: open }, () => match({ draw_offer: 'them' }))
+  show({ chess_human: open, chess: open }, () => match({ draw_offer: 'them' }))
   fireEvent.click(screen.getByTestId('play-human'))
   expect(await screen.findByTestId('draw-accept')).toBeInTheDocument()
   await act(async () => {})

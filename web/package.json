@@ -13,6 +13,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@testing-library/dom": "^10.4.2",
     "chess.js": "1.4.0",
     "clsx": "^2.1.1",
     "i18next": "^26.5.3",

@@ -46,6 +46,7 @@ class TierOut(BaseModel):
     next_tier: int | None  # None at tier 10
     points_to_next: int | None
     capped_by_ceiling: bool  # next tier exists but the repeat-return ceiling blocks it
+    max_tier_override: int | None = None  # staff-set hard cap; None = no manual override
 
 
 class AllowanceOut(BaseModel):

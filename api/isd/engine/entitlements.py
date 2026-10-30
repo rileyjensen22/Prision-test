@@ -70,7 +70,7 @@ class ResidentFacts:
     sanctions: tuple[SanctionFact, ...] = ()
     blocked_contact_ids: tuple[int, ...] = ()
     device_locks: tuple[DeviceLockFact, ...] = ()
-    chess_human_off: bool = False  # staff switch (facility, unit or resident)
+    chess_human_off: bool = False  # staff switch (facility, unit or resident) — blocks human vs human only
 
 
 @dataclass(frozen=True)
@@ -97,21 +97,19 @@ def _tier_grant(feature: str, tier: int, cfg: EngineConfig) -> dict[str, int] | 
         case "texting":
             return {"messages_per_day": row.texts_day} if row.texts_day > 0 else None
         case "video":
-            return {"minutes_per_week": row.video_min_week} if row.video_min_week > 0 else None
+            return {"minutes_per_day": row.video_min_day} if row.video_min_day > 0 else None
         case "commissary":
             usd = row.commissary_usd_week
             return {"dollars_per_week": usd} if usd > 0 else None
-        case "chess_engine":
-            return {} if row.chess in ("engine", "human") else None
+        case "chess":
+            return {}  # chess (engine) available at every tier
         case "chess_human":
-            return {} if row.chess == "human" else None
+            return {}  # human play also available at every tier; only blocked by staff switch or sanction
         case "outdoor_rec":
-            hours = row.outdoor_rec_h_day
-            return {"minutes_per_day": hours * 60} if hours > 0 else None
+            mins = row.outdoor_rec_min_day
+            return {"minutes_per_day": mins} if mins > 0 else None
         case "reading_general":
             return {} if tier >= cfg.general_reading_from_tier else None
-        case "reading_expanded":
-            return {} if tier >= cfg.expanded_catalog_from_tier else None
         case "advanced_education":
             return {} if tier >= cfg.advanced_education_from_tier else None
     raise ValueError(f"unknown feature {feature}")

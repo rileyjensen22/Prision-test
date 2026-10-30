@@ -24,7 +24,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from isd.crypto import EncryptedText, blind_index
 
-ROLES = ("officer", "supervisor", "admin", "auditor")
+ROLES = ("officer", "supervisor", "admin", "auditor", "health_staff", "legal_liaison", "commissary_clerk")
 CONTACT_TYPES = ("family", "friend", "attorney")
 SANCTION_STATUSES = ("pending", "active", "rejected", "expired", "overturned")
 APPEAL_STATUSES = ("open", "upheld", "overturned")
@@ -93,6 +93,8 @@ class Resident(Base):
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Staff switch for human chess: None follows the unit and facility setting.
     chess_human: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    # Staff-settable hard cap on earned tier (repeat-return ceiling is automatic; this is manual).
+    max_tier_override: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class Site(Base):
@@ -423,11 +425,16 @@ class QuizAttempt(Base):
 
 class CommissaryOrder(Base):
     __tablename__ = "commissary_orders"
+    __table_args__ = (CheckConstraint("status IN ('new','packed','delivered','refunded')", name="ck_co_status"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
     client_id: Mapped[str] = mapped_column(String(64), unique=True)
     total_cents: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(20), default="new", server_default="new")
+    staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    refund_reason: Mapped[str] = mapped_column(Text, default="", server_default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class CommissaryOrderLine(Base):
@@ -1030,6 +1037,118 @@ class SweepState(Base):
     __tablename__ = "sweep_state"
     name: Mapped[str] = mapped_column(String(32), primary_key=True)
     last_run_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class HealthRequest(Base):
+    """Medical or mental-health request from a resident. Hidden from officers."""
+
+    __tablename__ = "health_requests"
+    __table_args__ = (
+        CheckConstraint("kind IN ('medical','mental_health')", name="ck_hr_kind"),
+        CheckConstraint("status IN ('open','triaged','scheduled','seen','closed')", name="ck_hr_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    description: Mapped[str] = mapped_column(Text, default="", server_default="")
+    status: Mapped[str] = mapped_column(String(20), default="open", server_default="open")
+    staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    staff_note: Mapped[str] = mapped_column(Text, default="", server_default="")
+    created_at: Mapped[datetime] = _now()
+    updated_at: Mapped[datetime] = _now()
+
+
+class Grievance(Base):
+    """Resident grievance. Decided by supervisor/admin only (no dedicated coordinator)."""
+
+    __tablename__ = "grievances"
+    __table_args__ = (
+        CheckConstraint("status IN ('open','under_review','resolved','closed')", name="ck_griev_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    category: Mapped[str] = mapped_column(String(50), default="general", server_default="general")
+    description: Mapped[str] = mapped_column(Text, default="", server_default="")
+    status: Mapped[str] = mapped_column(String(20), default="open", server_default="open")
+    assigned_to: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    response: Mapped[str] = mapped_column(Text, default="", server_default="")
+    due_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = _now()
+    updated_at: Mapped[datetime] = _now()
+
+
+class AttorneyCallRequest(Base):
+    """Resident request for a privileged attorney call. Approved by legal_liaison/supervisor/admin.
+    INVARIANT 6: no content is ever recorded for attorney calls."""
+
+    __tablename__ = "attorney_call_requests"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending','approved','scheduled','completed','denied')",
+            name="ck_acr_status",
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resident_id: Mapped[int] = mapped_column(ForeignKey("residents.id"), index=True)
+    contact_id: Mapped[int | None] = mapped_column(ForeignKey("contacts.id"), nullable=True)
+    attorney_name: Mapped[str] = mapped_column(String(200), default="", server_default="")
+    attorney_phone: Mapped[str] = mapped_column(String(30), default="", server_default="")
+    requested_at: Mapped[datetime] = _now()
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", server_default="pending")
+    staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    staff_note: Mapped[str] = mapped_column(Text, default="", server_default="")
+
+
+class DepositImport(Base):
+    """Batch deposit import from an outside vendor. Preview before apply; never enter by hand."""
+
+    __tablename__ = "deposit_imports"
+    __table_args__ = (
+        CheckConstraint("status IN ('pending','applied','rejected')", name="ck_di_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    filename: Mapped[str] = mapped_column(String(255))
+    imported_by: Mapped[int] = mapped_column(ForeignKey("staff.id"))
+    row_count: Mapped[int] = mapped_column(Integer, default=0)
+    total_cents: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(20), default="pending", server_default="pending")
+    error_detail: Mapped[str] = mapped_column(Text, default="", server_default="")
+    created_at: Mapped[datetime] = _now()
+    applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class LibraryItem(Base):
+    """A book or document in the resident library. Requires two-person approval before visible."""
+
+    __tablename__ = "library_items"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(300))
+    author: Mapped[str] = mapped_column(String(200), default="", server_default="")
+    category: Mapped[str] = mapped_column(String(50), default="general", server_default="general")
+    language: Mapped[str] = mapped_column(String(10), default="en", server_default="en")
+    reading_level: Mapped[str] = mapped_column(String(20), default="standard", server_default="standard")
+    content_text: Mapped[str] = mapped_column(Text, default="", server_default="")
+    approved: Mapped[bool] = mapped_column(Boolean, default=False)
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
+    uploaded_by: Mapped[int] = mapped_column(ForeignKey("staff.id"))
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = _now()
+    updated_at: Mapped[datetime] = _now()
+
+
+class ReentryResource(Base):
+    """Staff-editable list of reentry resources shown to residents approaching release."""
+
+    __tablename__ = "reentry_resources"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(300))
+    description: Mapped[str] = mapped_column(Text, default="", server_default="")
+    phone: Mapped[str] = mapped_column(String(50), default="", server_default="")
+    address: Mapped[str] = mapped_column(String(500), default="", server_default="")
+    category: Mapped[str] = mapped_column(String(50), default="general", server_default="general")
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = _now()
 
 
 @event.listens_for(Contact, "before_insert")

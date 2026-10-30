@@ -8,7 +8,10 @@ import { ResidentProvider, useResident } from './ResidentContext'
 import { Calls } from './features/Calls'
 import { Commissary } from './features/Commissary'
 import { Contacts } from './features/Contacts'
+import { Grievances } from './features/Grievances'
+import { HealthRequests } from './features/HealthRequests'
 import { Jobs } from './features/Jobs'
+import { LawLibrary } from './features/LawLibrary'
 import { Reading } from './features/Reading'
 import { Rec } from './features/Rec'
 import { Texting } from './features/Texting'
@@ -107,14 +110,16 @@ function Shell() {
             <Route path="feature/basic_education" element={<Education />} />
             <Route path="feature/advanced_education" element={<Education />} />
             <Route path="feature/texting" element={<Texting />} />
-            <Route path="feature/chess_engine" element={<Chess />} />
+            <Route path="feature/chess" element={<Chess />} />
             <Route path="feature/chess_human" element={<Chess />} />
             <Route path="feature/video" element={<Video />} />
             <Route path="feature/contact_requests" element={<Contacts />} />
             <Route path="feature/reading_general" element={<Reading />} />
-            <Route path="feature/reading_expanded" element={<Reading />} />
             <Route path="feature/outdoor_rec" element={<Rec />} />
-            <Route path="feature/out_of_cell_minimum" element={<Rec />} />
+            <Route path="feature/legal_materials" element={<LawLibrary />} />
+            <Route path="feature/grievances_appeals" element={<Grievances />} />
+            <Route path="feature/health_requests" element={<HealthRequests />} />
+            <Route path="feature/attorney_calls" element={<Calls />} />
             <Route path="jobs" element={<Jobs />} />
             <Route path="course/:code" element={<Course />} />
             <Route path="reentry" element={<Reentry />} />

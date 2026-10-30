@@ -25,9 +25,10 @@ interface Day {
 
 export function Rec() {
   const { t } = useTranslation()
-  const { request } = useResident()
+  const { request, features } = useResident()
   const [day, setDay] = useState<Day | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const outdoorAllowed = features['outdoor_rec']?.allowed === true
   const load = () =>
     request<Day>('/device/rec')
       .then(setDay)
@@ -51,18 +52,25 @@ export function Rec() {
     await load()
   }
 
+  const visibleSlots = (day?.slots ?? []).filter((s) => s.kind !== 'outdoor' || outdoorAllowed)
+
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <BackLink />
       <h1 className="text-h1 font-bold">{t('rec.title')}</h1>
       {day && <p data-testid="rec-baseline">{t('rec.baseline', { n: day.baseline_minutes })}</p>}
+      {!outdoorAllowed && (
+        <p className="text-sm text-ink-soft" data-testid="outdoor-locked-note">
+          {t('code.TIER_LOCKED', { tier: 8 })} — {t('feature.outdoor_rec')}
+        </p>
+      )}
       {error && (
         <Notice tone="danger" role="alert" data-testid="rec-error">
           {error}
         </Notice>
       )}
       <ul className="space-y-3">
-        {(day?.slots ?? []).map((s) => (
+        {visibleSlots.map((s) => (
           <li key={`${s.slot}-${s.kind}`}>
             <Card
               data-testid={`slot-${s.slot}`}

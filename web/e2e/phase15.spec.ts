@@ -25,7 +25,7 @@ test('intake: a supervisor admits a resident with contacts, a category and a rel
   await form.getByLabel('Prior returns').fill('2')
   await form.getByLabel('Source of that number').fill('synthetic records')
   await form.getByLabel('Release date').fill(day(90))
-  await form.getByLabel(/PLACEHOLDER_CATEGORY_A/).check()
+  await form.getByLabel(/SEX_OFFENSE/).check()
   await form.getByRole('button', { name: 'Add contact' }).click()
   await form.getByLabel('Contact 1 name').fill('Pat Family')
   await form.getByLabel('Contact 1 number').fill('555-0142')

@@ -14,16 +14,23 @@ from isd.routers import (
     device_features,
     mock,
     staff_accounts,
+    staff_attorney,
     staff_chess,
     staff_comms,
+    staff_commissary,
     staff_extras,
     staff_fleet,
     staff_floor,
+    staff_grievances,
+    staff_health,
     staff_intake,
+    staff_library,
     staff_lifecycle,
     staff_ops,
     staff_outcomes,
+    staff_reentry,
     staff_residents,
+    staff_video,
     view_as,
 )
 
@@ -62,6 +69,13 @@ app.include_router(staff_accounts.router)
 app.include_router(staff_chess.router)
 app.include_router(staff_lifecycle.router)
 app.include_router(staff_outcomes.router)
+app.include_router(staff_health.router)
+app.include_router(staff_grievances.router)
+app.include_router(staff_attorney.router)
+app.include_router(staff_commissary.router)
+app.include_router(staff_library.router)
+app.include_router(staff_video.router)
+app.include_router(staff_reentry.router)
 
 
 @app.get("/health")

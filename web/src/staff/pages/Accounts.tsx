@@ -167,7 +167,15 @@ export default function Accounts() {
           <label className="block">
             {t('staff.accounts.role')}
             <select value={role} onChange={(e) => setRole(e.target.value)} className="mt-1 block">
-              {['officer', 'supervisor', 'admin', 'auditor'].map((r) => (
+              {[
+                'officer',
+                'supervisor',
+                'admin',
+                'auditor',
+                'health_staff',
+                'legal_liaison',
+                'commissary_clerk',
+              ].map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>

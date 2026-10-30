@@ -15,11 +15,8 @@ test('reading: general texts at tier 1, expanded at tier 4', async ({ page }) =>
   await expect(page.getByTestId('reading-preamble')).toHaveAttribute('data-allowed', 'false')
   await expect(page.getByTestId('reading-preamble')).toContainText('Unlocks at Tier 4')
 
-  await openKiosk(page, 'tess', '/resident/feature/reading_expanded')
-  await page.getByTestId('reading-preamble').getByRole('button', { name: 'Read' }).click()
-  await expect(page.getByTestId('reading-text')).toContainText('We the People')
-  await page.getByRole('button', { name: /Back to the list/ }).click()
-  await expect(page.getByTestId('reading-gettysburg')).toHaveAttribute('data-allowed', 'true')
+  // reading_expanded removed: all general texts are available from tier 1
+  await expect(page.getByTestId('reading-tortoise-hare')).toHaveAttribute('data-allowed', 'true')
 })
 
 test('jobs are optional and joining or leaving changes nothing about the resident', async ({

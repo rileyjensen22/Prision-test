@@ -4,7 +4,6 @@ import re
 
 CATALOG_FEATURE = {
     "general": "reading_general",
-    "expanded": "reading_expanded",
     "legal": "legal_materials",
     "religious": "religious_texts",
 }

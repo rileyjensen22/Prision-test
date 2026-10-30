@@ -40,7 +40,7 @@ def _allowed(session: Session, resident_id: int, feature: str, now: datetime) ->
 
 # ---------------- engine games (played on the device, logged here) ----------------
 def new_engine_game(session: Session, resident_id: int, level: int, now: datetime) -> ChessGame:
-    if not _allowed(session, resident_id, "chess_engine", now):
+    if not _allowed(session, resident_id, "chess", now):
         raise ChessDenied("FEATURE_LOCKED", "this kind of game is locked")
     if level not in {lv["level"] for lv in levels(session)}:
         raise ChessDenied("BAD_LEVEL", "unknown level")

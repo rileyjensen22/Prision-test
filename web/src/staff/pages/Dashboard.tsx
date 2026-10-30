@@ -17,6 +17,11 @@ interface Summary {
   welfare_escalated: number
   below_minimum: number
   ledger_ok: boolean | null
+  open_health_requests: number
+  open_grievances: number
+  pending_attorney_calls: number
+  commissary_orders_waiting: number
+  deposit_imports_pending: number
 }
 interface Ev {
   seq: number
@@ -127,6 +132,34 @@ export default function Dashboard() {
             label="Staff outlier flags"
             value={s.outlier_flags}
             to="/staff/outliers"
+            warn
+          />
+          <Stat
+            id="stat-health"
+            label="Open health requests"
+            value={s.open_health_requests}
+            to="/staff/health-requests"
+            warn
+          />
+          <Stat
+            id="stat-grievances"
+            label="Open grievances"
+            value={s.open_grievances}
+            to="/staff/grievances"
+            warn
+          />
+          <Stat
+            id="stat-attorney"
+            label="Pending attorney calls"
+            value={s.pending_attorney_calls}
+            to="/staff/attorney-calls"
+            warn
+          />
+          <Stat
+            id="stat-commissary"
+            label="Commissary orders waiting"
+            value={s.commissary_orders_waiting}
+            to="/staff/commissary"
             warn
           />
         </div>

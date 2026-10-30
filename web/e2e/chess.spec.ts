@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { apiHeaders, openKiosk, staffLogin, token } from './helpers'
 
 test('chess against the computer works with no connection', async ({ context, page }) => {
-  await openKiosk(page, 'cha', '/resident/feature/chess_engine')
+  await openKiosk(page, 'cha', '/resident/feature/chess')
   await page.getByTestId('level-1').click()
   await page.getByTestId('play-engine').click()
   await expect(page.getByTestId('chess-status')).toHaveText('Your move')

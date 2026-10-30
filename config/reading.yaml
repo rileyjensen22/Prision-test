@@ -1,5 +1,5 @@
 # Bundled public-domain or original texts (nothing is fetched from outside).
-# catalog: general (tier 1) | expanded (tier 4) | legal | religious (the last two are protected baseline, never locked).
+# catalog: general (tier 1) | legal | religious (the last two are protected baseline, never locked).
 # source: the approved_content_sources entry this text comes from. Blank lines in `text` start a new page.
 # `variants` hold other languages and the easy-reading (simple) level of the same text; the reader picks
 # the best match for the resident's language and reading level (staff set both).
@@ -55,7 +55,7 @@ items:
   - id: preamble
     title: "Preamble to the Constitution of the United States"
     author: "United States, 1787 (public domain)"
-    catalog: expanded
+    catalog: general
     source: Bundled public-domain texts
     language: en
     text: "We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility, provide for the common defence, promote the general Welfare, and secure the Blessings of Liberty to ourselves and our Posterity, do ordain and establish this Constitution for the United States of America."
@@ -68,7 +68,7 @@ items:
   - id: gettysburg
     title: "The Gettysburg Address (opening)"
     author: "Abraham Lincoln, 1863 (public domain)"
-    catalog: expanded
+    catalog: general
     source: Bundled public-domain texts
     language: en
     text: "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal."

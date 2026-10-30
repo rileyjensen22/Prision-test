@@ -45,12 +45,12 @@ export function Chess() {
   const navigate = useNavigate()
   const [mode, setMode] = useState<Mode>('menu')
   const [level, setLevel] = useState(2)
-  const engineOk = features['chess_engine']?.allowed === true
+  const engineOk = features['chess']?.allowed === true
   const humanOk = features['chess_human']?.allowed === true
 
   useEffect(() => {
-    if (features['chess_engine'] && !engineOk && !humanOk)
-      navigate('/resident/locks?feature=chess_engine', { replace: true })
+    if (features['chess'] && !engineOk && !humanOk)
+      navigate('/resident/locks?feature=chess', { replace: true })
   }, [features, engineOk, humanOk, navigate])
 
   if (mode === 'engine') return <EngineGame level={level} onExit={() => setMode('menu')} />
@@ -133,7 +133,7 @@ function EngineGame({ level, onExit }: { level: number; onExit: () => void }) {
   )
   const logId = useRef<number | null>(null)
   const levels = useRef<Level[]>(FALLBACK_LEVELS)
-  const allowed = features['chess_engine']?.allowed === true
+  const allowed = features['chess']?.allowed === true
 
   useEffect(() => {
     // Logging and the level list are best effort: the game itself never needs the network.

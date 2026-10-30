@@ -94,16 +94,14 @@ const en = {
     texting: 'Text messages',
     video: 'Video calls',
     commissary: 'Commissary',
-    chess_engine: 'Chess vs computer',
+    chess: 'Chess',
     chess_human: 'Chess vs people',
     reading_general: 'Reading library',
-    reading_expanded: 'Expanded reading',
     advanced_education: 'Advanced classes',
     outdoor_rec: 'Outdoor recreation',
     legal_materials: 'Law library',
     grievances_appeals: 'Grievances and appeals',
-    medical_requests: 'Medical requests',
-    mental_health_requests: 'Mental health requests',
+    health_requests: 'Health and mental health',
     request_staff: 'Request staff',
     emergency_contact: 'Emergency contact',
     religious_texts: 'Religious texts',
@@ -278,8 +276,9 @@ const en = {
   },
   commissary: {
     title: 'Commissary',
-    balance: 'Your balance: {{amount}}',
-    weekly: 'This week: {{left}} left of {{limit}}',
+    balance: 'Deposited funds: {{amount}}',
+    weekly: 'Spending cap: {{left}} left of {{limit}} this week',
+    noFunds: 'No funds in your account. Ask staff or a family member to make a deposit.',
     add: 'Add',
     remove: 'Remove',
     cart: 'Your order',
@@ -330,6 +329,8 @@ const en = {
   },
   jobs: {
     title: 'Optional jobs',
+    comingSoon:
+      'Work in progress — coming soon. Jobs will be voluntary and will never affect your tier or privileges.',
     voluntary:
       'Jobs are your choice. Not joining, or leaving later, never changes your tier, points, or privileges.',
     split:
@@ -412,7 +413,7 @@ const en = {
   },
   video: {
     title: 'Video calls',
-    left: '{{n}} video minutes left this week',
+    left: '{{n}} video minutes left today',
     tab: { now: 'Call now', schedule: 'Schedule' },
     start: 'Start video call',
     inCall: 'Video call in progress',
@@ -554,6 +555,12 @@ const en = {
       config: 'Config',
       audit: 'Audit log',
       styleguide: 'Style guide',
+      healthRequests: 'Health requests',
+      grievances: 'Grievances',
+      attorneyCalls: 'Attorney calls',
+      commissary: 'Commissary orders',
+      video: 'Video oversight',
+      reentryResources: 'Reentry resources',
     },
     table: {
       region: 'Scrollable table',
@@ -794,6 +801,7 @@ const en = {
         reasonStaffOnly: 'Reason (staff only)',
         addEntry: 'Add entry',
         admitResident: 'Admit resident',
+        tierCeilingPreview: 'With {{prior}} prior return(s), max starting tier: T{{tier}}.',
       },
       Mirror: {
         whyAreYouWatching: 'Why are you watching?',
@@ -867,6 +875,7 @@ const en = {
         notes: 'Notes',
         belowMinimum: 'below minimum',
         shortOfSchedule: 'short of schedule',
+        notRecorded: 'not recorded',
       },
       Outcomes: {
         '6Months': '6 months',
@@ -957,7 +966,7 @@ const en = {
       Schedule: {
         unitSchedule: 'Unit schedule',
         eachUnitHasIts:
-          'Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no changes uses the default template. Who can sign up comes from the entitlement rules (for example outdoor time at tiers 9 and 10), not from this page.',
+          'Each unit has its own day: indoor and outdoor recreation, programs and visits. A day with no changes uses the default template. Who can sign up comes from the entitlement rules (for example outdoor time at Tier 8+), not from this page.',
         unit: 'Unit',
         day: 'Day',
         makeTheNextWeek: 'Make the next week',
@@ -1028,6 +1037,13 @@ const en = {
         recordCheckIn: 'Record check-in',
         cancel: 'Cancel',
         iCheckedIn: 'I checked in…',
+        howThisWorks: 'How this works',
+        howDetail1:
+          "Flags are raised when a resident's recent activity or contact drops sharply versus their own baseline, or when they have had no contact for several days.",
+        howDetail2:
+          'Health staff see only health-triggered flags. Officers and supervisors see all flags.',
+        howDetail3:
+          'Acknowledging a flag means you checked in. The flag quiets for a few days, but reappears if the pattern continues.',
       },
     },
     lifecycle: {

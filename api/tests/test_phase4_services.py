@@ -359,7 +359,7 @@ def test_item_restrictions_by_tier_and_offense(owner, seeded, make_resident):
     owner.add(
         OffenseFlag(
             resident_id=rid,
-            offense_category="PLACEHOLDER_CATEGORY_A",
+            offense_category="SEX_OFFENSE",
             added_at=NOW - timedelta(days=1),
         )
     )

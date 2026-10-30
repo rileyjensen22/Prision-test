@@ -115,7 +115,7 @@ def test_significant_sanction_needs_other_supervisor_and_evidence(
     assert e.value.code == "SAME_PERSON"
     sanctions.confirm_sanction(owner, sup2, s.id, NOW + timedelta(hours=1))
     ent = get_entitlements(owner, rid, NOW + timedelta(hours=2))
-    assert not any(ent.allowed(f) for f in ("calls", "commissary", "texting", "chess_engine"))
+    assert not any(ent.allowed(f) for f in ("calls", "commissary", "texting", "chess"))
     assert ent.allowed("attorney_calls") and ent.allowed("basic_education")
     assert all(r.code == "CAM_BLOCK" for r in ent.features["calls"].reasons)
 
@@ -186,7 +186,7 @@ def test_db_rejects_self_confirmation(owner, seeded, make_resident, make_staff):
 def test_get_entitlements_is_read_only(owner, seeded, make_resident):
     rid = make_resident(prior_returns=3)
     owner.flush()
-    owner.add(OffenseFlag(resident_id=rid, offense_category="PLACEHOLDER_CATEGORY_A", added_at=NOW))
+    owner.add(OffenseFlag(resident_id=rid, offense_category="SEX_OFFENSE", added_at=NOW))
     owner.flush()
     before = (_count(owner, AuditLog), _count(owner, TierHistory), _count(owner, PointEvent))
     e = get_entitlements(owner, rid, NOW)
@@ -199,7 +199,7 @@ def test_get_entitlements_is_read_only(owner, seeded, make_resident):
 
 def test_offense_restriction_shown_with_reason_text(owner, seeded, make_resident):
     rid = make_resident()
-    owner.add(OffenseFlag(resident_id=rid, offense_category="PLACEHOLDER_CATEGORY_B", added_at=NOW))
+    owner.add(OffenseFlag(resident_id=rid, offense_category="VIOLENCE", added_at=NOW))
     owner.flush()
     for _ in range(3):
         points.add_point_event(owner, SYSTEM, rid, "program_certificate", NOW)

@@ -4,8 +4,7 @@ BASELINE_FEATURES = frozenset(
     {
         "legal_materials",
         "grievances_appeals",
-        "medical_requests",
-        "mental_health_requests",
+        "health_requests",  # merged medical + mental health requests
         "request_staff",
         "emergency_contact",
         "religious_texts",
@@ -23,10 +22,9 @@ NON_BASELINE_FEATURES = frozenset(
         "texting",
         "video",
         "commissary",
-        "chess_engine",
-        "chess_human",
+        "chess",        # access to chess page; available at every tier
+        "chess_human",  # human vs human play only; blocked by staff chess_human_off switch
         "reading_general",
-        "reading_expanded",
         "advanced_education",
         "outdoor_rec",
     }
@@ -39,7 +37,7 @@ SCOPES: dict[str, frozenset[str]] = {
     "communication": frozenset({"calls", "texting", "video"}),
     "commissary": frozenset({"commissary"}),
     "video": frozenset({"video"}),
-    "games": frozenset({"chess_human"}),  # blocks human play only; the engine stays open
+    "games": frozenset({"chess", "chess_human"}),
     "all_non_baseline": NON_BASELINE_FEATURES,
 }
 

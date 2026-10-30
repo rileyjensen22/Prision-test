@@ -36,6 +36,7 @@ export interface Tier {
   next_tier: number | null
   points_to_next: number | null
   capped_by_ceiling: boolean
+  max_tier_override: number | null
 }
 
 export interface Allowance {

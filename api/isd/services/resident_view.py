@@ -27,13 +27,13 @@ from isd.services.usage import (
     call_seconds_today,
     messages_sent_today,
     spent_cents_this_week,
-    video_seconds_this_week,
+    video_seconds_today,
 )
 
 _ALLOWANCES = [  # feature, limit key, period, unit
     ("calls", "minutes_per_day", "day", "minutes"),
     ("texting", "messages_per_day", "day", "messages"),
-    ("video", "minutes_per_week", "week", "minutes"),
+    ("video", "minutes_per_day", "day", "minutes"),
     ("commissary", "dollars_per_week", "week", "dollars"),
     ("outdoor_rec", "minutes_per_day", "day", "minutes"),
 ]
@@ -82,7 +82,7 @@ def build_resident_view(
         "calls": minutes_used(call_seconds_today(session, resident_id, at_time)),
         "commissary": spent_cents_this_week(session, resident_id, at_time) / 100,
         "texting": messages_sent_today(session, resident_id, at_time),
-        "video": minutes_used(video_seconds_this_week(session, resident_id, at_time)),
+        "video": minutes_used(video_seconds_today(session, resident_id, at_time)),
     }
     return ResidentView(
         resident_code=resident.code,
@@ -123,6 +123,7 @@ def _tier(session, resident_id, ent, cfg, at_time, overrides=None) -> TierOut:
         points = cfg.thresholds[overrides.tier - 1]  # show the points a tier-N resident would have
     earned = ent.earned_tier
     nxt = earned + 1 if earned < 10 else None
+    resident = session.get(Resident, resident_id)
     return TierOut(
         earned=earned,
         ceiling=ent.ceiling_tier,
@@ -132,6 +133,7 @@ def _tier(session, resident_id, ent, cfg, at_time, overrides=None) -> TierOut:
         points_to_next=max(0, cfg.thresholds[earned] - points) if nxt else None,
         # True whenever the resident has earned everything their ceiling allows
         capped_by_ceiling=ent.ceiling_tier < 10 and ent.earned_tier >= ent.ceiling_tier,
+        max_tier_override=resident.max_tier_override if resident else None,
     )
 
 
