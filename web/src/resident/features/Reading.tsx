@@ -30,7 +30,17 @@ function initialSize(): number {
   }
 }
 
-type Shown = CatalogItem & { savedOffline?: boolean }
+type Shown = CatalogItem & { savedOffline?: boolean; category?: string }
+
+const CATEGORIES = ['all', 'fiction', 'history', 'education', 'other'] as const
+type Category = (typeof CATEGORIES)[number]
+
+function guessCategory(item: CatalogItem): string {
+  const title = item.title.toLowerCase()
+  if (title.includes('history') || title.includes('declaration') || title.includes('war')) return 'history'
+  if (title.includes('educati') || title.includes('cours') || title.includes('math') || title.includes('science')) return 'education'
+  return 'other'
+}
 
 export function Reading() {
   const { t } = useTranslation()
@@ -38,6 +48,7 @@ export function Reading() {
   const [items, setItems] = useState<CatalogItem[] | null>(loadCatalog())
   const [open, setOpen] = useState<{ book: Book; feature: string } | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [filter, setFilter] = useState<Category>('all')
 
   const load = useCallback(() => {
     request<CatalogItem[]>('/device/reading')
@@ -79,8 +90,14 @@ export function Reading() {
       />
     )
 
-  const shown: Shown[] =
+  const allShown: Shown[] =
     items === null ? [] : online ? items : offlineCatalog(items, savedIds(), features)
+  const shown = filter === 'all'
+    ? allShown
+    : allShown.filter((i) => {
+        const cat = (i as Shown & { category?: string }).category ?? guessCategory(i)
+        return cat === filter
+      })
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -95,6 +112,21 @@ export function Reading() {
       {items === null && online === false && <p>{t('reading.notSaved')}</p>}
       {!items && !notice && <LoadingState />}
       {items?.length === 0 && <EmptyState title={t('reading.none')} />}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setFilter(cat)}
+            className={`rounded-full border px-4 py-1.5 text-sm font-bold capitalize transition-colors ${
+              filter === cat
+                ? 'border-primary bg-primary text-primary-ink'
+                : 'border-line bg-surface hover:border-primary'
+            }`}
+          >
+            {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+          </button>
+        ))}
+      </div>
       <ul className="space-y-3">
         {shown.map((i) => (
           <li key={i.id}>

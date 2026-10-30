@@ -275,3 +275,66 @@ def set_job_active(
     except jobs.JobError as e:
         raise HTTPException(404, str(e)) from e
     return {"id": row.id, "active": row.active}
+
+
+# ─── Deposit import by resident code ────────────────────────────────────────
+
+class DepositImportRow(BaseModel):
+    resident_code: str
+    amount_cents: int = Field(ge=1, le=100_000_00)
+    source: str = Field(min_length=1)
+    note: str | None = None
+
+
+class DepositImportIn(BaseModel):
+    rows: list[DepositImportRow]
+
+
+DEPOSIT_IMPORT_ROLES = require_roles("supervisor", "admin")
+
+
+@router.post("/finance/deposit-import", status_code=201)
+def deposit_import(
+    body: DepositImportIn,
+    staff: Staff = Depends(DEPOSIT_IMPORT_ROLES),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Import a batch of deposits identified by resident code. Each row is an append-only ledger entry."""
+    from datetime import UTC, datetime as _dt
+    from isd.models import Resident as R, TrustLedger
+    from isd.services.audit import append_audit
+
+    now = _dt.now(UTC)
+    imported = 0
+    for i, row in enumerate(body.rows):
+        res = db.execute(select(R).where(R.code == row.resident_code)).scalar()
+        if res is None:
+            raise HTTPException(422, f"Row {i}: resident code {row.resident_code!r} not found")
+        from sqlalchemy import func as _func
+        bal = db.execute(
+            select(_func.coalesce(_func.max(TrustLedger.balance_after_cents), 0))
+            .where(TrustLedger.resident_id == res.id)
+        ).scalar() or 0
+        entry = TrustLedger(
+            resident_id=res.id,
+            entry_type="deposit",
+            amount_cents=row.amount_cents,
+            balance_after_cents=bal + row.amount_cents,
+            memo=f"{row.source}" + (f" — {row.note}" if row.note else ""),
+            created_by=staff.id,
+            created_at=now,
+        )
+        db.add(entry)
+        db.flush()
+        imported += 1
+    total = sum(r.amount_cents for r in body.rows)
+    append_audit(
+        db,
+        Actor(staff.id, staff.role),
+        "deposit_import_applied",
+        "batch_deposit",
+        imported,
+        payload={"row_count": imported, "total_cents": total},
+    )
+    db.commit()
+    return {"imported": imported, "total_cents": total}

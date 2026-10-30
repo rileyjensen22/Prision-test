@@ -11,6 +11,7 @@ from isd.auth import require_roles
 from isd.db import get_db
 from isd.models import Device, DeviceAssignment, Resident, Staff
 from isd.services.audit import Actor, append_audit
+from isd.services import points as points_svc
 
 router = APIRouter(prefix="/staff", tags=["staff"])
 
@@ -50,6 +51,73 @@ def update_settings(
             payload={"changes": changes, "reason": body.reason},
         )
     return {"changed": sorted(changes)}
+
+
+class PointsIn(BaseModel):
+    kind: str = Field(pattern="^staff_commendation$")
+    reason: str = Field(min_length=5)
+
+
+@router.post("/residents/{resident_id}/points", status_code=201)
+def add_commendation(
+    resident_id: int,
+    body: PointsIn,
+    staff: Staff = Depends(require_roles("officer", "supervisor", "admin")),
+    db: Session = Depends(get_db),
+) -> dict:
+    r = db.get(Resident, resident_id)
+    if r is None:
+        raise HTTPException(404, "resident not found")
+    now = datetime.now(UTC)
+    actor = Actor(staff.id, staff.role)
+    try:
+        ev = points_svc.add_point_event(db, actor, resident_id, "staff_commendation", now, reason=body.reason)
+    except (ValueError, PermissionError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    from isd.services.points import load_engine_config
+    from sqlalchemy import func
+    from isd.models import PointEvent as PE
+    from datetime import timedelta
+    cfg = points_svc.load_engine_config(db)
+    rule = cfg.point_events.get("staff_commendation", {})
+    weekly_max = rule.get("max_per_week", 3)
+    used = db.execute(
+        select(func.count()).where(
+            PE.resident_id == resident_id,
+            PE.kind == "staff_commendation",
+            PE.created_at > now - timedelta(days=7),
+        )
+    ).scalar() or 0
+    return {"points": ev.points, "event_id": ev.id, "weekly_remaining": max(0, weekly_max - used)}
+
+
+class TierOverrideIn(BaseModel):
+    max_tier_override: int = Field(ge=1, le=10)
+    reason: str = Field(min_length=5)
+
+
+@router.put("/residents/{resident_id}")
+def update_resident(
+    resident_id: int,
+    body: TierOverrideIn,
+    staff: Staff = Depends(require_roles("supervisor", "admin")),
+    db: Session = Depends(get_db),
+) -> dict:
+    r = db.get(Resident, resident_id)
+    if r is None:
+        raise HTTPException(404, "resident not found")
+    old = r.max_tier_override
+    r.max_tier_override = body.max_tier_override
+    append_audit(
+        db,
+        Actor(staff.id, staff.role),
+        "tier_override",
+        "resident",
+        r.code,
+        reason_code="TIER_OVERRIDE",
+        payload={"from": old, "to": body.max_tier_override, "reason": body.reason},
+    )
+    return {"resident_id": resident_id, "max_tier_override": body.max_tier_override}
 
 
 class AssignmentIn(BaseModel):

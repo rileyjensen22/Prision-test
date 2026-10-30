@@ -17,6 +17,8 @@ interface Contact {
   note: string | null
 }
 
+const PHONE_RE = /^\+?[0-9\s\-\(\)]{7,15}$/
+
 export function Contacts() {
   const { t } = useTranslation()
   const { request } = useResident()
@@ -25,6 +27,8 @@ export function Contacts() {
   const [kind, setKind] = useState('family')
   const [phone, setPhone] = useState('')
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+  const phoneValid = PHONE_RE.test(phone.trim())
+  const phoneDuplicate = phone.trim().length > 0 && !!list?.some((c) => c.name.toLowerCase() === name.trim().toLowerCase())
 
   const load = useCallback(() => {
     request<Contact[]>('/device/contacts/all')
@@ -114,9 +118,15 @@ export function Contacts() {
             inputMode="tel"
             onChange={(e) => setPhone(e.target.value)}
           />
+          {phone.trim().length > 0 && !phoneValid && (
+            <p className="mt-1 text-sm text-danger">Enter a valid phone number (7–15 digits, spaces, hyphens, or parentheses allowed).</p>
+          )}
         </label>
+        {phoneDuplicate && (
+          <p className="mt-1 text-sm text-notice">A contact with this name is already in your list.</p>
+        )}
         <button
-          disabled={!name.trim() || !phone.trim()}
+          disabled={!name.trim() || !phoneValid || phoneDuplicate}
           onClick={() => void send()}
           className="mt-4 min-h-touch rounded-ctl bg-primary px-6 py-3 text-label font-bold text-primary-ink hover:brightness-110 disabled:opacity-40"
         >

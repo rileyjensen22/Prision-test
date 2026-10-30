@@ -201,6 +201,103 @@ function IssueSanction({ residentId, onDone }: { residentId: number; onDone: () 
   )
 }
 
+function CommendationForm({ residentId, onDone }: { residentId: number; onDone: () => void }) {
+  const [reason, setReason] = useState('')
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    setMsg(null)
+    try {
+      const r = await post<{ points: number; weekly_remaining: number }>(
+        `/staff/residents/${residentId}/points`,
+        { kind: 'commendation', reason },
+      )
+      setMsg({ kind: 'ok', text: `+${r.points} points. ${r.weekly_remaining} commendation(s) remaining this week.` })
+      setReason('')
+      onDone()
+    } catch (err) {
+      setMsg({ kind: 'err', text: errorText(err) })
+    }
+  }
+
+  return (
+    <Panel title="Staff Commendation" data-testid="commendation-panel">
+      <form onSubmit={submit} className="space-y-3">
+        <label className="block text-sm">
+          Reason (required)
+          <input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Describe the commendable behavior"
+            className="mt-1 block w-full rounded-ctl border px-2 py-2"
+          />
+        </label>
+        <p className="text-sm text-ink-soft">+10 points. Max 3 commendations per officer per rolling week.</p>
+        <Btn type="submit" disabled={reason.trim().length < 5}>
+          Issue Commendation
+        </Btn>
+        {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+      </form>
+    </Panel>
+  )
+}
+
+function MaxTierOverride({ d, onDone }: { d: Detail; onDone: () => void }) {
+  const [maxTier, setMaxTier] = useState(String(d.tier.ceiling))
+  const [reason, setReason] = useState('')
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    setMsg(null)
+    try {
+      await put(`/staff/residents/${d.resident_id}`, {
+        max_tier_override: Number(maxTier),
+        reason,
+      })
+      setMsg({ kind: 'ok', text: `Tier ceiling set to ${maxTier}.` })
+      setReason('')
+      onDone()
+    } catch (err) {
+      setMsg({ kind: 'err', text: errorText(err) })
+    }
+  }
+
+  return (
+    <Panel title="Tier Ceiling Override" data-testid="tier-override-panel">
+      <p className="mb-2 text-sm text-ink-soft">
+        This overrides the repeat-return formula ceiling. The resident can still earn up to this tier through points. Requires supervisor or admin role. Audit-logged.
+      </p>
+      <form onSubmit={submit} className="space-y-3">
+        <label className="block text-sm">
+          Maximum tier (1–10)
+          <input
+            type="number"
+            min={1}
+            max={10}
+            value={maxTier}
+            onChange={(e) => setMaxTier(e.target.value)}
+            className="mt-1 block w-24 rounded-ctl border px-2 py-2"
+          />
+        </label>
+        <label className="block text-sm">
+          Reason for override
+          <input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="mt-1 block w-full rounded-ctl border px-2 py-2"
+          />
+        </label>
+        <Btn type="submit" disabled={reason.trim().length < 5}>
+          Set Ceiling
+        </Btn>
+        {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+      </form>
+    </Panel>
+  )
+}
+
 function SettingsForm({ d, onDone }: { d: Detail; onDone: () => void }) {
   const { t: tr } = useTranslation()
 
@@ -470,6 +567,12 @@ export default function ResidentDetail() {
           {tr('staff.pages.ResidentDetail.certificates')}
         </Link>
       </p>
+      {canEdit && (
+        <CommendationForm residentId={d.resident_id} onDone={() => void reload()} />
+      )}
+      {user && ['supervisor', 'admin'].includes(user.role) && (
+        <MaxTierOverride d={d} onDone={() => void reload()} />
+      )}
       {canRecord && <IssueSanction residentId={d.resident_id} onDone={() => void reload()} />}
       <Panel title={tr('staff.pages.ResidentDetail.sanctions')}>
         <DataTable

@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -61,12 +62,35 @@ function Stat({
   )
 }
 
+const EVENT_LABEL: Record<string, string> = {
+  clean_day: 'Clean day',
+  course_completed: 'Course completed',
+  commendation: 'Staff commendation',
+  infraction_confirmed: 'Infraction recorded',
+  sanction_applied: 'Sanction applied',
+  appeal_filed: 'Appeal filed',
+  appeal_resolved: 'Appeal resolved',
+  tier_changed: 'Tier changed',
+  assignment_changed: 'Assignment changed',
+  contact_added: 'Contact added',
+}
+
+const SYSTEM_PREFIXES = ['seed_', 'system_', 'daily_', 'sync_', 'heartbeat_']
+
+function humanAction(action: string): string {
+  return EVENT_LABEL[action] ?? action.replace(/_/g, ' ')
+}
+
 export default function Dashboard() {
   const { t } = useTranslation()
+  const [hideSystem, setHideSystem] = useState(true)
 
   const summary = useLoad<Summary>('/staff/summary')
-  const events = useLoad<Ev[]>('/staff/events?limit=25')
+  const events = useLoad<Ev[]>('/staff/events?limit=50')
   const s = summary.data
+  const shownEvents = (events.data ?? []).filter(
+    (e) => !hideSystem || !SYSTEM_PREFIXES.some((p) => e.action.startsWith(p)),
+  )
   return (
     <Page title={t('staff.pages.Dashboard.dashboard')}>
       <ErrorLine error={summary.error} />
@@ -172,6 +196,15 @@ export default function Dashboard() {
       <FacilityOverview />
       <Panel title={t('staff.pages.Dashboard.recentEvents')}>
         <ErrorLine error={events.error} />
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={hideSystem}
+            onChange={(e) => setHideSystem(e.target.checked)}
+            className="size-4"
+          />
+          Hide automated system events
+        </label>
         <Table data-testid="event-feed">
           <thead>
             <tr>
@@ -183,11 +216,11 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {(events.data ?? []).map((e) => (
+            {shownEvents.map((e) => (
               <tr key={e.seq}>
                 <Td>{fmt(e.ts)}</Td>
                 <Td>{e.actor}</Td>
-                <Td>{e.action.replace(/_/g, ' ')}</Td>
+                <Td>{humanAction(e.action)}</Td>
                 <Td>{e.target}</Td>
                 <Td>{e.reason_code ?? ''}</Td>
               </tr>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { errorText, fmt, post } from '../api'
@@ -27,6 +27,114 @@ interface Run {
 }
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(2)}`
+
+interface DepositRow {
+  resident_code: string
+  amount_cents: number
+  source: string
+  note: string | null
+}
+
+function DepositImport() {
+  const [rows, setRows] = useState<DepositRow[] | null>(null)
+  const [parseErr, setParseErr] = useState<string | null>(null)
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  function parseCsv(text: string): DepositRow[] {
+    const lines = text.trim().split('\n').filter(Boolean)
+    if (!lines.length) throw new Error('File is empty')
+    // skip header if present
+    const start = lines[0].toLowerCase().includes('resident') ? 1 : 0
+    return lines.slice(start).map((line, i) => {
+      const cols = line.split(',').map((c) => c.trim().replace(/^"|"$/g, ''))
+      if (cols.length < 3) throw new Error(`Row ${i + start + 1}: need at least 3 columns (resident_code, amount, source)`)
+      const amount_cents = Math.round(parseFloat(cols[1]) * 100)
+      if (isNaN(amount_cents) || amount_cents <= 0) throw new Error(`Row ${i + start + 1}: invalid amount "${cols[1]}"`)
+      return { resident_code: cols[0], amount_cents, source: cols[2], note: cols[3] ?? null }
+    })
+  }
+
+  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    setParseErr(null)
+    setRows(null)
+    setMsg(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        setRows(parseCsv(ev.target?.result as string))
+      } catch (err) {
+        setParseErr(err instanceof Error ? err.message : 'Parse error')
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  async function confirm() {
+    if (!rows) return
+    setBusy(true)
+    setMsg(null)
+    try {
+      const r = await post<{ imported: number }>('/staff/finance/deposit-import', { rows })
+      setMsg({ kind: 'ok', text: `${r.imported} deposit(s) imported. All entries are append-only.` })
+      setRows(null)
+    } catch (err) {
+      setMsg({ kind: 'err', text: errorText(err) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const usdCents = (c: number) => `$${(c / 100).toFixed(2)}`
+
+  return (
+    <Panel title="Deposit Import (CSV)" data-testid="deposit-import-panel">
+      <p className="mb-2 text-sm text-ink-soft">
+        CSV columns: <code>resident_code, amount (dollars), source, note (optional)</code>. Each row creates an append-only ledger entry.
+      </p>
+      <input
+        type="file"
+        accept=".csv,text/csv"
+        onChange={onFile}
+        className="block text-sm"
+        data-testid="deposit-import-file"
+      />
+      {parseErr && <Notice kind="err">{parseErr}</Notice>}
+      {rows && rows.length > 0 && (
+        <div className="mt-3 space-y-2">
+          <p className="text-sm font-medium">{rows.length} row(s) to import — review before confirming:</p>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Resident</Th>
+                <Th>Amount</Th>
+                <Th>Source</Th>
+                <Th>Note</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.slice(0, 20).map((r, i) => (
+                <tr key={i}>
+                  <Td>{r.resident_code}</Td>
+                  <Td>{usdCents(r.amount_cents)}</Td>
+                  <Td>{r.source}</Td>
+                  <Td>{r.note ?? ''}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          {rows.length > 20 && <p className="text-sm text-ink-soft">…and {rows.length - 20} more</p>}
+          <Btn onClick={() => void confirm()} disabled={busy}>
+            {busy ? 'Importing…' : `Confirm and import ${rows.length} deposit(s)`}
+          </Btn>
+        </div>
+      )}
+      {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+    </Panel>
+  )
+}
 
 export default function Finance() {
   const { t } = useTranslation()
@@ -109,6 +217,7 @@ export default function Finance() {
           </tbody>
         </Table>
       </Panel>
+      {user && ['supervisor', 'admin'].includes(user.role) && <DepositImport />}
       <Panel title={t('staff.pages.Finance.workPartnerDashboardDemo')}>
         <p className="mb-3 text-sm text-ink-soft">
           {t('staff.pages.Finance.totalsOnlyIndividualParticipation')}
