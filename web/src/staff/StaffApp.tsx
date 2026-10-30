@@ -53,6 +53,7 @@ import MonitoringHub from './pages/MonitoringHub'
 import Monitoring from './pages/Monitoring'
 import OutOfCell from './pages/OutOfCell'
 import Outliers from './pages/Outliers'
+import Requests from './pages/Requests'
 import ResidentDetail from './pages/ResidentDetail'
 import Schedule from './pages/Schedule'
 import Roster from './pages/Roster'
@@ -62,7 +63,6 @@ import Certificates from './pages/Certificates'
 import Devices from './pages/Devices'
 import Accounts from './pages/Accounts'
 import Intake from './pages/Intake'
-import ChessAdmin from './pages/ChessAdmin'
 import KeepSeparate from './pages/KeepSeparate'
 import Outcomes from './pages/Outcomes'
 import VideoOversight from './pages/VideoOversight'
@@ -85,6 +85,7 @@ interface NavItem {
     | 'open_grievances'
     | 'pending_attorney_calls'
     | 'commissary_orders_waiting'
+    | 'open_requests'
 }
 const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
   {
@@ -93,7 +94,6 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
       { to: '/staff', key: 'dashboard', icon: LayoutDashboard },
       { to: '/staff/roster', key: 'roster', icon: Users },
       { to: '/staff/welfare', key: 'welfare', icon: HeartPulse, badge: 'welfare_flags' },
-      { to: '/staff/out-of-cell', key: 'outOfCell', icon: DoorOpen },
       { to: '/staff/schedule', key: 'schedule', icon: CalendarDays },
       { to: '/staff/devices', key: 'devices', icon: Tablet, badge: 'offline_devices' },
     ],
@@ -102,18 +102,10 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
     key: 'decisions',
     items: [
       {
-        to: '/staff/confirmations',
-        key: 'confirmations',
-        icon: CheckCheck,
-        roles: SUPERVISION,
-        badge: 'pending_confirmations',
-      },
-      {
-        to: '/staff/appeals',
-        key: 'appeals',
-        icon: Scale,
-        roles: SUPERVISION,
-        badge: 'open_appeals',
+        to: '/staff/requests',
+        key: 'requests',
+        icon: ClipboardList,
+        badge: 'open_requests' as const,
       },
       { to: '/staff/outliers', key: 'outliers', icon: BarChart3, roles: SUPERVISION },
       {
@@ -124,27 +116,6 @@ const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
       },
       { to: '/staff/monitoring-hub', key: 'monitoringHub', icon: Eye, roles: SUPERVISION },
       { to: '/staff/keep-separate', key: 'keepSeparate', icon: UserX, roles: SUPERVISION },
-      {
-        to: '/staff/health-requests',
-        key: 'healthRequests',
-        icon: HeartPulse,
-        roles: ['health_staff', 'supervisor', 'admin', 'auditor'],
-        badge: 'open_health_requests' as const,
-      },
-      {
-        to: '/staff/grievances',
-        key: 'grievances',
-        icon: Scale,
-        roles: ['supervisor', 'admin', 'auditor'],
-        badge: 'open_grievances' as const,
-      },
-      {
-        to: '/staff/attorney-calls',
-        key: 'attorneyCalls',
-        icon: Phone,
-        roles: ['legal_liaison', 'supervisor', 'admin', 'auditor'],
-        badge: 'pending_attorney_calls' as const,
-      },
       {
         to: '/staff/commissary',
         key: 'commissary',
@@ -186,7 +157,20 @@ function useCounts(enabled: boolean): Counts {
     let live = true
     const load = () =>
       api<Counts>('/staff/summary')
-        .then((c) => live && setCounts(c))
+        .then((c) => {
+          if (!live) return
+          const computed: Counts = {
+            ...c,
+            open_requests:
+              (c.open_health_requests ?? 0) +
+              (c.open_grievances ?? 0) +
+              (c.open_appeals ?? 0) +
+              (c.pending_confirmations ?? 0) +
+              (c.pending_attorney_calls ?? 0) +
+              (c.welfare_flags ?? 0),
+          }
+          setCounts(computed)
+        })
         .catch(() => {})
     void load()
     const id = setInterval(load, 30_000)
@@ -351,7 +335,8 @@ function Shell() {
                 path="mirror"
                 element={<Navigate to="/staff/monitoring-hub" replace />}
               />
-              <Route path="out-of-cell" element={<OutOfCell />} />
+              <Route path="out-of-cell" element={<Navigate to="/staff/roster" replace />} />
+              <Route path="requests" element={<Requests />} />
               <Route path="schedule" element={<Schedule />} />
               <Route path="welfare" element={<Welfare />} />
               <Route
@@ -374,14 +359,7 @@ function Shell() {
                   </Guard>
                 }
               />
-              <Route
-                path="chess"
-                element={
-                  <Guard roles={SUPERVISION}>
-                    <ChessAdmin />
-                  </Guard>
-                }
-              />
+              <Route path="chess" element={<Navigate to="/staff" replace />} />
               <Route
                 path="keep-separate"
                 element={

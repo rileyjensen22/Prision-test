@@ -379,22 +379,32 @@ export function TierScreen() {
       <Card className="space-y-4">
         <h2 className="text-h3 font-bold">What each tier includes</h2>
         <div className="flex flex-wrap gap-2">
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              onClick={() => setSelected(n)}
-              className={`min-h-touch min-w-[3rem] rounded-ctl border-2 px-3 py-2 text-label font-bold transition-colors ${
-                n === selected
-                  ? 'border-primary bg-primary text-primary-ink'
-                  : n === tier.effective
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-line bg-surface hover:border-primary'
-              }`}
-              aria-pressed={n === selected}
-            >
-              T{n}
-            </button>
-          ))}
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+            const isLocked = n > tier.effective
+            const isCurrent = n === tier.effective
+            return (
+              <button
+                key={n}
+                onClick={() => setSelected(n)}
+                className={`relative min-h-touch min-w-[3.5rem] rounded-ctl border-2 px-3 py-2 text-label font-bold transition-colors ${
+                  n === selected
+                    ? 'border-primary bg-primary text-primary-ink'
+                    : isCurrent
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : isLocked
+                        ? 'border-line bg-surface/60 text-ink-soft'
+                        : 'border-line bg-surface hover:border-primary'
+                }`}
+                aria-pressed={n === selected}
+                aria-label={`Tier ${n}${isLocked ? ' (locked)' : isCurrent ? ' (current)' : ''}`}
+              >
+                <span className="flex items-center justify-center gap-1">
+                  T{n}
+                  {isLocked && <Lock aria-hidden="true" className="size-3 opacity-60" />}
+                </span>
+              </button>
+            )
+          })}
         </div>
         {selected === tier.effective && (
           <p className="text-sm font-bold text-ok">← Your current tier</p>

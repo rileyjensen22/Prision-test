@@ -33,35 +33,6 @@ interface Ev {
   reason_code: string | null
 }
 
-function Stat({
-  label,
-  value,
-  to,
-  warn,
-  id,
-}: {
-  label: string
-  value: number | null
-  to: string
-  warn?: boolean
-  id: string
-}) {
-  if (value === null) return null
-  return (
-    <Link
-      to={to}
-      data-testid={id}
-      className={`block rounded-card border bg-surface p-4 hover:border-primary ${warn && value > 0 ? 'border-2 border-notice' : ''}`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="text-display font-bold tabular-nums">{value}</span>
-        {warn && value > 0 && <AlertTriangle aria-hidden="true" className="size-6 text-notice" />}
-      </div>
-      <div className="text-ink-soft">{label}</div>
-    </Link>
-  )
-}
-
 const EVENT_LABEL: Record<string, string> = {
   clean_day: 'Clean day',
   course_completed: 'Course completed',
@@ -86,11 +57,20 @@ export default function Dashboard() {
   const [hideSystem, setHideSystem] = useState(true)
 
   const summary = useLoad<Summary>('/staff/summary')
-  const events = useLoad<Ev[]>('/staff/events?limit=50')
+  const events = useLoad<Ev[]>('/staff/events?limit=10')
   const s = summary.data
   const shownEvents = (events.data ?? []).filter(
     (e) => !hideSystem || !SYSTEM_PREFIXES.some((p) => e.action.startsWith(p)),
   )
+
+  const openRequests = s
+    ? (s.open_health_requests ?? 0) +
+      (s.open_grievances ?? 0) +
+      (s.open_appeals ?? 0) +
+      (s.pending_confirmations ?? 0) +
+      (s.pending_attorney_calls ?? 0)
+    : 0
+
   return (
     <Page title={t('staff.pages.Dashboard.dashboard')}>
       <ErrorLine error={summary.error} />
@@ -106,94 +86,62 @@ export default function Dashboard() {
           </Link>
         </p>
       )}
-      {s && (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat id="stat-residents" label="Residents" value={s.residents} to="/staff/roster" />
-          <Stat
-            id="stat-pending"
-            label="Awaiting confirmation"
-            value={s.pending_confirmations}
-            to="/staff/confirmations"
-            warn
-          />
-          <Stat
-            id="stat-appeals"
-            label="Open appeals"
-            value={s.open_appeals}
-            to="/staff/appeals"
-            warn
-          />
-          <Stat
-            id="stat-offline"
-            label="Devices offline"
-            value={s.offline_devices}
-            to="/staff/roster"
-            warn
-          />
-          <Stat
-            id="stat-escalated"
-            label="Escalated welfare flags"
-            value={s.welfare_escalated}
-            to="/staff/welfare"
-            warn
-          />
-          <Stat
-            id="stat-below-minimum"
-            label="Below out-of-cell minimum"
-            value={s.below_minimum}
-            to="/staff/out-of-cell"
-            warn
-          />
-          <Stat
-            id="stat-welfare"
-            label="Welfare flags"
-            value={s.welfare_flags}
-            to="/staff/welfare"
-            warn
-          />
-          <Stat
-            id="stat-outliers"
-            label="Staff outlier flags"
-            value={s.outlier_flags}
-            to="/staff/outliers"
-            warn
-          />
-          <Stat
-            id="stat-health"
-            label="Open health requests"
-            value={s.open_health_requests}
-            to="/staff/health-requests"
-            warn
-          />
-          <Stat
-            id="stat-grievances"
-            label="Open grievances"
-            value={s.open_grievances}
-            to="/staff/grievances"
-            warn
-          />
-          <Stat
-            id="stat-attorney"
-            label="Pending attorney calls"
-            value={s.pending_attorney_calls}
-            to="/staff/attorney-calls"
-            warn
-          />
-          <Stat
-            id="stat-commissary"
-            label="Commissary orders waiting"
-            value={s.commissary_orders_waiting}
-            to="/staff/commissary"
-            warn
-          />
-        </div>
-      )}
-      {s && s.overdue_appeals > 0 && (
+      {s && (s.overdue_appeals ?? 0) > 0 && (
         <p role="alert" className="rounded-ctl bg-danger-soft px-3 py-2 text-ink">
           {t('staff.msg.overdueAppeals', { count: s.overdue_appeals })}
         </p>
       )}
+      {s && (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Link
+            to="/staff/roster"
+            data-testid="stat-residents"
+            className="block rounded-card border bg-surface p-4 hover:border-primary"
+          >
+            <div className="text-display font-bold tabular-nums">{s.residents}</div>
+            <div className="text-ink-soft">Residents</div>
+          </Link>
+
+          <Link
+            to="/staff/requests"
+            data-testid="stat-requests"
+            className={`block rounded-card border bg-surface p-4 hover:border-primary ${openRequests > 0 ? 'border-2 border-notice' : ''}`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-display font-bold tabular-nums">{openRequests}</span>
+              {openRequests > 0 && <AlertTriangle aria-hidden="true" className="size-6 text-notice" />}
+            </div>
+            <div className="text-ink-soft">Open requests</div>
+          </Link>
+
+          <Link
+            to="/staff/welfare"
+            data-testid="stat-welfare"
+            className={`block rounded-card border bg-surface p-4 hover:border-primary ${(s.welfare_flags ?? 0) > 0 ? 'border-2 border-notice' : ''}`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-display font-bold tabular-nums">{s.welfare_flags ?? 0}</span>
+              {(s.welfare_flags ?? 0) > 0 && <AlertTriangle aria-hidden="true" className="size-6 text-notice" />}
+            </div>
+            <div className="text-ink-soft">Welfare flags</div>
+          </Link>
+
+          <Link
+            to="/staff/roster"
+            data-testid="stat-offline"
+            className={`block rounded-card border bg-surface p-4 hover:border-primary ${(s.offline_devices ?? 0) > 0 ? 'border-2 border-notice' : ''}`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-display font-bold tabular-nums">{s.offline_devices ?? 0}</span>
+              {(s.offline_devices ?? 0) > 0 && <AlertTriangle aria-hidden="true" className="size-6 text-notice" />}
+            </div>
+            <div className="text-ink-soft">Devices offline</div>
+          </Link>
+        </div>
+      )}
+
       <FacilityOverview />
+
       <Panel title={t('staff.pages.Dashboard.recentEvents')}>
         <ErrorLine error={events.error} />
         <label className="flex cursor-pointer items-center gap-2 text-sm">

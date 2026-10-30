@@ -233,6 +233,7 @@ export function DataTable<T>({
   rowKey,
   testId,
   rowTestId,
+  rowClassName,
   empty,
 }: {
   columns: Column<T>[]
@@ -240,6 +241,7 @@ export function DataTable<T>({
   rowKey: (row: T) => string | number
   testId?: string
   rowTestId?: (row: T) => string
+  rowClassName?: (row: T) => string
   empty?: ReactNode
 }) {
   const { t } = useTranslation()
@@ -341,7 +343,7 @@ export function DataTable<T>({
           </thead>
           <tbody>
             {shown.map((r) => (
-              <tr key={rowKey(r)} data-testid={rowTestId?.(r)} className="hover:bg-surface-2">
+              <tr key={rowKey(r)} data-testid={rowTestId?.(r)} className={cn('hover:bg-surface-2', rowClassName?.(r))}>
                 {columns.map((c) => (
                   <Td key={c.key}>{c.cell(r)}</Td>
                 ))}

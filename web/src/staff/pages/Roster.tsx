@@ -18,6 +18,7 @@ interface Row {
   device: string | null
   last_sync_at: string | null
   offline: boolean
+  out_of_cell_today?: number
   tier: { earned: number; ceiling: number; effective: number }
   points: number
   active_sanctions: { id: number; code: string; ends_at: string }[]
@@ -107,6 +108,26 @@ export default function Roster() {
           )}
         </span>
       ),
+    },
+    {
+      key: 'location',
+      header: 'Location',
+      sort: (r) => (r.out_of_cell_today ?? 0) > 0 ? 1 : 0,
+      text: (r) => (r.out_of_cell_today ?? 0) > 0 ? 'Out of cell' : 'In cell',
+      cell: (r) => {
+        const out = (r.out_of_cell_today ?? 0) > 0
+        return (
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
+            <span
+              className={`inline-block size-2.5 rounded-full ${out ? 'bg-red-500' : 'bg-green-500'}`}
+              aria-hidden="true"
+            />
+            <span className={out ? 'text-red-700' : 'text-green-700'}>
+              {out ? 'Out of cell' : 'In cell'}
+            </span>
+          </span>
+        )
+      },
     },
     {
       key: 'points',
@@ -227,6 +248,11 @@ export default function Roster() {
         rowKey={(r) => r.resident_id}
         testId="roster"
         rowTestId={(r) => `row-${r.code}`}
+        rowClassName={(r) =>
+          (r.out_of_cell_today ?? 0) > 0
+            ? 'border-l-4 border-l-red-400'
+            : 'border-l-4 border-l-green-400'
+        }
       />
       {total > PAGE && (
         <div className="flex items-center gap-3" data-testid="roster-pager">
