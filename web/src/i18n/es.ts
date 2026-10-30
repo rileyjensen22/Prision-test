@@ -583,6 +583,7 @@ const es: Dict = {
       video: 'Supervisión de video',
       monitoringHub: 'Monitoreo',
       reentryResources: 'Recursos de reinserción',
+      requests: 'Solicitudes',
     },
     table: {
       region: 'Tabla desplazable',

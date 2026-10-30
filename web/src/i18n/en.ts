@@ -562,6 +562,7 @@ const en = {
       video: 'Video oversight',
       monitoringHub: 'Monitoring',
       reentryResources: 'Reentry resources',
+      requests: 'Requests',
     },
     table: {
       region: 'Scrollable table',
