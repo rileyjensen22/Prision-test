@@ -17,9 +17,9 @@ interface Request {
 }
 
 const VERIFY: Record<string, { text: string; tone: 'green' | 'amber' | 'gray' }> = {
-  stub_verified: { text: 'Number checked (stub)', tone: 'green' },
-  stub_unverified: { text: 'Number not checked (stub)', tone: 'amber' },
-  stub_needs_bar_check: { text: 'Bar number check needed (stub)', tone: 'amber' },
+  verified: { text: 'Number checked', tone: 'green' },
+  unverified: { text: 'Number not checked', tone: 'amber' },
+  needs_bar_check: { text: 'Bar number check needed', tone: 'amber' },
 }
 
 export default function ContactRequests() {

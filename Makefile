@@ -1,6 +1,6 @@
 DB_SUPERUSER ?= postgres
 
-.PHONY: kiosk-check demo-smoke demo demo-scenario demo-down demo-reset demo-logs seed-full load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check dev test seed lint format simulate-week export-public-log install clean
+.PHONY: kiosk-check demo-smoke demo demo-scenario demo-down demo-reset demo-logs seed-full load-test db-local migrate daily reconcile welfare-sweep courses-check secrets-check import-books import-law dev test seed lint format simulate-week export-public-log install clean
 
 VENV := .venv
 PY := $(VENV)/bin/python
@@ -87,6 +87,12 @@ simulate-week: $(VENV)/.installed
 
 export-public-log: $(VENV)/.installed
 	$(PY) scripts/export-public-log.py
+
+import-books: $(VENV)/.installed  ## download 20 public-domain books from Project Gutenberg into web/public/books/
+	$(PY) scripts/import_books.py --output-dir web/public/books
+
+import-law: $(VENV)/.installed  ## refresh Georgia O.C.G.A. titles 16/17/42 in web/public/law/
+	$(PY) scripts/import_law.py --output-dir web/public/law
 
 clean:
 	rm -rf $(VENV) var web/node_modules web/dist
